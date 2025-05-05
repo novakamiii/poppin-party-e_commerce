@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Poppin Party</title>
-    <link rel="icon" href="img/logowhite.png" type="image/png">
-    <link rel="stylesheet" href="styles.css">   
+    <link rel="icon" th:href="@{/img/logowhite.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/styles.css}">   
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+
 </head>
 <body>
     <header>
@@ -262,6 +263,9 @@
               <li>POPPIN' GUARANTEE</li>
               <li>FREE SHIPPING</li>
               <li>PAYMENT METHODS</li>
+              <!--TODO:Replace this placeholder with login page, it only redirects to the inventory
+              instantly.-->
+              <li><a th:href="@{/products}">ADMIN LOGIN</a></li>
             </ul>
           </div>
           <div class="footer-section">

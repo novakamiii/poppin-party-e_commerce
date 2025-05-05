@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Product</title>
+</head>
+<body>
+<h2>Add Product</h2>
+<form action="/products/add" method="post">
+    Name: <input type="text" name="item_name"><br>
+    Price: <input type="number" name="price" step="0.01"><br>
+    Stock: <input type="number" name="stock"><br>
+    Category: <input type="text" name="category"><br>
+    <button type="submit">Add</button>
+</form>
+<a th:href="@{/products}">Back to Inventory</a>
+</body>
+</html>
