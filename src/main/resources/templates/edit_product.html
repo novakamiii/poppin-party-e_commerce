@@ -4,22 +4,146 @@
     <title>Edit Product</title>
 </head>
 <body>
-<h1>Edit Product</h1>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
 
-<form th:action="@{/products/update/{id}(id=${product.id})}" method="post">
-    <label for="item_name">Name</label>
-    <input type="text" id="item_name" name="item_name" th:value="${product.item_name}" required><br>
+    body {
+        font-family: 'Bebas Neue', sans-serif; /* Apply Bebas Neue */
+        background-color: #f4f4f4;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
 
-    <label for="price">Price</label>
-    <input type="text" id="price" name="price" th:value="${product.price}" required><br>
+    .add-product-container {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        width: 400px; /* Adjust as needed */
+        margin-bottom: 20px;
+    }
 
-    <label for="stock">Stock</label>
-    <input type="text" id="stock" name="stock" th:value="${product.stock}" required><br>
+    .add-product-title {
+        text-align: center;
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 2em; /* Make title larger with Bebas Neue */
+    }
 
-    <label for="category">Category</label>
-    <input type="text" id="category" name="category" th:value="${product.category}" required><br>
+    .form-group {
+        margin-bottom: 15px;
+        
+    }
 
-    <button type="submit">Save</button>
-</form>
+    .form-label {
+        display: block;
+        margin-bottom: 5px;
+        color: #555;
+        font-weight: bold;
+        font-size: 1.2em; /* Slightly larger labels */
+    }
+
+    .form-input {
+        width: calc(100% - 22px);
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-size: 1.2em; /* Larger input text */
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #b944fd; /* Purple focus color */
+        box-shadow: 0 0 5px rgba(185, 68, 253, 0.5); /* Purple focus shadow */
+    }
+
+    .form-button {
+        background-color: #b944fd; /* Purple button */
+        color: white;
+        padding: 12px 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.4em; /* Larger button text */
+        transition: background-color 0.3s ease;
+        width: 100%;
+        box-sizing: border-box;
+        letter-spacing: 0.05em; /* Slight letter spacing for Bebas Neue */
+        font-family: 'Bebas Neue', sans-serif; /* Apply Bebas Neue */
+    }
+
+    .form-button:hover {
+        background-color: #8e31c9; /* Darker purple on hover */
+    }
+
+    .upload-container {
+        margin-top: 20px;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border: 1px solid #eee;
+        border-radius: 8px;
+    }
+
+    .upload-label {
+        display: block;
+        margin-bottom: 5px;
+        color: #555;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+
+    .back-link {
+        margin-top: 20px;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 1.2em;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>
+    <div class="add-product-container">
+        <h2 class="add-product-title">EDIT PRODUCT</h2>
+        <form th:action="@{/products/update/{id}(id=${product.id})}" method="post">
+            <div class="form-group">
+                <label for="item_name" class="form-label">Name</label>
+                <input type="text" id="item_name" name="item_name" th:value="${product.item_name}" class="form-input" required><br>
+            </div>
+        
+            <div class="form-group">
+                <label for="price" class="form-label">Price</label>
+                <input type="text" id="price" name="price" th:value="${product.price}" class="form-input" required><br>
+            </div>
+        
+            <div class="form-group">
+                <label for="stock" class="form-label">Stock</label>
+                <input type="text" id="stock" name="stock" th:value="${product.stock}" class="form-input" required><br>
+            </div>
+        
+            <div class="form-group">
+                <label for="category" class="form-label">Category</label>
+                <input type="text" id="category" name="category" th:value="${product.category}" class="form-input" required><br>
+            </div>
+
+            <!-- TODO: This. -->
+            <div class="upload-container">
+                <h3>UPLOAD IMAGE</h3>
+                <form action="/upload" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="imageUpload" class="upload-label">CHOOSE AN IMAGE:</label>
+                        <input type="file" id="imageUpload" name="image" accept="image/*" class="form-input">
+                    </div>
+                    <button type="submit" class="form-button">UPLOAD IMAGE</button>
+                </form>
+            </div>
+        
+            <button type="submit" class="form-button">EDIT PRODUCT</button>
+        </form>
+    </div>
+    <a th:href="@{/products}" class="back-link">BACK TO INVENTORY</a>
 </body>
 </html>

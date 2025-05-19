@@ -344,4 +344,84 @@ footer {
       text-align: center;
       margin-bottom: 30px;
     }
+
+    
+  }
+
+  .table-section {
+    width: 95%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-family: 'Bebas Neue', sans-serif; /* Consistent font */
+    font-size: 2em;
+    border-radius: 8px; /* Overall rounded corners */
+    overflow: hidden; /* Hide overflow for rounded corners on inner elements */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    background-color: #f8f8f8; /* Light background */
+    font-weight: normal;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee; /* Light row separators */
+  }
+  
+  th {
+    background-color: #b944fd; /* Purple header background */
+    color: white;
+    text-transform: uppercase;
+  }
+  
+  tbody tr:hover {
+    background-color: #e0e0e0; /* Light hover effect on rows */
+  }
+  
+  td a {
+    color: #007bff; /* Standard link color */
+    text-decoration: none;
+    margin-right: 5px;
+  }
+  
+  td a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Style for the last 'Actions' column links */
+  td:last-child {
+    text-align: center; /* Center the action links */
+  }
+  
+  td:last-child a:last-child {
+    margin-right: 0; /* Remove margin from the last action link */
+    color: #dc3545; /* Red for delete action */
+  }
+  
+  /* Optional: More subtle border */
+  /*
+  table {
+    border: 1px solid #ddd;
+  }
+  */
+
+  .addproduct-button {
+    background-color: #b944fd; /* Purple color */
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 1.5em;
+    font-family: "Bebas Neue", sans-serif;
+  }
+  .addproduct-container {
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 1.5em;
+    font-family: "Bebas Neue", sans-serif;
+    margin-left: auto;
+    margin-right: auto;
   }

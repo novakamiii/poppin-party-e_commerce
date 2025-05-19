@@ -1,36 +1,86 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Product Inventory</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Poppin Party</title>
+
+  <div class="logo">
+    <a th:href="@{landing.html}"><img th:src="@{img/logowhite.png"} alt="logo" id="logo"></a>
+  </div>
+  
+  <link rel="stylesheet" th:href="@{/styles.css}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet"/>
 </head>
 <body>
-<h1>Product Inventory</h1>
+    <header>
+        <div class="rectangle-container">
+            <div class="logo">
+                <a th:href="@{'/admin/page'}"><img th:src="@{img/logowhite.png}" alt="logo" id="logo"></a>
+            </div>
+            <div class="search">
+                <div class="searchrectangle"></div>
+                <button class="search" type="button" id="search">
+                    <img th:src="@{/img/search.png}" alt="search">
+                </button>
+                <input class="search" type="text" id="search" name="search" placeholder="Search">
+            </div>
+        </div>
+    </header>
 
-<table border="1">
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Price</th>
-        <th>Stock</th>
-        <th>Category</th>
-        <th>Actions</th>
-    </tr>
-    <tr th:each="product : ${products}">
-        <td th:text="${product.id}"></td>
-        <td th:text="${product.item_name}"></td>
-        <td th:text="${product.price}"></td>
-        <td th:text="${product.stock}"></td>
-        <td th:text="${product.category}"></td>
-        <td>
-            <a th:href="@{'/products/edit/' + ${product.id}}">Edit</a>
-            |
-            <a th:href="@{'/products/delete/' + ${product.id}}"
-               onclick="return confirm('Delete this item?');">Delete</a>
-        </td>
-    </tr>
-</table>
 
-<br>
-<a href="/products/add">Add New Product</a>
+    <main>
+        <table class="table-section">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Category</th>
+                <th>Image</th>
+                <th>Actions</th>
+            </tr>
+            <tr th:each="product : ${products}">
+                <td th:text="${product.id}"></td>
+                <td th:text="${product.item_name}"></td>
+                <td th:text="${product.price}"></td>
+                <td th:text="${product.stock}"></td>
+                <td th:text="${product.category}"></td>
+                <td>
+                    <a th:href="@{'/products/edit/' + ${product.id}}">Edit</a>
+                    |
+                    <a th:href="@{'/products/delete/' + ${product.id}}"
+                       onclick="return confirm('Delete this item?');">Delete</a>
+                </td>
+            </tr>
+        </table>
+        <div class="addproduct-container">
+            <a th:href="@{/products/add}">
+                <button class="addproduct-button"> Add New Product</button>
+            </a>
+        </div>
+    </main>
+    <footer>
+        <div class="footer-container">
+          <div class="footer-logo">
+            <img th:src="@{/img/logowhite.png}" alt="Poppin Party Logo">
+            <p>POPPIN PARTY</p>
+            <p>CELEBRATION NEEDS</p>
+          </div>
+          <div class="footer-section">
+            <h3>CUSTOMER SERVICE</h3>
+            <ul>
+              <li><a th:href="@{'/admin/page'}">MAIN PAGE</a></li>
+              <li><a th:href="@{/logout}">LOG-OUT</a></li>
+            </ul>
+          </div>
+        <div class="copyright">
+          © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
+        </div>
+    </footer>
 </body>
 </html>
