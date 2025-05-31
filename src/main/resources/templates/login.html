@@ -1,29 +1,134 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poppin Party</title>
+  <link rel="icon" th:href="@{img/logowhite.png}" type="image/png">
+  <link rel="stylesheet" th:href="@{/styles.css}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 </head>
+
 <body>
-    <h2>Login</h2>
+  
 
-    <!--Error and Logs-->
-    <p th:if="${param.logout}">You have been logged out.</p>
-    <p th:if="${param.error}">Invalid username or password.</p>
-
-    <!--Login Form-->
-    <form action="#" th:action="@{/login}" method="post">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
-        <p>Don't have an account? <a th:href="@{/register}">Register here</a></p>
-        
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
-        <p><a th:href="@{/forgot-password}">Forgot Password?</a></p>
+  <!--Header-->
+  <header class="sticky-header">
+    <div class="header-inner">
+      <div class="logo">
+        <a th:href="@{'/home'}">
+          <img th:src="@{/img/logowhite.png}" alt="logo" id="logo">
+        </a>
+      </div>
+    </div>
+  </header>
+  <!--End of Header-->
+  <main>
+    <br>
+    <br>
+    <div class="login-container">
+      <p>LOGIN</p>
+      <form action="#" th:action="@{/login}" method="POST">
+        <input type="text" name="username" placeholder="Username" required>
+        <a th:href="@{/register}">Create an Account</a>
+        <br>
+        <br>
+        <input type="password" name="password" placeholder="Password" required>
+        <a th:href="@{/forgot-password}">Forgot Password?</a>
+        <br>
+        <br>
         <button type="submit">Login</button>
-    </form>  
 
+    </div>
+    <br>
+    <br>
+    <br>
+
+    <script th:inline="javascript">
+      /*<![CDATA[*/
+      window.onload = function () {
+        if ([[${ param.logout }]] != null) {
+          alert("You have been logged out.");
+        }
+        if ([[${ param.error }]] != null) {
+          alert("Invalid username or password.");
+        }
+        // Show success notification
+        if ([[${success}]] != null) {
+          alert("Your account has been successfully created!");
+        }
+      };
+      /*]]>*/
+    </script>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <div class="footer-logo">
+        <img th:src="@{/img/logowhite.png}" alt="Poppin Party Logo">
+        <p>POPPIN PARTY</p>
+        <p>CELEBRATION NEEDS</p>
+      </div>
+      <div class="footer-section">
+        <h3>CUSTOMER SERVICE</h3>
+        <ul>
+          <li>HELP CENTRE</li>
+          <li>CONTACT US</li>
+          <li>RETURN AND REFUND</li>
+          <li>POPPIN' GUARANTEE</li>
+          <li>FREE SHIPPING</li>
+          <li>PAYMENT METHODS</li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>ABOUT POPPIN' PARTY</h3>
+        <ul>
+          <li>ABOUT US</li>
+          <li>PRIVACY POLICY</li>
+          <li>POPPIN' DEALS</li>
+          <li>MEDIA CONTACT</li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>PAYMENT</h3>
+        <ul>
+          <li>GCASH</li>
+          <li>PAYPAL</li>
+          <li>CASHAPP</li>
+          <li>VISA</li>
+          <li>MASTERCARD</li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>LOGISTICS</h3>
+        <ul>
+          <li>GOGO EXPRESS</li>
+          <li>NINJAVAN</li>
+          <li>UPS</li>
+          <li>FEDEX</li>
+          <li>LBC</li>
+          <li>DHL</li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>FOLLOW US</h3>
+        <ul>
+          <li>FACEBOOK</li>
+          <li>INSTAGRAM</li>
+          <li>X</li>
+          <li>TIKTOK</li>
+        </ul>
+      </div>
+    </div>
+    <div class="copyright">
+      © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
+    </div>
+  </footer>
+
+  <script th:src="@{/script.js}"></script>
 </body>
+
 </html>

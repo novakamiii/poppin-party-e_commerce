@@ -1,129 +1,131 @@
 <!DOCTYPE html>
-<html lang="en"
-    xmlns:th="http://www.thymeleaf.org"
-    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Poppin Party</title>
   <link rel="icon" th:href="@{/img/logowhite.png}" type="image/png" />
   <link rel="stylesheet" th:href="@{/styles.css}" />
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
 </head>
+
 <body>
-    <header>
-        <div class="rectangle-container">
-            <div class="logo">
-                <img th:src="@{/img/logowhite.png}" alt="logo" id="logo">
-            </div>
-            <div class ="cart-container">
-                <img th:src="@{/img/cart.png}" alt="cart" id="cart">
-            </div>
-            <div class="search">
-                <div class="searchrectangle"></div>
-                <button class="search" type="button" id="search">
-                    <img th:src="@{/img/search.png}" alt="search">
-                </button>
-                <input class="search" type="text" id="search" name="search" placeholder="Search">
-            </div>
-        </div>
-    </header>
+  <header>
+    <div class="rectangle-container">
+      <div class="logo">
+        <a th:href="@{'/home'}">
+          <img th:src="@{/img/logowhite.png}" alt="logo" id="logo">
+        </a>
+      </div>
+      <div class="cart-container">
+        <img th:src="@{/img/cart.png}" alt="cart" id="cart">
+      </div>
+      <div class="search">
+        <div class="searchrectangle"></div>
+        <button class="search" type="button" id="search">
+          <img th:src="@{/img/search.png}" alt="search">
+        </button>
+        <input class="search" type="text" id="search" name="search" placeholder="Search">
+      </div>
+    </div>
+  </header>
 
   <main>
     <div class="categories">
-        <div class="categcontainer">
-            <button class="categbutton" id="pinata">
-                <img th:src="@{/img/imgpinata.png}" alt="pinata" class="categicon">
-            </button>
-            <p class="categtext">pinata & fillers</p>
-        </div>
-        <div class="categcontainer">
-            <button class="categbutton" id="partyhat">
-                <img th:src="@{/img/imgpartyhat.png}" alt="partyhat" class="categicon">
-            </button>
-            <p class="categtext">party hats</p>
-        </div>
-        <div class="categcontainer">
-            <button class="categbutton" id="masks">
-                <img th:src="@{/img/imgmask.png}" alt="masks" class="categicon">
-            </button>
-            <p class="categtext">masks</p>
-        </div>
-        <div class="categcontainer">
-            <button class="categbutton" id="wig">
-                <img th:src="@{/img/imgwig.png}" alt="wig" class="categicon">
-            </button>
-            <p class="categtext">wigs & hair accessories</p>
-        </div>
-        <div class="categcontainer">
-            <button class="categbutton" id="led">
-                <img th:src="@{/img/imgled.png}" alt="led" class="categicon">
-            </button>
-            <p class="categtext">led accessories</p>
-        </div>
-        <div class="categcontainer">
-            <button class="categbutton" id="balloon">
-                <img th:src="@{/img/imgballoon.png}" alt="balloon" class="categicon">
-            </button>
-            <p class="categtext">balloons</p>
-        </div>
-        <div class="categcontainer">
-            <button class="categbutton" id="confetti">
-                <img th:src="@{/img/imgconfetti.png}" alt="confetti" class="categicon">
-            </button>
-            <p class="categtext">confetti & party poppers</p>
-        </div>
-        <div class="categcontainer">
-            <button class="categbutton" id="banners">
-                <img th:src="@{/img/imgbanner.png}" alt="banners" class="categicon">
-            </button>
-            <p class="categtext">banners</p>
-        </div>
-        <div class="categcontainer">
-            <button class="categbutton" id="garland">
-                <img th:src="@{/img/imggarland.png}" alt="garland" class="categicon">
-            </button>
-            <p class="categtext">garlands & streamers</p>
-        </div>
-        <div class="categcontainer">
-            <button class="categbutton" id="hanging">
-                <img th:src="@{/img/imghang.png}" alt="hanging" class="categicon">
-            </button>
-            <p class="categtext">hanging decorations</p>
-        </div>
-        <div class="categcontainer">
-            <button class="categbutton" id="props">
-                <img th:src="@{/img/imgprop.png}" alt="props" class="categicon">
-            </button>
-            <p class="categtext">props & cutouts</p>
-        </div>
-        <div class="categcontainer">
-            <button class="categbutton" id="strlight">
-                <img th:src="@{/img/imgstrlight.png}" alt="strlight" class="categicon">
-            </button>
-            <p class="categtext">string lights</p>
-        </div>
-        <div class="categcontainer">
-            <button class="categbutton" id="customtarp">
-                <img th:src="@{/img/imgcustarp.png}" alt="customtarp" class="categicon">
-            </button>
-            <p class="categtext">custom tarpaulin</p>
-        </div>
-        <div class="categcontainer">
-            <button class="categbutton" id="table">
-                <img th:src="@{/img/imgcenterpc.png}" alt="table" class="categicon">
-            </button>
-            <p class="categtext">table centerpieces</p>
-        </div>
+      <div class="categcontainer">
+        <button class="categbutton" id="pinata">
+          <img th:src="@{/img/imgpinata.png}" alt="pinata" class="categicon">
+        </button>
+        <p class="categtext">pinata & fillers</p>
+      </div>
+      <div class="categcontainer">
+        <button class="categbutton" id="partyhat">
+          <img th:src="@{/img/imgpartyhat.png}" alt="partyhat" class="categicon">
+        </button>
+        <p class="categtext">party hats</p>
+      </div>
+      <div class="categcontainer">
+        <button class="categbutton" id="masks">
+          <img th:src="@{/img/imgmask.png}" alt="masks" class="categicon">
+        </button>
+        <p class="categtext">masks</p>
+      </div>
+      <div class="categcontainer">
+        <button class="categbutton" id="wig">
+          <img th:src="@{/img/imgwig.png}" alt="wig" class="categicon">
+        </button>
+        <p class="categtext">wigs & hair accessories</p>
+      </div>
+      <div class="categcontainer">
+        <button class="categbutton" id="led">
+          <img th:src="@{/img/imgled.png}" alt="led" class="categicon">
+        </button>
+        <p class="categtext">led accessories</p>
+      </div>
+      <div class="categcontainer">
+        <button class="categbutton" id="balloon">
+          <img th:src="@{/img/imgballoon.png}" alt="balloon" class="categicon">
+        </button>
+        <p class="categtext">balloons</p>
+      </div>
+      <div class="categcontainer">
+        <button class="categbutton" id="confetti">
+          <img th:src="@{/img/imgconfetti.png}" alt="confetti" class="categicon">
+        </button>
+        <p class="categtext">confetti & party poppers</p>
+      </div>
+      <div class="categcontainer">
+        <button class="categbutton" id="banners">
+          <img th:src="@{/img/imgbanner.png}" alt="banners" class="categicon">
+        </button>
+        <p class="categtext">banners</p>
+      </div>
+      <div class="categcontainer">
+        <button class="categbutton" id="garland">
+          <img th:src="@{/img/imggarland.png}" alt="garland" class="categicon">
+        </button>
+        <p class="categtext">garlands & streamers</p>
+      </div>
+      <div class="categcontainer">
+        <button class="categbutton" id="hanging">
+          <img th:src="@{/img/imghang.png}" alt="hanging" class="categicon">
+        </button>
+        <p class="categtext">hanging decorations</p>
+      </div>
+      <div class="categcontainer">
+        <button class="categbutton" id="props">
+          <img th:src="@{/img/imgprop.png}" alt="props" class="categicon">
+        </button>
+        <p class="categtext">props & cutouts</p>
+      </div>
+      <div class="categcontainer">
+        <button class="categbutton" id="strlight">
+          <img th:src="@{/img/imgstrlight.png}" alt="strlight" class="categicon">
+        </button>
+        <p class="categtext">string lights</p>
+      </div>
+      <div class="categcontainer">
+        <button class="categbutton" id="customtarp">
+          <img th:src="@{/img/imgcustarp.png}" alt="customtarp" class="categicon">
+        </button>
+        <p class="categtext">custom tarpaulin</p>
+      </div>
+      <div class="categcontainer">
+        <button class="categbutton" id="table">
+          <img th:src="@{/img/imgcenterpc.png}" alt="table" class="categicon">
+        </button>
+        <p class="categtext">table centerpieces</p>
+      </div>
     </div>
 
-    <br/>
+    <br />
     <div class="tarpaulinbanner">
-      <img th:src="@{/img/tarpaulinbanner.png}" alt="tarpaulinbanner" class="tarpban"/>
+      <img th:src="@{/img/tarpaulinbanner.png}" alt="tarpaulinbanner" class="tarpban" />
     </div>
-    <br/>
+    <br />
 
     <div class="top-products-section">
       <p class="top-products-title">TOP PRODUCTS</p>
@@ -134,7 +136,7 @@
       <!-- Example product, repeat as needed -->
       <div class="product-card">
         <div class="product-image">
-          <img th:src="@{/img/bluemasq.png}" alt="Blue Masquerade Mask"/>
+          <img th:src="@{/img/bluemasq.png}" alt="Blue Masquerade Mask" />
         </div>
         <div class="product-details">
           <p class="product-title">BLUE MASQUERADE MASK FOR WOMEN</p>
@@ -143,31 +145,31 @@
       </div>
       <div class="product-card">
         <div class="product-image">
-        <img th:src="@{/img/clownwig.png}" alt="Clown Wig">
+          <img th:src="@{/img/clownwig.png}" alt="Clown Wig">
         </div>
         <div class="product-details">
-        <p class="product-title">Clown wig colorful hair multicolor wig for kids...</p>
-        <p class="product-price">₱100</p>
+          <p class="product-title">Clown wig colorful hair multicolor wig for kids...</p>
+          <p class="product-price">₱100</p>
         </div>
-    </div>
-    <div class="product-card">
+      </div>
+      <div class="product-card">
         <div class="product-image">
-        <img th:src="@{/img/confetti.png}" alt="Confetti">
+          <img th:src="@{/img/confetti.png}" alt="Confetti">
         </div>
         <div class="product-details">
-        <p class="product-title">Party confetti poppers set of 4 colorful conf...</p>
-        <p class="product-price">₱350</p>
+          <p class="product-title">Party confetti poppers set of 4 colorful conf...</p>
+          <p class="product-price">₱350</p>
         </div>
-    </div>
-    <div class="product-card">
+      </div>
+      <div class="product-card">
         <div class="product-image">
-        <img th:src="@{/img/nosedisguise.png}" alt="nose">
+          <img th:src="@{/img/nosedisguise.png}" alt="nose">
         </div>
         <div class="product-details">
-        <p class="product-title">disguise nose glasses prop funny kids and a...</p>
-        <p class="product-price">₱350</p>
+          <p class="product-title">disguise nose glasses prop funny kids and a...</p>
+          <p class="product-price">₱350</p>
         </div>
-    </div>
+      </div>
     </div>
 
     <div class="seemorebuttoncontainer">
@@ -178,7 +180,7 @@
   <footer>
     <div class="footer-container">
       <div class="footer-logo">
-        <img th:src="@{/img/logowhite.png}" alt="Poppin Party Logo"/>
+        <img th:src="@{/img/logowhite.png}" alt="Poppin Party Logo" />
         <p>POPPIN PARTY</p>
         <p>CELEBRATION NEEDS</p>
       </div>
@@ -191,14 +193,16 @@
           <li>POPPIN' GUARANTEE</li>
           <li>FREE SHIPPING</li>
           <li>PAYMENT METHODS</li>
-          <li><a th:href="@{/logout}">LOG-OUT</a></li>
+          <!--USER Role-->
+          <li th:if="${#authorization.expression('hasAuthority(''ROLE_USER'')')}">
+            <a th:href="@{'/logout'}">LOG-OUT</a>
 
-          <!--Admin Role-->
+            <!--Admin Role-->
           <li th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}">
             <a th:href="@{/admin/home}">
-                PRODUCT INVENTORY
+              PRODUCT INVENTORY
             </a>
-        </li>                              
+          </li>
         </ul>
       </div>
       <div class="footer-section">
@@ -246,4 +250,5 @@
     </div>
   </footer>
 </body>
+
 </html>

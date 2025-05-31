@@ -41,6 +41,8 @@ public class SecurityConfig {
                 .requestMatchers("/user/**").hasRole("USER")
                 .anyRequest().authenticated() // everything else requires login
             )
+            //too lazy to rename this but it is now redirected to home
+            //instead of login
             .formLogin(form -> form
                 .loginPage("/login")
                 .successHandler(loginSuccessHandler)

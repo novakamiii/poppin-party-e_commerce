@@ -1,31 +1,166 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>Poppin Party</title>
+    <link rel="icon" th:href="@{/img/logowhite.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 </head>
+
 <body>
-    <h2>Register</h2>
 
-    <form action="#" th:action="@{/register}" method="post">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
+    <!--Header-->
+    <header class="sticky-header">
+        <div class="header-inner">
+            <div class="logo">
+                <a th:href="@{'/home'}">
+                    <img th:src="@{/img/logowhite.png}" alt="logo" id="logo">
+                </a>
+            </div>
+        </div>
+    </header>
+    <!--End of Header-->
+    <main>
+        <br>
+        <br>
+        <div class="signup-container">
+            <p>SIGN UP</p>
+            <form action="#" th:action="@{/register}" method="POST">
+                <input type="text" id="email" name="email" placeholder="E-Mail" required>
+                <br>
+                <br>
+                <input type="text" id="username" name="username" placeholder="Username" required>
+                <br>
+                <br>
+                <input type="text" id="address" name="address" placeholder="Permanent Address" required>
+                <br>
+                <br>
+                <!--PAssword Section-->
+                <style>
+                    .password-match {
+                        color: green;
+                    }
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
+                    .password-mismatch {
+                        color: red;
+                    }
+                </style>
 
-        <label for="address">Address:</label>
-        <input type="text" id="address" name="address" required><br><br>
+                <input type="password" id="password" name="password" placeholder="Password" required>
+                <br><br>
+                <input type="password" id="confpassword" name="confpassword" placeholder="Confirm Password" required
+                    oninput="validatePassword()">
+                <br>
+                <span id="passwordError"></span>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br><br>
+                <script>
+                    function validatePassword() {
+                        const password = document.getElementById('password').value;
+                        const confPassword = document.getElementById('confpassword').value;
+                        const errorElement = document.getElementById('passwordError');
 
-        <button type="submit">Register</button>
-    </form>
+                        if (confPassword.length === 0) {
+                            errorElement.textContent = "";
+                            errorElement.className = "";
+                        }
+                        else if (password !== confPassword) {
+                            errorElement.textContent = "Passwords do not match!";
+                            errorElement.className = "password-mismatch";
+                            return false;
+                        } else {
+                            errorElement.textContent = "Passwords match!";
+                            errorElement.className = "password-match";
+                            return true;
+                        }
+                    }
 
-    <!-- Link back to Login -->
-    <p>Already have an account? <a th:href="@{/login}">Login here</a></p>
+                    document.querySelector('form').addEventListener('submit', function (e) {
+                        if (!validatePassword()) {
+                            e.preventDefault();
+                            alert("Please make sure passwords match!");
+                        }
+                    });
+                </script>
+                <br>
+                <br>
+                <!--PAssword Section End-->
+                <button type="submit">SIGN UP</button>
+            </form>
+        </div>
+        <br>
+        <br>
+        <br>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-logo">
+                <img th:src="@{/img/logowhite.png}" alt="Poppin Party Logo">
+                <p>POPPIN PARTY</p>
+                <p>CELEBRATION NEEDS</p>
+            </div>
+            <div class="footer-section">
+                <h3>CUSTOMER SERVICE</h3>
+                <ul>
+                    <li>HELP CENTRE</li>
+                    <li>CONTACT US</li>
+                    <li>RETURN AND REFUND</li>
+                    <li>POPPIN' GUARANTEE</li>
+                    <li>FREE SHIPPING</li>
+                    <li>PAYMENT METHODS</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>ABOUT POPPIN' PARTY</h3>
+                <ul>
+                    <li>ABOUT US</li>
+                    <li>PRIVACY POLICY</li>
+                    <li>POPPIN' DEALS</li>
+                    <li>MEDIA CONTACT</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>PAYMENT</h3>
+                <ul>
+                    <li>GCASH</li>
+                    <li>PAYPAL</li>
+                    <li>CASHAPP</li>
+                    <li>VISA</li>
+                    <li>MASTERCARD</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>LOGISTICS</h3>
+                <ul>
+                    <li>GOGO EXPRESS</li>
+                    <li>NINJAVAN</li>
+                    <li>UPS</li>
+                    <li>FEDEX</li>
+                    <li>LBC</li>
+                    <li>DHL</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>FOLLOW US</h3>
+                <ul>
+                    <li>FACEBOOK</li>
+                    <li>INSTAGRAM</li>
+                    <li>X</li>
+                    <li>TIKTOK</li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
+        </div>
+    </footer>
+
+    <script th:src="@{/script.js}"></script>
 </body>
+
 </html>

@@ -1,17 +1,21 @@
 package com.poppinparty.trinity.poppin_party_needs_alpha;
 
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.persistence.Column;
-
-import java.time.LocalDateTime;
-import org.springframework.security.core.userdetails.UserDetails;
 
 @Controller
 public class UserController {
@@ -21,7 +25,6 @@ public class UserController {
 
     @Autowired
     private ProductRepository productRepository;
-
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
@@ -54,7 +57,7 @@ public class UserController {
     @GetMapping("/redirect")
     public String redirectBasedOnRole(Authentication authentication) {
         if (authentication == null || authentication.getAuthorities().isEmpty()) {
-            return "redirect:/login";
+            return "redirect:/home";
         }
 
         if (authentication.getAuthorities().stream()
@@ -65,7 +68,7 @@ public class UserController {
             return "redirect:/user/home";
         }
 
-        return "redirect:/login";
+        return "redirect:/home";
     }
 
     @GetMapping("/admin/home")
@@ -75,21 +78,21 @@ public class UserController {
         return "product_list";
     }
 
-
-    //Update last login time
-    //why the fuck it is here.
-    //idk nagana lang
+    // Update last login time
+    // why the fuck it is here.
+    // idk nagana lang
     private void updateLastLogin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated()) {
             String username = auth.getName();
-    
+
             userRepository.findByUsername(username).ifPresent(user -> {
                 user.setLastLogin(LocalDateTime.now());
                 userRepository.save(user);
             });
         }
     }
+
     @GetMapping("/admin/page")
     public String adminPage() {
         updateLastLogin();
@@ -97,7 +100,7 @@ public class UserController {
     }
 
     @GetMapping("/home")
-    public String noLogin(){
+    public String noLogin() {
         return "index";
     }
 
@@ -113,10 +116,14 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public String registerUser(User user) {
+    public String registerUser(User user, RedirectAttributes redirectAttributes) {
         user.setPassword(NoOpPasswordEncoder.getInstance().encode(user.getPassword()));
         user.setRole("USER");
         userRepository.save(user);
+
+        // Add success message as a flash attribute
+        redirectAttributes.addFlashAttribute("success", "Your account has been successfully created!");
+
         return "redirect:/login";
     }
 
@@ -147,7 +154,7 @@ public class UserController {
 
     @PostMapping("/reset-password")
     public String processReset(@RequestParam("email") String email,
-                            @RequestParam("newPassword") String newPassword) {
+            @RequestParam("newPassword") String newPassword) {
         User user = userRepository.findByEmail(email);
         if (user != null) {
             user.setPassword(NoOpPasswordEncoder.getInstance().encode(newPassword));
@@ -156,8 +163,6 @@ public class UserController {
 
         return "redirect:/login?resetSuccess";
     }
-
-
 
     // ========== PRODUCT ==========
 

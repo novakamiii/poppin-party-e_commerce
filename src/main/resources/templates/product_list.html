@@ -7,10 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Poppin Party</title>
 
-  <div class="logo">
-    <a th:href="@{landing.html}"><img th:src="@{img/logowhite.png"} alt="logo" id="logo"></a>
-  </div>
-  
+  <link rel="icon" th:href="@{/img/logowhite.png}" type="image/png" />
+
   <link rel="stylesheet" th:href="@{/styles.css}" />
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -20,8 +18,10 @@
     <header>
         <div class="rectangle-container">
             <div class="logo">
-                <a th:href="@{'/admin/page'}"><img th:src="@{img/logowhite.png}" alt="logo" id="logo"></a>
-            </div>
+                <a th:href="@{'/admin/page'}">
+                  <img th:src="@{/img/logowhite.png}" alt="logo" id="logo">
+                </a>
+              </div>
             <div class="search">
                 <div class="searchrectangle"></div>
                 <button class="search" type="button" id="search">
