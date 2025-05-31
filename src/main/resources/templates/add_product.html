@@ -2,16 +2,143 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Add Product</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+        body {
+            font-family: 'Bebas Neue', sans-serif; /* Apply Bebas Neue */
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .add-product-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 400px; /* Adjust as needed */
+            margin-bottom: 20px;
+        }
+
+        .add-product-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2em; /* Make title larger with Bebas Neue */
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+            font-size: 1.2em; /* Slightly larger labels */
+        }
+
+        .form-input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1.2em; /* Larger input text */
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #b944fd; /* Purple focus color */
+            box-shadow: 0 0 5px rgba(185, 68, 253, 0.5); /* Purple focus shadow */
+        }
+
+        .form-button {
+            background-color: #b944fd; /* Purple button */
+            color: white;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.4em; /* Larger button text */
+            transition: background-color 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+            letter-spacing: 0.05em; /* Slight letter spacing for Bebas Neue */
+            font-family: 'Bebas Neue', sans-serif; /* Apply Bebas Neue */
+        }
+
+        .form-button:hover {
+            background-color: #8e31c9; /* Darker purple on hover */
+        }
+
+        .upload-container {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .upload-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .back-link {
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 1.2em;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-<h2>Add Product</h2>
-<form action="/products/add" method="post">
-    Name: <input type="text" name="item_name"><br>
-    Price: <input type="number" name="price" step="0.01"><br>
-    Stock: <input type="number" name="stock"><br>
-    Category: <input type="text" name="category"><br>
-    <button type="submit">Add</button>
-</form>
-<a th:href="@{/products}">Back to Inventory</a>
+    <div class="add-product-container">
+        <h2 class="add-product-title">ADD PRODUCT</h2>
+        <form action="/products/add" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="itemName" class="form-label">NAME:</label>
+                <input type="text" id="itemName" name="item_name" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label for="price" class="form-label">PRICE:</label>
+                <input type="number" id="price" name="price" step="0.01" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label for="stock" class="form-label">STOCK:</label>
+                <input type="number" id="stock" name="stock" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label for="category" class="form-label">CATEGORY:</label>
+                <input type="text" id="category" name="category" class="form-input" required>
+            </div>
+        
+            <div class="upload-container">
+                <h3>UPLOAD IMAGE</h3>
+                <div class="form-group">
+                    <label for="imageUpload" class="upload-label">CHOOSE AN IMAGE:</label>
+                    <input type="file" id="imageUpload" name="image" accept="image/*" class="form-input">
+                </div>
+            </div>
+        
+            <button type="submit" class="form-button">ADD PRODUCT</button>
+        </form>
+
+    </div>
+
+    <a th:href="@{/products}" class="back-link">BACK TO INVENTORY</a>
 </body>
 </html>

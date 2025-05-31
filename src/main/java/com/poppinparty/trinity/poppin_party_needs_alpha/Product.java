@@ -1,6 +1,9 @@
 package com.poppinparty.trinity.poppin_party_needs_alpha;
-import jakarta.annotation.Generated;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "products")
@@ -13,6 +16,14 @@ public class Product
     private double price;
     private long stock;
     private String category;
+
+    
+    public String getCategory() {
+        return category;
+    }
+    public void setCategory(String category) {
+        this.category = category;
+    }
 
     
     public long getId() {
@@ -38,11 +49,5 @@ public class Product
     }
     public void setStock(long stock) {
         this.stock = stock;
-    }
-    public String getCategory() {
-        return category;
-    }
-    public void setCategory(String category) {
-        this.category = category;
     }
 }
