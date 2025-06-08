@@ -15,22 +15,26 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet"/>
 </head>
 <body>
-    <header>
-        <div class="rectangle-container">
-            <div class="logo">
-                <a th:href="@{'/admin/page'}">
-                  <img th:src="@{/img/logowhite.png}" alt="logo" id="logo">
-                </a>
-              </div>
-            <div class="search">
-                <div class="searchrectangle"></div>
-                <button class="search" type="button" id="search">
-                    <img th:src="@{/img/search.png}" alt="search">
-                </button>
-                <input class="search" type="text" id="search" name="search" placeholder="Search">
-            </div>
+  <header class="sticky-header">
+    <div class="header-inner">
+      <div class="logo">
+        <a th:href="@{/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
+      </div>
+      <div class="search">
+        <input type="text" class="search-input" placeholder="Search">
+        <button class="search-button">
+          <img th:src="@{/img/search.png}" alt="search">
+        </button>
+      </div>
+      <div class="header-actions">
+        <div class="account-button">
+          <a th:href="@{/dummy}">
+            <img th:src="@{/img/account.png}" alt="user" id="user">
+          </a>
         </div>
-    </header>
+      </div>
+    </div>
+  </header>
 
 
     <main>

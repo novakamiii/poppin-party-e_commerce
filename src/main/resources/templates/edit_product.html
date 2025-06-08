@@ -126,7 +126,7 @@
         
             <div class="form-group">
                 <label for="category" class="form-label">Category</label>
-                <input type="text" id="category" name="category" th:value="${product.category}" class="form-input" required><br>
+                <input type="text" id="category" name="category" th:value="${product.category}" class="form-input" placeholder="put mask only"><br>
             </div>
 
             <!-- TODO: This. -->
@@ -138,10 +138,11 @@
                         <input type="file" id="imageUpload" name="image" accept="image/*" class="form-input">
                     </div>
                     <button type="submit" class="form-button">UPLOAD IMAGE</button>
+                    <br>
+                    <br>
+                    <button type="submit" class="form-button">EDIT PRODUCT</button>
                 </form>
             </div>
-        
-            <button type="submit" class="form-button">EDIT PRODUCT</button>
         </form>
     </div>
     <a th:href="@{/products}" class="back-link">BACK TO INVENTORY</a>

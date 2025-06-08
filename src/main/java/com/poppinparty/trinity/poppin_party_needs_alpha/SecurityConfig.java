@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,7 +22,8 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance(); // Use plain text password for this case
+        // Same encoder everywhere
+        return new BCryptPasswordEncoder(12); // Strength 10-12 is safe
     }
 
     @Bean
@@ -35,26 +37,27 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/register", "/home", "styles.css", "/img/**", "/forgot-password", "/reset-password", "/login", "/css/**", "/js/**").permitAll() // allow public access
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/user/**").hasRole("USER")
-                .anyRequest().authenticated() // everything else requires login
-            )
-            //too lazy to rename this but it is now redirected to home
-            //instead of login
-            .formLogin(form -> form
-                .loginPage("/login")
-                .successHandler(loginSuccessHandler)
-                .defaultSuccessUrl("/redirect", true) // redirect after successful login
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutSuccessUrl("/login?logout") // what happens after logout
-                .permitAll()
-            )
-            .csrf(csrf -> csrf.disable()); // Disable this if you're not using CSRF tokens
-
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/register", "/dummy", "/home", "/styles.css", "/img/**", "/forgot-password",
+                                "/reset-password", "/login", "/css/**", "/js/**")
+                        .permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/user/**").hasRole("USER")
+                        .anyRequest().authenticated()
+                )
+                //god forbid how this works
+                //huh pano to
+                //what
+                //wag mo na galawin (coping)
+                .formLogin(form -> form
+                        .loginPage("/login") // Custom login page
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/home", true) // Redirect to /home after successful login
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/home") // Redirect to /home after logout
+                        .permitAll())
+                .csrf(csrf -> csrf.disable());
         return http.build();
     }
 }

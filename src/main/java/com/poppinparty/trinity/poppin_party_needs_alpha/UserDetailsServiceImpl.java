@@ -1,6 +1,7 @@
 package com.poppinparty.trinity.poppin_party_needs_alpha;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,13 +19,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = repo.findByUsername(username)
-                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-                        return new org.springframework.security.core.userdetails.User(
-                            user.getUsername(),
-                            user.getPassword(),
-                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
-                    );
-                    
+        return new CustomUserDetails(user);
     }
+
 }

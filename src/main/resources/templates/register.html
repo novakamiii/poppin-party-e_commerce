@@ -11,12 +11,26 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 </head>
+<style>
+    .form-footer {
+        font-size: 0.2em;
+        color: #333;
+        margin-top: 20px;
+    }
+
+    /* Style the date picker */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(0.5);
+        padding: 4px;
+        cursor: pointer;
+    }
+</style>
 
 <body>
 
     <!--Header-->
     <header class="sticky-header">
-        <div class="header-inner">
+        <div class="header-inner-login">
             <div class="logo">
                 <a th:href="@{'/home'}">
                     <img th:src="@{/img/logowhite.png}" alt="logo" id="logo">
@@ -30,15 +44,70 @@
         <br>
         <div class="signup-container">
             <p>SIGN UP</p>
-            <form action="#" th:action="@{/register}" method="POST">
-                <input type="text" id="email" name="email" placeholder="E-Mail" required>
+            <form th:object="${user}" th:action="@{/register}" method="post">
+                <input type="text" th:field="*{email}" placeholder="E-Mail" required> <br>
+                <input type="text" th:field="*{name}" placeholder="First Name" required> <br>
+                <div class="form-group">
+                    <label for="gender"><span class="required"></span></label>
+                    <select th:field="*{gender}" class="form-select" style="
+                                background: white;
+                                border-radius: 5px;
+                                padding: 12px;
+                                width: 100%;
+                                font-family: sans-serif;
+                                font-size: 1.1rem;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                                transition: all 0.3s ease;
+                            " required>
+                        <option value="" disabled selected style="color: #999; font-style: italic;">
+                            Select your gender
+                        </option>
+                
+                        <option
+                            th:each="genderOpt : ${genders}"
+                            th:value="${genderOpt}" th:text="${genderOpt}" style="
+                                padding: 8px;
+                                background: white;
+                                transition: background 0.2s;
+                            " th:attr="data-gender=${genderOpt}">
+                        </option>
+                    </select>
+                </div>
+                
                 <br>
+                <div class="form-group">
+                    <label for="birthDate" style="display: block; text-align: center; margin-bottom: 8px;">
+                        Birthdate (YYYY-MM-DD)
+                      </label>
+                    <input 
+                        type="date" 
+                        th:field="*{birthDate}" 
+                        class="form-control" 
+                        pattern="\d{4}-\d{2}-\d{2}"
+                        required
+                        style="
+                            background: white;
+                            border-radius: 5px;
+                            padding: 12px;
+                            width: 100%;
+                            font-family: sans-serif;
+                            font-size: 1.1rem;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                            border: 1px solid #ccc;
+                            transition: all 0.3s ease;
+                            cursor: pointer;
+                        "
+                        onfocus="this.style.boxShadow='0 0 6px #6ca0dc'; this.style.borderColor='#6ca0dc';" 
+                        onblur="this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'; this.style.borderColor='#ccc';"
+                    >
+                </div>
                 <br>
-                <input type="text" id="username" name="username" placeholder="Username" required>
+
+                <input type="text" th:field="*{username}" placeholder="Username" required>
                 <br>
+                <input type="tel" th:field="*{phone}" placeholder="Phone Number" required>
                 <br>
-                <input type="text" id="address" name="address" placeholder="Permanent Address" required>
-                <br>
+                <input type="text" th:field="*{address}" placeholder="Permanent Address" required>
                 <br>
                 <!--PAssword Section-->
                 <style>
@@ -51,8 +120,9 @@
                     }
                 </style>
 
-                <input type="password" id="password" name="password" placeholder="Password" required>
-                <br><br>
+                <input type="password" th:field="*{password}" placeholder="Password" required>
+
+                <br>
                 <input type="password" id="confpassword" name="confpassword" placeholder="Confirm Password" required
                     oninput="validatePassword()">
                 <br>
@@ -79,6 +149,16 @@
                         }
                     }
 
+                    // Validate birthdate is not future
+                    document.querySelector('input[type="date"]').addEventListener('change', function () {
+                        const selectedDate = new Date(this.value);
+                        if (selectedDate > new Date()) {
+                            alert("Birthdate cannot be in the future!");
+                            this.value = '';
+                        }
+                    });
+
+
                     document.querySelector('form').addEventListener('submit', function (e) {
                         if (!validatePassword()) {
                             e.preventDefault();
@@ -86,13 +166,13 @@
                         }
                     });
                 </script>
-                <br>
-                <br>
                 <!--PAssword Section End-->
                 <button type="submit">SIGN UP</button>
+                <h2>
+                    Already have an Account? <a th:href="@{/login}">Log In</a>
+                </h2>
             </form>
         </div>
-        <br>
         <br>
         <br>
     </main>
