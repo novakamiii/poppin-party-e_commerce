@@ -1,9 +1,19 @@
 package com.poppinparty.trinity.poppin_party_needs_alpha;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.List;
+// Removed incorrect import for java.util.Locale.Category
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,8 +26,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 
 import jakarta.persistence.Column;
 import jakarta.validation.Valid;
@@ -30,6 +45,9 @@ public class UserController {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
@@ -165,7 +183,6 @@ public class UserController {
             return "forgot_password";
         }
 
-
         return "redirect:/reset-password?email=" + email;
     }
 
@@ -180,7 +197,7 @@ public class UserController {
             @RequestParam("newPassword") String newPassword) {
         User user = userRepository.findByEmail(email);
         if (user != null) {
-            user.setPassword(NoOpPasswordEncoder.getInstance().encode(newPassword));
+            user.setPassword(new BCryptPasswordEncoder().encode(newPassword));
             userRepository.save(user);
         }
 
@@ -237,7 +254,80 @@ public class UserController {
         // Redirect to the GET /account endpoint to fetch updated data
         return "redirect:/account";
     }
-    // ========== PRODUCT ==========
+    // ========== ITEMS ==========
+
+    @GetMapping("/product-page")
+    public String productPage() {
+        return "product_page";
+    }
+
+    @RestController
+    @RequestMapping("/api/products")
+    public class ProductController {
+
+        @Autowired
+        private ProductRepository productRepository;
+
+        private static final String UPLOAD_DIR = "uploads/";
+
+        @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<Product> addProduct(
+                @RequestParam("item_name") String itemName,
+                @RequestParam("price") Double price,
+                @RequestParam("stock") Long stock,
+                @RequestParam(value = "category", required = false) String category,
+                @RequestParam(value = "description", required = false) String description,
+                @RequestParam("image") MultipartFile imageFile) throws IOException {
+
+            String originalFilename = imageFile.getOriginalFilename();
+            String fileExtension = "";
+
+            if (originalFilename != null && originalFilename.contains(".")) {
+                fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+
+            String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            Path filePath = uploadPath.resolve(uniqueFileName);
+            Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            Product newProduct = new Product();
+            newProduct.setItemName(itemName);
+            newProduct.setPrice(price);
+            newProduct.setStock(stock);
+            newProduct.setCategory(category);
+            newProduct.setDescription(description);
+            newProduct.setImageLoc("/" + UPLOAD_DIR + uniqueFileName);
+
+            productRepository.save(newProduct);
+
+            return ResponseEntity.ok(newProduct);
+        }
+
+        // ✅ MOVE THIS INSIDE ProductController
+        @GetMapping
+        public ResponseEntity<List<ProductDTO>> getAllProducts() {
+            List<Product> products = productRepository.findAll();
+
+            List<ProductDTO> productDTOs = products.stream().map(product -> {
+                ProductDTO dto = new ProductDTO();
+                dto.setId(product.getId());
+                dto.setItemName(product.getItemName());
+                dto.setPrice(product.getPrice());
+                dto.setImageLoc(product.getImageLoc());
+                dto.setStock(product.getStock());
+                return dto;
+            }).collect(Collectors.toList());
+
+            return ResponseEntity.ok(productDTOs);
+        }
+    }
+    // ========== PRODUCT MANAGEMENT ==========
 
     @GetMapping("/products")
     public String showProducts(Model model) {
@@ -245,15 +335,63 @@ public class UserController {
         return "product_list";
     }
 
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll(); // or any custom fetch logic
+    }
+
     @GetMapping("/products/add")
-    public String showAddForm(Model model) {
-        model.addAttribute("product", new Product());
-        return "add_product";
+    public String showAddProductForm(Model model) {
+        model.addAttribute("product", new Product()); // For binding the form
+        model.addAttribute("categories", getAllCategories()); // <-- This is crucial
+        return "add_product"; // Name of your Thymeleaf HTML file
     }
 
     @PostMapping("/products/add")
-    public String addProduct(@ModelAttribute Product product) {
+    public String addProduct(
+            @ModelAttribute Product product,
+            @RequestParam(value = "category", required = false) String categoryId,
+            @RequestParam(value = "newCategory", required = false) String newCategoryName,
+            @RequestParam("image") MultipartFile imageFile) {
+
+        Category category = null;
+
+        if ("other".equals(categoryId)) {
+            if (newCategoryName != null && !newCategoryName.trim().isEmpty()) {
+                category = categoryRepository.findByName(newCategoryName).orElse(null);
+                if (category == null) {
+                    category = new Category();
+                    category.setName(newCategoryName);
+                    categoryRepository.save(category);
+                }
+            }
+        } else {
+            Long catId = Long.parseLong(categoryId);
+            category = categoryRepository.findById(catId).orElse(null);
+        }
+
+        product.setCategory(category != null ? category.getName() : null);
+
+        // ✅ Handle image upload
+        if (imageFile != null && !imageFile.isEmpty()) {
+            try {
+                String uploadDir = "uploads/";
+                String filename = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
+                Path uploadPath = Paths.get(uploadDir);
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+                Path filePath = uploadPath.resolve(filename);
+                Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                product.setImageLoc("/uploads/" + filename); // For rendering via <img>
+            } catch (IOException e) {
+                e.printStackTrace();
+                // Optional: Add error handling here
+            }
+        }
+
+        product.setCreatedAt(LocalDateTime.now().toString());
         productRepository.save(product);
+
         return "redirect:/products";
     }
 
@@ -261,14 +399,77 @@ public class UserController {
     public String editProduct(@PathVariable("id") Long id, Model model) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid product Id:" + id));
+
+        List<com.poppinparty.trinity.poppin_party_needs_alpha.Category> categories = categoryRepository.findAll(); // You
+                                                                                                                   // need
+                                                                                                                   // to
+                                                                                                                   // inject
+                                                                                                                   // categoryRepository
+
         model.addAttribute("product", product);
+        model.addAttribute("categories", categories);
         return "edit_product";
     }
 
     @PostMapping("/products/update/{id}")
-    public String updateProduct(@PathVariable("id") Long id, Product product) {
-        product.setId(id);
-        productRepository.save(product);
+    public String updateProduct(
+            @PathVariable("id") Long id,
+            @ModelAttribute Product updatedProduct,
+            @RequestParam(value = "category", required = false) String categoryId,
+            @RequestParam(value = "newCategory", required = false) String newCategoryName,
+            @RequestParam(value = "image", required = false) MultipartFile imageFile) {
+
+        // Load existing product from DB
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid product Id:" + id));
+
+        // Update fields from the form
+        existingProduct.setItemName(updatedProduct.getItemName());
+        existingProduct.setPrice(updatedProduct.getPrice());
+        existingProduct.setStock(updatedProduct.getStock());
+        existingProduct.setDescription(updatedProduct.getDescription());
+
+        // Handle category selection/new category
+        Category category = null;
+        if ("other".equals(categoryId)) {
+            if (newCategoryName != null && !newCategoryName.trim().isEmpty()) {
+                category = categoryRepository.findByName(newCategoryName).orElse(null);
+                if (category == null) {
+                    category = new Category();
+                    category.setName(newCategoryName);
+                    categoryRepository.save(category);
+                }
+            }
+        } else if (categoryId != null && !categoryId.isEmpty()) {
+            Long catId = Long.parseLong(categoryId);
+            category = categoryRepository.findById(catId).orElse(null);
+        }
+        existingProduct.setCategory(category != null ? category.getName() : null);
+
+        // Handle image upload if new image is provided
+        if (imageFile != null && !imageFile.isEmpty()) {
+            try {
+                String uploadDir = "uploads/";
+                String filename = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
+                Path uploadPath = Paths.get(uploadDir);
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+                Path filePath = uploadPath.resolve(filename);
+                Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                existingProduct.setImageLoc("/uploads/" + filename);
+            } catch (IOException e) {
+                e.printStackTrace();
+                // Optional: add error handling here
+            }
+        }
+
+        // You may want to preserve the original createdAt or update it depending on
+        // your logic
+        // existingProduct.setCreatedAt(existingProduct.getCreatedAt());
+
+        productRepository.save(existingProduct);
+
         return "redirect:/products";
     }
 
