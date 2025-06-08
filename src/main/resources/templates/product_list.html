@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="en"
-    xmlns:th="http://www.thymeleaf.org"
-    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Poppin Party</title>
 
   <link rel="icon" th:href="@{/img/logowhite.png}" type="image/png" />
 
   <link rel="stylesheet" th:href="@{/styles.css}" />
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
 </head>
+
 <body>
   <header class="sticky-header">
     <div class="header-inner">
@@ -28,7 +28,7 @@
       </div>
       <div class="header-actions">
         <div class="account-button">
-          <a th:href="@{/dummy}">
+          <a th:href="@{/account}">
             <img th:src="@{/img/account.png}" alt="user" id="user">
           </a>
         </div>
@@ -37,54 +37,59 @@
   </header>
 
 
-    <main>
-        <table class="table-section">
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Category</th>
-                <th>Image</th>
-                <th>Actions</th>
-            </tr>
-            <tr th:each="product : ${products}">
-                <td th:text="${product.id}"></td>
-                <td th:text="${product.item_name}"></td>
-                <td th:text="${product.price}"></td>
-                <td th:text="${product.stock}"></td>
-                <td th:text="${product.category}"></td>
-                <td>
-                    <a th:href="@{'/products/edit/' + ${product.id}}">Edit</a>
-                    |
-                    <a th:href="@{'/products/delete/' + ${product.id}}"
-                       onclick="return confirm('Delete this item?');">Delete</a>
-                </td>
-            </tr>
-        </table>
-        <div class="addproduct-container">
-            <a th:href="@{/products/add}">
-                <button class="addproduct-button"> Add New Product</button>
-            </a>
-        </div>
-    </main>
-    <footer>
-        <div class="footer-container">
-          <div class="footer-logo">
-            <img th:src="@{/img/logowhite.png}" alt="Poppin Party Logo">
-            <p>POPPIN PARTY</p>
-            <p>CELEBRATION NEEDS</p>
-          </div>
-          <div class="footer-section">
-            <h3>CUSTOMER SERVICE</h3>
-            <ul>
-              <li><a th:href="@{'/admin/page'}">MAIN PAGE</a></li>
-              <li><a th:href="@{/logout}">LOG-OUT</a></li>
-            </ul>
-          </div>
-        <div class="copyright">
-          © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
-        </div>
-    </footer>
+  <main>
+    <table class="table-section">
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Category</th>
+        <th>Image</th>
+        <th>Description</th> <!-- Add header for description -->
+        <th>Actions</th>
+      </tr>
+      <tr th:each="product : ${products}">
+        <td th:text="${product.id}"></td>
+        <td th:text="${product.itemName}"></td>
+        <td th:text="${product.price}"></td>
+        <td th:text="${product.stock}"></td>
+        <td th:text="${product.category}"></td>
+        <td id="table-description" style="position: relative;">
+
+          <img th:src="${product.imageLoc}" alt="Product Image" class="hover-image" />
+        </td>        
+        <td th:text="${product.description}" id="table-description"></td> <!-- Ensure description is displayed -->
+        <td>
+          <a th:href="@{'/products/edit/' + ${product.id}}">Edit</a> |
+          <a th:href="@{'/products/delete/' + ${product.id}}" onclick="return confirm('Delete this item?');">Delete</a>
+        </td>
+      </tr>
+    </table>
+    <div class="addproduct-container">
+      <a th:href="@{/products/add}">
+        <button class="addproduct-button"> Add New Product</button>
+      </a>
+    </div>
+  </main>
+  <footer>
+    <div class="footer-container">
+      <div class="footer-logo">
+        <img th:src="@{/img/logowhite.png}" alt="Poppin Party Logo">
+        <p>POPPIN PARTY</p>
+        <p>CELEBRATION NEEDS</p>
+      </div>
+      <div class="footer-section">
+        <h3>CUSTOMER SERVICE</h3>
+        <ul>
+          <li><a th:href="@{'/admin/page'}">MAIN PAGE</a></li>
+          <li><a th:href="@{/logout}">LOG-OUT</a></li>
+        </ul>
+      </div>
+      <div class="copyright">
+        © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
+      </div>
+  </footer>
 </body>
+
 </html>

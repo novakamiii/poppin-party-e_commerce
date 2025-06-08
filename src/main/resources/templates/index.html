@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <script th:src="@{/ajax.js}"></script>
 </head>
 
 <body>
@@ -136,45 +137,42 @@
       <a href="#" class="see-more-link">SEE MORE →</a>
     </div>
 
-    <div class="productlist">
-      <!-- Example product, repeat as needed -->
-      <div class="product-card">
-        <div class="product-image">
-          <img th:src="@{/img/bluemasq.png}" alt="Blue Masquerade Mask" />
-        </div>
-        <div class="product-details">
-          <p class="product-title">BLUE MASQUERADE MASK FOR WOMEN</p>
-          <p class="product-price">₱85</p>
-        </div>
-      </div>
-      <div class="product-card">
-        <div class="product-image">
-          <img th:src="@{/img/clownwig.png}" alt="Clown Wig">
-        </div>
-        <div class="product-details">
-          <p class="product-title">Clown wig colorful hair multicolor wig for kids...</p>
-          <p class="product-price">₱100</p>
-        </div>
-      </div>
-      <div class="product-card">
-        <div class="product-image">
-          <img th:src="@{/img/confetti.png}" alt="Confetti">
-        </div>
-        <div class="product-details">
-          <p class="product-title">Party confetti poppers set of 4 colorful conf...</p>
-          <p class="product-price">₱350</p>
-        </div>
-      </div>
-      <div class="product-card">
-        <div class="product-image">
-          <img th:src="@{/img/nosedisguise.png}" alt="nose">
-        </div>
-        <div class="product-details">
-          <p class="product-title">disguise nose glasses prop funny kids and a...</p>
-          <p class="product-price">₱350</p>
-        </div>
-      </div>
-    </div>
+    <div class="productlist"></div>
+
+    <script type="module">
+      import { addProductAjax, createProductCardHTML } from './ajax.js';
+
+      const productList = document.querySelector('.productlist');
+      const form = document.getElementById('addProductForm');
+
+      fetch('/api/products')
+        .then(res => res.json())
+        .then(products => {
+          products.forEach(product => {
+            productList.insertAdjacentHTML('beforeend', createProductCardHTML(product));
+          });
+        })
+        .catch(err => {
+          console.error("Error fetching products", err);
+        });
+
+      if (form) {
+        form.addEventListener('submit', e => {
+          e.preventDefault();
+
+          addProductAjax(
+            form,
+            newProduct => {
+              productList.insertAdjacentHTML('beforeend', createProductCardHTML(newProduct));
+              form.reset();
+            },
+            () => {
+              alert('Failed to add product');
+            }
+          );
+        });
+      }
+    </script>
 
     <div class="seemorebuttoncontainer">
       <button class="seemorebutton" id="seemore">SEE MORE</button>

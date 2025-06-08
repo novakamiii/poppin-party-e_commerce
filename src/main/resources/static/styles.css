@@ -172,14 +172,19 @@ body {
 }
 
 .signup-container input[type="date"] {
-  width: 100%;           /* Make the date input fill the container width */
-  padding: 10px;         /* Same padding as other inputs */
-  margin-bottom: 10px;   /* Same margin */
+  width: 100%;
+  /* Make the date input fill the container width */
+  padding: 10px;
+  /* Same padding as other inputs */
+  margin-bottom: 10px;
+  /* Same margin */
   border: 1px solid #ccc;
   border-radius: 4px;
-  box-sizing: border-box; /* Include padding in width */
+  box-sizing: border-box;
+  /* Include padding in width */
   font-family: sans-serif;
-  font-size: 1.5em;       /* Same font size */
+  font-size: 1.5em;
+  /* Same font size */
 }
 
 
@@ -274,7 +279,8 @@ body {
 .cart-image img {
   width: 50px;
   height: 50px;
-  margin-right: 15px; /* Add some spacing between cart and account */
+  margin-right: 15px;
+  /* Add some spacing between cart and account */
 }
 
 /* Account Button Styling */
@@ -282,7 +288,7 @@ body {
 .account-button img {
   width: 40px;
   height: 40px;
-  margin-left: 10px ;
+  margin-left: 10px;
 }
 
 /* CATEGORIES */
@@ -383,6 +389,8 @@ body {
   text-decoration: underline;
 }
 
+/* Product Card */
+
 .product-card {
   width: 250px;
   border: 1px solid #ccc;
@@ -395,7 +403,16 @@ body {
   text-align: center;
   font-family: "Bebas Neue", sans-serif;
   font-size: 1.3em;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  /* Add transitions */
 
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  /* Move the card up slightly */
+  box-shadow: 5px 10px 15px rgba(0, 0, 0, 0.2);
+  /* Add a shadow */
 }
 
 .product-image {
@@ -590,29 +607,40 @@ footer {
   margin-right: auto;
 }
 
-th,
-td {
+.table-section {
+  width: 95%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  font-family: 'Bebas Neue', sans-serif; /* Consistent font */
+  font-size: 2em;
+  border-radius: 8px; /* Overall rounded corners */
+  overflow: hidden; /* Hide overflow for rounded corners on inner elements */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  background-color: #f8f8f8; /* Light background */
+  font-weight: normal;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+th, td {
   padding: 12px 15px;
   text-align: left;
-  border-bottom: 1px solid #eee;
-  /* Light row separators */
+  border-bottom: 1px solid #eee; /* Light row separators */
 }
 
 th {
-  background-color: #b944fd;
-  /* Purple header background */
+  background-color: #b944fd; /* Purple header background */
   color: white;
   text-transform: uppercase;
 }
 
 tbody tr:hover {
-  background-color: #e0e0e0;
-  /* Light hover effect on rows */
+  background-color: #e0e0e0; /* Light hover effect on rows */
 }
 
 td a {
-  color: #007bff;
-  /* Standard link color */
+  color: #007bff; /* Standard link color */
   text-decoration: none;
   margin-right: 5px;
 }
@@ -623,23 +651,53 @@ td a:hover {
 
 /* Style for the last 'Actions' column links */
 td:last-child {
-  text-align: center;
-  /* Center the action links */
+  text-align: center; /* Center the action links */
 }
 
 td:last-child a:last-child {
-  margin-right: 0;
-  /* Remove margin from the last action link */
-  color: #dc3545;
-  /* Red for delete action */
+  margin-right: 0; /* Remove margin from the last action link */
+  color: #dc3545; /* Red for delete action */
+}
+#table-description {
+  position: relative; /* needed for absolute positioning of the image */
+  font-size: 0.5em;
+  color: #333;
+  margin-bottom: 10px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
 }
 
-/* Optional: More subtle border */
-/*
-table {
-  border: 1px solid #ddd;
+#table-description:hover {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  background-color: #f0f0f0;
+  padding: 8px;
 }
-*/
+
+/* Hide image by default */
+.hover-image {
+  display: none;
+  position: absolute;
+  top: 0%; /* below the text */
+  left: 20%;
+  width: 50px;  /* fixed width */
+  height: auto;  /* maintain aspect ratio */
+  border: 1px solid #ccc;
+  background-color: white;
+  padding: 5px;
+  z-index: 10;
+}
+
+
+/* Show image on hover */
+#table-description:hover .hover-image {
+  display: block;
+}
+
 
 .addproduct-button {
   background-color: #b944fd;
