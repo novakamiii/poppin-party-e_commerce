@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en"
+xmlns:th="http://www.thymeleaf.org"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - Poppin Party</title>
+    <link rel="icon" th:href="@{/img/logowhite.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{styles.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{account.css}">
+    <link rel="stylesheet" th:href="@{order-status.css}">
+</head>
+
+<body>
+    <header class="sticky-header">
+        <div class="header-inner">
+            <div class="logo">
+                <a th:href="@{/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
+            </div>
+            <div class="search">
+                <input type="text" class="search-input" placeholder="Search">
+                <button class="search-button">
+                    <img th:src="@{/img/search.png}" alt="search">
+                </button>
+            </div>
+            <div class="header-actions">
+                <div class="cart-image">
+                    <a th:href="@{/dummy}"><img th:src="@{/img/cart.png}" alt="cart" id="cart"></a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="account-dashboard-wrapper">
+            <div class="sidebar">
+                <div class="profile-header">
+                    <!-- PROFILE IMAGE -->
+                    <div class="profile-image">
+                        <!-- comeback to this later -->
+                        <img th:src="@{/img/default-profile.png}" alt="Profile Picture">
+                    </div>
+
+                    <!-- Safe Navigation + Security -->
+                    <p class="username" th:text="${user?.username ?: 'No user detected'}">
+                        placeholder
+                    </p>
+
+                    <!-- Secured edit link
+                    <a th:href="@{/account}" th:if="${user != null}" class="edit-profile-link">
+                        Edit Profile
+                    </a> -->
+                    <p class="edit-profile-link">
+                        User Information
+                    </p>
+                    <a th:href="@{'/logout'}">LOG-OUT</a>
+                </div>
+
+                <ul class="dashboard-menu">
+                    <li><a href="#profile" class="active">My Account</a></li>
+                    <li><a href="#order-status">Order Status</a></li>
+                </ul>
+            </div>
+
+            <div class="main-content">
+                <section id="profile" class="dashboard-section active">
+                    <h2 class="content-title">My Profile</h2>
+
+                    <div th:if="${param.success}" class="alert alert-success">
+                        Profile updated!
+                    </div>
+
+                    <form th:action="@{/account/update}" method="post">
+                        <div class="form-group">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" id="username" name="username" th:value="${user.username}"
+                                class="form-input" readonly />
+                            <small class="form-text">Username can only be changed once.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" id="name" name="name" th:value="${user.name}" class="form-input" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" id="email" name="email" th:value="${user.email}" class="form-input" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" th:value="${user.phone}" class="form-input" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select id="gender" name="gender" class="form-input">
+                                <option
+                                    th:each="genderOpt : ${T(com.poppinparty.trinity.poppin_party_needs_alpha.User.Gender).values()}"
+                                    th:value="${genderOpt.name()}" th:text="${genderOpt.name()}"
+                                    th:selected="${user.gender == genderOpt.name()}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="birthDate" class="form-label">Date of Birth</label>
+                            <input type="date" id="birthDate" name="birthDate" th:value="${user.birthDate}"
+                                class="form-input" readonly />
+                            <small class="form-text">You have already done KYC. Changing your birthday is not
+                                permitted.</small>
+                        </div>
+
+                        <button type="submit" class="form-button">Save</button>
+                    </form>
+                </section>
+            </div>
+
+            <section id="order-status" class="dashboard-section">
+                <h2 class="order-status-title">ORDER STATUS</h2>
+                <div class="status-tabs">
+                    <button class="status-tab active" data-tab="to-ship">TO SHIP</button>
+                    <button class="status-tab" data-tab="to-receive">TO RECEIVE</button>
+                    <button class="status-tab" data-tab="completed">COMPLETED</button>
+                    <button class="status-tab" data-tab="cancelled">CANCELLED</button>
+                </div>
+
+                <div class="order-item-list" id="to-ship">
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img th:src="@{/img/bluemasq.png}" alt="Blue Masquerade Mask">
+                        </div>
+                        <div class="item-details">
+                            <h3 class="item-name">BLUE MASQUERADE MASK FOR WOMEN SHINY GLITTER SEQUINS FOR PARTIES
+                            </h3>
+                            <p class="item-qty">QTY: 1</p>
+                        </div>
+                        <div class="item-total">
+                            <span class="total-label">TOTAL:</span>
+                            <span class="total-price">₱85</span>
+                        </div>
+                    </div>
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img th:src="@{/img/clownwig.png}" alt="Clown Wig Colorful Hair">
+                        </div>
+                        <div class="item-details">
+                            <h3 class="item-name">CLOWN WIG COLORFUL HAIR MULTICOLOR WIG FOR KIDS' BIRTHDAY PARTIES
+                            </h3>
+                            <p class="item-qty">QTY: 1</p>
+                        </div>
+                        <div class="item-total">
+                            <span class="total-label">TOTAL:</span>
+                            <span class="total-price">₱100</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-item-list" id="to-receive">
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img th:src="@{/img/bluemasq.png}" alt="Blue Masquerade Mask">
+                        </div>
+                        <div class="item-details">
+                            <h3 class="item-name">BLUE MASQUERADE MASK FOR WOMEN SHINY GLITTER SEQUINS FOR PARTIES
+                            </h3>
+                            <p class="item-qty">QTY: 1</p>
+                        </div>
+                        <div class="item-total">
+                            <span class="total-label">TOTAL:</span>
+                            <span class="total-price">₱85</span>
+                        </div>
+                    </div>
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img th:src="@{/img/clownwig.png}" alt="Clown Wig Colorful Hair">
+                        </div>
+                        <div class="item-details">
+                            <h3 class="item-name">CLOWN WIG COLORFUL HAIR MULTICOLOR WIG FOR KIDS' BIRTHDAY PARTIES
+                            </h3>
+                            <p class="item-qty">QTY: 1</p>
+                        </div>
+                        <div class="item-total">
+                            <span class="total-label">TOTAL:</span>
+                            <span class="total-price">₱100</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-item-list" id="completed">
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img th:src="@{/img/bluemasq.png}" alt="Blue Masquerade Mask">
+                        </div>
+                        <div class="item-details">
+                            <h3 class="item-name">BLUE MASQUERADE MASK FOR WOMEN SHINY GLITTER SEQUINS FOR PARTIES
+                            </h3>
+                            <p class="item-qty">QTY: 1</p>
+                        </div>
+                        <div class="item-total">
+                            <span class="total-label">TOTAL:</span>
+                            <span class="total-price">₱85</span>
+                        </div>
+                    </div>
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img th:src="@{img/clownwig.png}" alt="Clown Wig Colorful Hair">
+                        </div>
+                        <div class="item-details">
+                            <h3 class="item-name">CLOWN WIG COLORFUL HAIR MULTICOLOR WIG FOR KIDS' BIRTHDAY PARTIES
+                            </h3>
+                            <p class="item-qty">QTY: 1</p>
+                        </div>
+                        <div class="item-total">
+                            <span class="total-label">TOTAL:</span>
+                            <span class="total-price">₱100</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-item-list" id="cancelled">
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img th:src="@{img/bluemasq.png}" alt="Blue Masquerade Mask">
+                        </div>
+                        <div class="item-details">
+                            <h3 class="item-name">BLUE MASQUERADE MASK FOR WOMEN SHINY GLITTER SEQUINS FOR PARTIES
+                            </h3>
+                            <p class="item-qty">QTY: 1</p>
+                        </div>
+                        <div class="item-total">
+                            <span class="total-label">TOTAL:</span>
+                            <span class="total-price">₱85</span>
+                        </div>
+                    </div>
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img th:src="@{img/clownwig.png}" alt="Clown Wig Colorful Hair">
+                        </div>
+                        <div class="item-details">
+                            <h3 class="item-name">CLOWN WIG COLORFUL HAIR MULTICOLOR WIG FOR KIDS' BIRTHDAY PARTIES
+                            </h3>
+                            <p class="item-qty">QTY: 1</p>
+                        </div>
+                        <div class="item-total">
+                            <span class="total-label">TOTAL:</span>
+                            <span class="total-price">₱100</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-logo">
+                <img th:src="@{img/logowhite.png}" alt="Poppin Party Logo">
+                <p>POPPIN PARTY</p>
+                <p>CELEBRATION NEEDS</p>
+            </div>
+            <div class="footer-section">
+                <h3>CUSTOMER SERVICE</h3>
+                <li>HELP CENTRE</li>
+                <li>CONTACT US</li>
+                <li>RETURN AND REFUND</li>
+                <li>POPPIN' GUARANTEE</li>
+                <li>FREE SHIPPING</li>
+                <li>PAYMENT METHODS</li>
+            </div>
+            <div class="footer-section">
+                <h3>ABOUT POPPIN' PARTY</h3>
+                <li>ABOUT US</li>
+                <li>PRIVACY POLICY</li>
+                <li>POPPIN' DEALS</li>
+                <li>MEDIA CONTACT</li>
+            </div>
+            <div class="footer-section">
+                <h3>PAYMENT</h3>
+                <li>GCASH</li>
+                <li>PAYPAL</li>
+                <li>CASHAPP</li>
+                <li>VISA</li>
+                <li>MASTERCARD</li>
+            </div>
+            <div class="footer-section">
+                <h3>LOGISTICS</h3>
+                <li>GOGO EXPRESS</li>
+                <li>NINJAVAN</li>
+                <li>UPS</li>
+                <li>FEDEX</li>
+                <li>LBC</li>
+                <li>DHL</li>
+            </div>
+            <div class="footer-section">
+                <h3>FOLLOW US</h3>
+                <li>FACEBOOK</li>
+                <li>INSTAGRAM</li>
+                <li>X</li>
+                <li>TIKTOK</li>
+            </div>
+        </div>
+        <div class="copyright">
+            © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
+        </div>
+    </footer>
+
+    <script th:src="@{script.js}"></script>
+    <script th:src="@{account.js}"></script>
+    <script>
+        const dashboardMenuLinks = document.querySelectorAll('.dashboard-menu a');
+        const dashboardSections = document.querySelectorAll('.dashboard-section');
+        const orderStatusTabs = document.querySelectorAll('#order-status .status-tab');
+        const orderItemLists = document.querySelectorAll('#order-status .order-item-list');
+
+        dashboardMenuLinks.forEach(link => {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                const targetId = this.getAttribute('href').substring(1); // Remove the '#'
+
+                // Deactivate all sections
+                dashboardSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+
+                // Activate the target section
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
+
+                // Update active link in the sidebar (optional)
+                dashboardMenuLinks.forEach(item => item.classList.remove('active'));
+                this.classList.add('active');
+
+                // If Order Status is activated, ensure the correct tab content is shown
+                if (targetId === 'order-status') {
+                    // Initially show 'to-ship' and make its tab active
+                    orderStatusTabs.forEach(tab => tab.classList.remove('active'));
+                    orderItemLists.forEach(list => list.style.display = 'none');
+
+                    const initialTab = document.querySelector('#order-status .status-tab[data-tab="to-ship"]');
+                    const initialContent = document.getElementById('to-ship');
+
+                    if (initialTab && initialContent) {
+                        initialTab.classList.add('active');
+                        initialContent.style.display = 'block';
+                    }
+
+                    // Add event listeners for order status tabs (if not already present)
+                    orderStatusTabs.forEach(tab => {
+                        tab.addEventListener('click', () => {
+                            orderStatusTabs.forEach(t => t.classList.remove('active'));
+                            orderItemLists.forEach(content => content.style.display = 'none');
+
+                            tab.classList.add('active');
+                            const targetTab = tab.getAttribute('data-tab');
+                            const targetContent = document.getElementById(targetTab);
+                            if (targetContent) {
+                                targetContent.style.display = 'block';
+                            }
+                        });
+                    });
+                }
+            });
+        });
+
+        // Initially show the 'profile' section
+        const initialSection = document.getElementById('profile');
+        if (initialSection) {
+            initialSection.classList.add('active');
+        }
+
+        // Initialize the 'to-ship' tab as active on load (if on order status)
+        if (window.location.hash === '#order-status') {
+            const initialTab = document.querySelector('#order-status .status-tab[data-tab="to-ship"]');
+            const initialContent = document.getElementById('to-ship');
+            if (initialTab && initialContent) {
+                initialTab.classList.add('active');
+                initialContent.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+
+</html>

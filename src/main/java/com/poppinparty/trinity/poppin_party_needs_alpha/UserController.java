@@ -1,13 +1,17 @@
 package com.poppinparty.trinity.poppin_party_needs_alpha;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.persistence.Column;
+import jakarta.validation.Valid;
 
 @Controller
 public class UserController {
@@ -35,6 +40,11 @@ public class UserController {
 
     public void setLastLogin(LocalDateTime lastLogin) {
         this.lastLogin = lastLogin;
+    }
+
+    @GetMapping("/dummy")
+    public String dummyPage() {
+        return "dummy";
     }
 
     // ========== LOGIN, REDIRECT, REGISTRATION ==========
@@ -110,20 +120,34 @@ public class UserController {
         return "index";
     }
 
+    @GetMapping("/")
+    public String setHome() {
+        return "index";
+    }
+
     @GetMapping("/register")
-    public String showRegistrationForm() {
+    public String showRegistrationForm(Model model) {
+        model.addAttribute("genders", User.Gender.values()); // Critical!
+        model.addAttribute("user", new User());
         return "register";
     }
 
     @PostMapping("/register")
-    public String registerUser(User user, RedirectAttributes redirectAttributes) {
-        user.setPassword(NoOpPasswordEncoder.getInstance().encode(user.getPassword()));
-        user.setRole("USER");
+    public String registerUser(@Valid @ModelAttribute("user") User user,
+            BindingResult result,
+            RedirectAttributes redirectAttributes) {
+
+        if (result.hasErrors()) {
+            return "register";
+        }
+
+        // FIXED: Match exact constraint values
+        user.setRole("USER"); // Changed from "ROLE_USER"
+        user.setLastLogin(LocalDateTime.now());
+        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+
         userRepository.save(user);
-
-        // Add success message as a flash attribute
-        redirectAttributes.addFlashAttribute("success", "Your account has been successfully created!");
-
+        redirectAttributes.addFlashAttribute("success", "Registration complete!");
         return "redirect:/login";
     }
 
@@ -141,8 +165,7 @@ public class UserController {
             return "forgot_password";
         }
 
-        // Ideally: Generate a secure token and send it via email
-        // For now: just redirect to a reset form
+
         return "redirect:/reset-password?email=" + email;
     }
 
@@ -164,6 +187,56 @@ public class UserController {
         return "redirect:/login?resetSuccess";
     }
 
+    // ========== USER MANAGEMENT ==========
+
+    @GetMapping("/account")
+    public String showDashboard(Model model, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        if (customUserDetails == null) {
+            throw new IllegalStateException("No user detected!");
+        }
+
+        // Fetch the latest user data
+        User user = userRepository.findByUsername(customUserDetails.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "User not found with username: " + customUserDetails.getUsername()));
+
+        // Add the user to the model
+        model.addAttribute("user", user);
+
+        return "account";
+    }
+
+    @PostMapping("/account/update")
+    public String updateAccount(@ModelAttribute("user") User formUser,
+            BindingResult result,
+            Principal principal,
+            RedirectAttributes redirectAttributes) {
+
+        if (result.hasErrors()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Validation errors occurred.");
+            return "redirect:/account";
+        }
+
+        // Find the currently logged-in user by username
+        User existingUser = userRepository.findByUsername(principal.getName())
+                .orElseThrow(
+                        () -> new IllegalArgumentException("User not found with username: " + principal.getName()));
+
+        // Update fields — only update what’s editable
+        existingUser.setGender(formUser.getGender());
+        existingUser.setEmail(formUser.getEmail());
+        existingUser.setName(formUser.getName());
+        existingUser.setPhone(formUser.getPhone());
+
+        // Save updated user
+        userRepository.save(existingUser);
+
+        // Add a success message
+        redirectAttributes.addFlashAttribute("success", "Profile updated successfully!");
+
+        // Redirect to the GET /account endpoint to fetch updated data
+        return "redirect:/account";
+    }
     // ========== PRODUCT ==========
 
     @GetMapping("/products")
