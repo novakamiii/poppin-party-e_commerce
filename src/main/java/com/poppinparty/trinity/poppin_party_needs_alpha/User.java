@@ -27,6 +27,16 @@ public class User {
     private String address;
     private String email;
     private String role;
+    @Column(name = "prof_img_loc")
+    private String imagePath; // Optional field for profile picture URL
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
 
     // Account Dashboard
     private String name;

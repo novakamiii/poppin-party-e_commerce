@@ -131,9 +131,11 @@
             </div>
             <div class="form-group">
                 <label for="description" class="form-label">DESCRIPTION:</label>
-                <textarea id="description" name="description" class="form-input" rows="4" required></textarea>
+                <textarea id="description" name="description" class="form-input" rows="4" required
+                    th:text="${product.description}"></textarea>
+
             </div>
-            
+
 
             <div class="form-group">
                 <label for="price" class="form-label">Price</label>
@@ -191,5 +193,39 @@
     </div>
     <a th:href="@{/products}" class="back-link">BACK TO INVENTORY</a>
 </body>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector("form");
+        const initialData = {
+            itemName: document.getElementById("itemName").value,
+            description: document.getElementById("description").value,
+            price: document.getElementById("price").value,
+            stock: document.getElementById("stock").value,
+            category: document.getElementById("category").value,
+            newCategory: document.getElementById("newCategory")?.value || "",
+            image: document.getElementById("imageUpload").value
+        };
+
+        form.addEventListener("submit", (e) => {
+            const currentData = {
+                itemName: document.getElementById("itemName").value,
+                description: document.getElementById("description").value,
+                price: document.getElementById("price").value,
+                stock: document.getElementById("stock").value,
+                category: document.getElementById("category").value,
+                newCategory: document.getElementById("newCategory")?.value || "",
+                image: document.getElementById("imageUpload").value
+            };
+
+            const hasChanged = Object.keys(initialData).some(key => initialData[key] !== currentData[key]);
+
+            if (!hasChanged) {
+                e.preventDefault();
+                alert("You haven't made any changes.");
+                window.location.href = "/admin/home";
+            }
+        });
+    });
+</script>
 
 </html>

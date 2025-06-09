@@ -6,12 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Details - Poppin Party</title>
     <link rel="icon" th:href="@{/img/logowhite.png}" type="image/png">
-    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/styles.css}">
-    <link rel="stylesheet" th:href="@{/style2.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/style2.css}">
 </head>
 
 <body>
@@ -38,31 +38,27 @@
         <div class="product-page-wrapper">
             <div class="product-gallery">
                 <div class="main-product-image-container">
-                    <img th:src="@{/img/bluemasq1.png}" alt="Main Product Image" id="mainProductImage">
+                    <img src="" alt="Main Product Image" id="mainProductImage">
                 </div>
-                <div class="thumbnail-images">
-                    <img th:src="@{/img/bluemasq1.png}" alt="Thumbnail 1" class="thumbnail active" th:attr="data-full-src=@{/img/bluemasq1.png}">
-                    <img th:src="@{/img/bluemasq2.png}" alt="Thumbnail 2" class="thumbnail active" th:attr="data-full-src=@{/img/bluemasq2.png}">
-                    <img th:src="@{/img/bluemasq3.png}" alt="Thumbnail 3" class="thumbnail active" th:attr="data-full-src=@{/img/bluemasq3.png}">
-
-
+                <div class="thumbnail-images" id="thumbnailContainer">
+                    <!-- Thumbnails will be inserted here -->
                 </div>
             </div>
 
             <div class="product-info">
-                <h1 class="product-page-title">BLUE MASQUERADE MASK FOR WOMEN SHINY GLITTER SEQUINS</h1>
+                <h1 id="productTitle" class="product-page-title"></h1>
                 <div class="product-rating">
                     <span class="stars">★★★★★</span>
                     <span class="review-count">(1,234 Reviews)</span>
                 </div>
-                <p class="product-page-price">₱ 85.00</p>
+                <p class="product-page-price" id="productPrice"></p>
 
                 <div class="quantity-selector">
                     <label for="product-qty" class="qty-label">QUANTITY:</label>
                     <button class="qty-btn minus">-</button>
                     <input type="number" id="product-qty" class="qty-input" value="1" min="1" max="99">
                     <button class="qty-btn plus">+</button>
-                    <span class="stock-info">999 pieces available</span>
+                    <span class="stock-info" id="stockInfo"></span>
                 </div>
 
                 <div class="action-buttons">
@@ -72,47 +68,20 @@
 
                 <div class="product-description">
                     <h3 class="section-heading">PRODUCT DESCRIPTION</h3>
-                    <p>
-                        Step into the spotlight with our stunning blue masquerade mask. Crafted with meticulous detail,
-                        this mask features a rich, vibrant blue hue that evokes a sense of sophistication and allure.
-                        Whether you're attending a Venetian ball, a costume party, or a theatrical performance, this
-                        mask will ensure you make a memorable entrance. The comfortable and secure fit allows you to
-                        dance the night away with confidence and grace.</p>
-                    <p>
-                        Indulge in the luxurious feel of our blue masquerade mask. Crafted from lightweight resin, and a
-                        delicate lace, this mask offers both comfort and style. The intricate colored accents, and the
-                        subtle glitter add a touch of unique charm. Secure it effortlessly with the attached lace and
-                        prepare to captivate.</p>
+                    <p id="productDescription"></p>
                 </div>
 
                 <div class="product-specs">
                     <h3 class="section-heading">PRODUCT SPECIFICATIONS</h3>
-                    <ul>
-                        <li><span class="spec-label">Brand:</span> Poppin' Party</li>
-                        <li><span class="spec-label">Material:</span> Lightweight Resin, Premium Cotton Lace</li>
-                        <li><span class="spec-label">Dimensions:</span> 17cm x 11cm</li>
+                    <ul id="productSpecs">
+                        <!-- Specs like brand, material, etc. -->
                     </ul>
                 </div>
             </div>
         </div>
-
-        <div class="related-products-section">
-            <h2 class="section-heading">YOU MAY ALSO LIKE</h2>
-            <div class="productlist">
-                <a th:href="@{/product-page}">
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img th:src="@{/img/bluemasq.png}" alt="Blue Masquerade Mask">
-                        </div>
-                        <div class="product-details">
-                            <p class="product-title">BLUE MASQUERADE MASK FOR WOMEN SHINY GLITTER SEQ...</p>
-                            <p class="product-price">₱85</p>
-                        </div>
-                    </div>
-                </a>  <!-- Close anchor tag -->
-            </div> <!-- Close productlist -->
-        </div> <!-- Close related-products-section -->        
     </main>
+
+
 
     <footer>
         <div class="footer-container">
@@ -177,7 +146,7 @@
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script th:src="@{/js/script.js}"></script>
     <script>
         // Product Quantity Selector Logic
         const qtyInput = document.getElementById('product-qty');
@@ -214,7 +183,39 @@
                 mainProductImage.src = thumbnail.getAttribute('data-full-src');
             });
         });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const productId = window.location.pathname.split('/').pop();
+
+            fetch(`/api/products/${productId}`)
+                .then(res => res.json())
+                .then(product => {
+                    document.getElementById('mainProductImage').src = product.imageLoc;
+                    document.getElementById('productTitle').textContent = product.itemName;
+                    document.getElementById('productPrice').textContent = `₱ ${product.price}`;
+                    document.getElementById('stockInfo').textContent = `${product.stock} pieces available`;
+                    document.getElementById('productDescription').textContent = product.description || 'No description available.';
+
+                    // Generate thumbnails (optional, if you store multiple images per product)
+                    const thumbnailContainer = document.getElementById('thumbnailContainer');
+                    thumbnailContainer.innerHTML = `<img src="${product.imageLoc}" class="thumbnail active" data-full-src="${product.imageLoc}">`;
+
+                    // Sample static specs (you can load dynamic fields instead if you store them)
+                    document.getElementById('productSpecs').innerHTML = `
+          <li><span class="spec-label">Brand:</span> Poppin' Party</li>
+          <li><span class="spec-label">Material:</span> Lightweight Resin, Premium Cotton Lace</li>
+          <li><span class="spec-label">Dimensions:</span> 17cm x 11cm</li>
+        `;
+                })
+                .catch(err => {
+                    console.error('Failed to fetch product:', err);
+                    alert("Product not found.");
+                });
+        });
     </script>
+
+
+
 </body>
 
 </html>

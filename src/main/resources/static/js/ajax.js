@@ -1,4 +1,3 @@
-// product-api.js
 
 /**
  * Sends form data (including image) to backend to add a product,

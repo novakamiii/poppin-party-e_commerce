@@ -8,17 +8,18 @@ import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
-// Removed incorrect import for java.util.Locale.Category
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -28,11 +29,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.MediaType;
 
 import jakarta.persistence.Column;
 import jakarta.validation.Valid;
@@ -254,6 +254,36 @@ public class UserController {
         // Redirect to the GET /account endpoint to fetch updated data
         return "redirect:/account";
     }
+
+    @PostMapping("/account/upload-image")
+    @ResponseBody
+    public Map<String, String> uploadProfileImage(@RequestParam("imageFile") MultipartFile file,
+            Principal principal) throws IOException {
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Sanitize username for file usage (remove spaces, special chars)
+        String sanitizedUsername = user.getUsername().replaceAll("[^a-zA-Z0-9]", "");
+
+        String uploadDir = "uploads/";
+
+        String fileName = sanitizedUsername + "-" + UUID.randomUUID() + "-" + file.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir + fileName);
+        Files.createDirectories(filePath.getParent());
+        Files.write(filePath, file.getBytes());
+
+        user.setImagePath("/uploads/" + fileName);
+        userRepository.save(user);
+
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("No file uploaded");
+        }
+        
+
+        return Map.of("imageUrl", "/uploads/" + fileName);
+    }
+    
+
     // ========== ITEMS ==========
 
     @GetMapping("/product-page")
@@ -309,7 +339,6 @@ public class UserController {
             return ResponseEntity.ok(newProduct);
         }
 
-        // ✅ MOVE THIS INSIDE ProductController
         @GetMapping
         public ResponseEntity<List<ProductDTO>> getAllProducts() {
             List<Product> products = productRepository.findAll();
@@ -326,7 +355,21 @@ public class UserController {
 
             return ResponseEntity.ok(productDTOs);
         }
+
+        // ✅ FIXED: THIS METHOD SHOULD BE HERE INSIDE ProductController
+        @GetMapping("/{id}")
+        public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+            Optional<Product> product = productRepository.findById(id);
+            return product.map(ResponseEntity::ok)
+                    .orElseGet(() -> ResponseEntity.notFound().build());
+        }
     }
+
+    @GetMapping("/product-page/{id}")
+    public String getProductPage(@PathVariable Long id, Model model) {
+        return "product_page"; // renders product-page.html
+    }
+
     // ========== PRODUCT MANAGEMENT ==========
 
     @GetMapping("/products")
