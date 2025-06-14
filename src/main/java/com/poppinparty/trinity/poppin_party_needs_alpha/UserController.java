@@ -242,6 +242,7 @@ public class UserController {
         // Update fields — only update what’s editable
         existingUser.setGender(formUser.getGender());
         existingUser.setEmail(formUser.getEmail());
+        existingUser.setAddress(formUser.getAddress());
         existingUser.setName(formUser.getName());
         existingUser.setPhone(formUser.getPhone());
 
@@ -259,32 +260,57 @@ public class UserController {
     @ResponseBody
     public Map<String, String> uploadProfileImage(@RequestParam("imageFile") MultipartFile file,
             Principal principal) throws IOException {
-        User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        // Sanitize username for file usage (remove spaces, special chars)
-        String sanitizedUsername = user.getUsername().replaceAll("[^a-zA-Z0-9]", "");
-
-        String uploadDir = "uploads/";
-
-        String fileName = sanitizedUsername + "-" + UUID.randomUUID() + "-" + file.getOriginalFilename();
-        Path filePath = Paths.get(uploadDir + fileName);
-        Files.createDirectories(filePath.getParent());
-        Files.write(filePath, file.getBytes());
-
-        user.setImagePath("/uploads/" + fileName);
-        userRepository.save(user);
-
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("No file uploaded");
         }
-        
 
-        return Map.of("imageUrl", "/uploads/" + fileName);
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 🔥 Delete the old image file if it exists and isn't the default
+        String oldImagePath = user.getImagePath();
+        if (oldImagePath != null && !oldImagePath.equals("/img/default-profile.png")) {
+            Path oldFile = Paths.get("uploads", oldImagePath.replace("/uploads/", ""));
+            if (Files.exists(oldFile)) {
+                Files.delete(oldFile);
+                System.out.println("Deleted old image: " + oldFile);
+            }
+        }
+
+        // ✅ Save the new image
+        String sanitizedUsername = user.getUsername().replaceAll("[^a-zA-Z0-9]", "");
+        String uploadDir = "uploads/profiles/";
+        String fileName = sanitizedUsername + "-" + UUID.randomUUID() + "-" + file.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir, fileName);
+        Files.createDirectories(filePath.getParent());
+        Files.write(filePath, file.getBytes());
+
+        String newImagePath = "/uploads/profiles/" + fileName;
+        user.setImagePath(newImagePath);
+        userRepository.save(user);
+
+        return Map.of("imageUrl", newImagePath);
     }
-    
 
     // ========== ITEMS ==========
+    @GetMapping("/products/category")
+    public String viewByCategory(@RequestParam String name, Model model) {
+        List<Product> products = productRepository.findByCategory(name);
+        model.addAttribute("products", products);
+        model.addAttribute("category", name);
+        return "PerCategory"; // your view template
+    }
+
+    @GetMapping("/products/see-more")
+    public String seeMore() {
+        return "seemore"; // Ensure the view name matches your template
+    }
+
+    @GetMapping("/products/customtarp")
+    public String orderBanner() {
+        return "customtarp";
+    }
+    
 
     @GetMapping("/product-page")
     public String productPage() {
@@ -350,6 +376,7 @@ public class UserController {
                 dto.setPrice(product.getPrice());
                 dto.setImageLoc(product.getImageLoc());
                 dto.setStock(product.getStock());
+                dto.setCategory(product.getCategory());
                 return dto;
             }).collect(Collectors.toList());
 

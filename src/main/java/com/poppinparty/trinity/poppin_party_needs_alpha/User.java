@@ -28,8 +28,10 @@ public class User {
     private String email;
     private String role;
     @Column(name = "prof_img_loc")
-    private String imagePath; // Optional field for profile picture URL
+    private String imagePath; 
 
+    //Fix this shit
+    //done na lods
     public String getImagePath() {
         return imagePath;
     }

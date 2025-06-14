@@ -6,6 +6,9 @@ public class ProductDTO {
     private String imageLoc;
     private Double price;
     private Long stock;
+    private String category;
+
+
     public Long getId() {
         return id;
     }
@@ -35,6 +38,12 @@ public class ProductDTO {
     }
     public void setStock(Long stock) {
         this.stock = stock;
+    }
+    public String getCategory() {
+        return category;
+    }
+    public void setCategory(String category) {
+        this.category = category;
     }
 
 }

@@ -79,6 +79,11 @@
                 </div>
             </div>
         </div>
+        <div class="related-products-section">
+            <h2 class="section-heading">YOU MAY ALSO LIKE</h2>
+            <div class="productlist" id="related-products">
+            </div> <!-- ✅ add this -->
+        </div>
     </main>
 
 
@@ -147,6 +152,57 @@
     </footer>
 
     <script th:src="@{/js/script.js}"></script>
+
+
+    <!--Related Products-->
+    <script type="module">
+        import { createProductCardHTML } from '/js/ajax.js';
+
+        const productList = document.querySelector('#related-products');
+
+        fetch('/api/products')
+            .then(res => res.json())
+            .then(products => {
+                const currentProductId = window.location.pathname.split('/').pop();
+
+                // Shuffle helper
+                function shuffle(array) {
+                    return array.sort(() => 0.5 - Math.random());
+                }
+
+                // Filter out current product, then shuffle, then take 4
+                const randomRelated = shuffle(
+                    products.filter(product => product.id != currentProductId)
+                ).slice(0, 4);
+
+                randomRelated.forEach(product => {
+                    productList.insertAdjacentHTML('beforeend', createProductCardHTML(product));
+                });
+            })
+            .catch(err => {
+                console.error("Error fetching products:", err);
+            });
+
+
+
+        if (form) {
+            form.addEventListener('submit', e => {
+                e.preventDefault();
+
+                addProductAjax(
+                    form,
+                    newProduct => {
+                        productList.insertAdjacentHTML('beforeend', createProductCardHTML(newProduct));
+                        form.reset();
+                    },
+                    () => {
+                        alert('Failed to add product');
+                    }
+                );
+            });
+        }
+    </script>
+
     <script>
         // Product Quantity Selector Logic
         const qtyInput = document.getElementById('product-qty');

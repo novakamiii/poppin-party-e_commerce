@@ -41,104 +41,113 @@
   <main>
     <div class="categories">
       <div class="categcontainer">
-        <button class="categbutton" id="pinata">
+        <button class="categbutton" onclick="goToCategory('Pinata')">
           <img th:src="@{/img/imgpinata.png}" alt="pinata" class="categicon">
         </button>
         <p class="categtext">pinata & fillers</p>
       </div>
       <div class="categcontainer">
-        <button class="categbutton" id="partyhat">
+        <button class="categbutton" id="partyhat" onclick="goToCategory('Party Hats')">
           <img th:src="@{/img/imgpartyhat.png}" alt="partyhat" class="categicon">
         </button>
         <p class="categtext">party hats</p>
       </div>
       <div class="categcontainer">
         <button class="categbutton" id="masks">
-          <img th:src="@{/img/imgmask.png}" alt="masks" class="categicon">
+          <img th:src="@{/img/imgmask.png}" alt="masks" class="categicon" onclick="goToCategory('Mask')">
         </button>
         <p class="categtext">masks</p>
       </div>
       <div class="categcontainer">
-        <button class="categbutton" id="wig">
+        <button class="categbutton" id="wig" onclick="goToCategory('Wig')">
           <img th:src="@{/img/imgwig.png}" alt="wig" class="categicon">
         </button>
         <p class="categtext">wigs & hair accessories</p>
       </div>
       <div class="categcontainer">
-        <button class="categbutton" id="led">
+        <button class="categbutton" id="led" onclick="goToCategory('LED')">
           <img th:src="@{/img/imgled.png}" alt="led" class="categicon">
         </button>
         <p class="categtext">led accessories</p>
       </div>
       <div class="categcontainer">
-        <button class="categbutton" id="balloon">
+        <button class="categbutton" id="balloon" onclick="goToCategory('Balloon')">
           <img th:src="@{/img/imgballoon.png}" alt="balloon" class="categicon">
         </button>
         <p class="categtext">balloons</p>
       </div>
       <div class="categcontainer">
-        <button class="categbutton" id="confetti">
+        <button class="categbutton" id="confetti" onclick="goToCategory('Confetti')">
           <img th:src="@{/img/imgconfetti.png}" alt="confetti" class="categicon">
         </button>
         <p class="categtext">confetti & party poppers</p>
       </div>
       <div class="categcontainer">
-        <button class="categbutton" id="banners">
+        <button class="categbutton" id="banners" onclick="goToCategory('Banner')">
           <img th:src="@{/img/imgbanner.png}" alt="banners" class="categicon">
         </button>
         <p class="categtext">banners</p>
       </div>
       <div class="categcontainer">
-        <button class="categbutton" id="garland">
+        <button class="categbutton" id="garland" onclick="goToCategory('Garland')">
           <img th:src="@{/img/imggarland.png}" alt="garland" class="categicon">
         </button>
         <p class="categtext">garlands & streamers</p>
       </div>
       <div class="categcontainer">
-        <button class="categbutton" id="hanging">
+        <button class="categbutton" id="hanging" onclick="goToCategory('Hanging')">
           <img th:src="@{/img/imghang.png}" alt="hanging" class="categicon">
         </button>
         <p class="categtext">hanging decorations</p>
       </div>
       <div class="categcontainer">
-        <button class="categbutton" id="props">
+        <button class="categbutton" id="props" onclick="goToCategory('Props')">
           <img th:src="@{/img/imgprop.png}" alt="props" class="categicon">
         </button>
         <p class="categtext">props & cutouts</p>
       </div>
       <div class="categcontainer">
-        <button class="categbutton" id="strlight">
+        <button class="categbutton" id="strlight" onclick="goToCategory('String Lights')">
           <img th:src="@{/img/imgstrlight.png}" alt="strlight" class="categicon">
         </button>
         <p class="categtext">string lights</p>
       </div>
       <div class="categcontainer">
-        <button class="categbutton" id="customtarp">
+        <button class="categbutton" id="customtarp" th:onclick="'location.href=\'' + @{/products/customtarp} + '\';'">
           <img th:src="@{/img/imgcustarp.png}" alt="customtarp" class="categicon">
         </button>
         <p class="categtext">custom tarpaulin</p>
       </div>
       <div class="categcontainer">
-        <button class="categbutton" id="table">
+        <button class="categbutton" id="table" onclick="goToCategory('Table Centerpiece')">
           <img th:src="@{/img/imgcenterpc.png}" alt="table" class="categicon">
         </button>
         <p class="categtext">table centerpieces</p>
       </div>
     </div>
 
+    <!-- Category Navigation Script -->
+    <script>
+      function goToCategory(category) {
+        window.location.href = `/products/category?name=${encodeURIComponent(category)}`;
+      }
+    </script>
+
+
     <br />
     <div class="tarpaulinbanner">
-      <img th:src="@{/img/tarpaulinbanner.png}" alt="tarpaulinbanner" class="tarpban" />
+      <img th:src="@{/img/tarpaulinbanner.png}" alt="tarpaulinbanner" class="tarpban" th:onclick="'location.href=\'' + @{/products/customtarp} + '\';'"/>
     </div>
     <br />
 
     <div class="top-products-section">
       <p class="top-products-title">TOP PRODUCTS</p>
-      <a href="#" class="see-more-link">SEE MORE →</a>
+      <a th:href="@{/products/see-more}" class="see-more-link">SEE MORE →</a>
     </div>
 
     <div class="productlist"></div>
 
+    <!-- Show Products -->
     <script type="module">
       import { addProductAjax, createProductCardHTML } from './js/ajax.js';
 
@@ -148,12 +157,24 @@
       fetch('/api/products')
         .then(res => res.json())
         .then(products => {
-          products.forEach(product => {
+          const currentProductId = window.location.pathname.split('/').pop();
+
+          // Shuffle helper
+          function shuffle(array) {
+            return array.sort(() => 0.5 - Math.random());
+          }
+
+          // Filter out current product, then shuffle, then take 4
+          const randomRelated = shuffle(
+            products.filter(product => product.id != currentProductId)
+          ).slice(0, 4);
+
+          randomRelated.forEach(product => {
             productList.insertAdjacentHTML('beforeend', createProductCardHTML(product));
           });
         })
         .catch(err => {
-          console.error("Error fetching products", err);
+          console.error("Error fetching products:", err);
         });
 
       if (form) {
@@ -175,7 +196,9 @@
     </script>
 
     <div class="seemorebuttoncontainer">
-      <button class="seemorebutton" id="seemore">SEE MORE</button>
+      <button class="seemorebutton" id="seemore" th:onclick="'location.href=\'' + @{/products/see-more} + '\';'">See
+        More</button>
+
     </div>
   </main>
 
