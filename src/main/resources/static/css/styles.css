@@ -187,6 +187,194 @@ body {
   /* Same font size */
 }
 
+/* CART PAGE */
+/* CART PAGE */
+/* CART PAGE */
+
+
+/* CART CARD */
+/* CART CARD */
+/* CART CARD */
+.cartpage-title {
+  font-size: 2em;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.cartpage-image {
+  width: 200px;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+.cartpage-image img {
+  max-width: 200px;
+  height: auto;
+  border-radius: 5px;
+}
+
+.cart-container {
+  background-color: #d9d9d9;
+  padding: 20px;
+  font-family: "Bebas Neue", sans-serif;
+  width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  justify-content: space-between; /* or flex-end to push to far right */
+}
+
+.cart-total {
+  font-family: "Bebas Neue", sans-serif;
+  margin-left: auto;  /* Pushes element to right */
+  width: fit-content; /* Shrinks to content width */
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  /* ✅ Add this */
+  align-items: center;
+  background-color: #d9d9d9;
+  padding: 10px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  border: 1px solid #999;
+  gap: 15px;
+}
+
+.price-quantity {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price {
+  font-size: 22px;
+  color: black;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.quantity-btn {
+  background-color: #b944fd;
+  color: #d9d9d9;
+  border: none;
+  padding: 5px 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.quantity-input {
+  width: 30px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  /* ✅ Align right */
+  justify-content: center;
+  gap: 10px;
+}
+
+
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.action-btn img {
+  max-width: 100%;
+  height: auto;
+}
+
+
+/* CHECKOUT BUTTON */
+/* CHECKOUT BUTTON */
+/* CHECKOUT BUTTON */
+
+.checkout-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.checkout-button {
+  background-color: #b944fd;
+  color: white;
+  padding: 10px 25px;
+  font-size: 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  height: 50px;
+  width: 300px;
+  font-family: "Bebas Neue", sans-serif;
+  align-items: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.checkout-button:hover {
+  background-color: #a032e6;
+}
+
+
+/* ORDER SUCCESS PAGE */
+/* ORDER SUCCESS PAGE */
+/* ORDER SUCCESS PAGE */
+
+.circlecheck {
+  width: 250px;
+  height: 250px;
+  background-color: #d9d9d9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: 100px;
+  padding-bottom: 20px;
+}
+
+.success-message {
+  font-size: 2.5em;
+  color: black;
+  text-align: center;
+  font-family: "Bebas Neue", sans-serif;
+}
+
+.continue-shopping-button {
+  background-color: #b944fd;
+  color: white;
+  padding: 10px 25px;
+  font-size: 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  height: 50px;
+  width: 300px;
+  font-family: "Bebas Neue", sans-serif;
+  align-items: center;
+  margin-left: auto;
+  margin-right: auto;
+}
 
 
 /* HEADER */
@@ -344,6 +532,24 @@ body {
   text-align: center;
 }
 
+.categories-section {
+  display: flex;
+  align-items: center;
+  margin-top: 30px;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 20pt;
+  text-align: center;
+  color: black;
+  padding-right: 110px;
+  padding-left: 110px;
+}
+
+.categories-title {
+  font-size: 1.5em;
+  margin: 0;
+  color: black;
+}
+
 .tarpaulinbanner {
   position: static;
   width: 100%;
@@ -428,6 +634,7 @@ body {
 }
 
 .product-details {
+  flex-grow: 1;
   padding: 10px;
 }
 
@@ -612,35 +819,45 @@ footer {
   border-collapse: collapse;
   margin-top: 20px;
   margin-bottom: 20px;
-  font-family: 'Bebas Neue', sans-serif; /* Consistent font */
+  font-family: 'Bebas Neue', sans-serif;
+  /* Consistent font */
   font-size: 2em;
-  border-radius: 8px; /* Overall rounded corners */
-  overflow: hidden; /* Hide overflow for rounded corners on inner elements */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  background-color: #f8f8f8; /* Light background */
+  border-radius: 8px;
+  /* Overall rounded corners */
+  overflow: hidden;
+  /* Hide overflow for rounded corners on inner elements */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  /* Subtle shadow */
+  background-color: #f8f8f8;
+  /* Light background */
   font-weight: normal;
   margin-left: auto;
   margin-right: auto;
 }
 
-th, td {
+th,
+td {
   padding: 12px 15px;
   text-align: left;
-  border-bottom: 1px solid #eee; /* Light row separators */
+  border-bottom: 1px solid #eee;
+  /* Light row separators */
 }
 
 th {
-  background-color: #b944fd; /* Purple header background */
+  background-color: #b944fd;
+  /* Purple header background */
   color: white;
   text-transform: uppercase;
 }
 
 tbody tr:hover {
-  background-color: #e0e0e0; /* Light hover effect on rows */
+  background-color: #e0e0e0;
+  /* Light hover effect on rows */
 }
 
 td a {
-  color: #007bff; /* Standard link color */
+  color: #007bff;
+  /* Standard link color */
   text-decoration: none;
   margin-right: 5px;
 }
@@ -651,15 +868,20 @@ td a:hover {
 
 /* Style for the last 'Actions' column links */
 td:last-child {
-  text-align: center; /* Center the action links */
+  text-align: center;
+  /* Center the action links */
 }
 
 td:last-child a:last-child {
-  margin-right: 0; /* Remove margin from the last action link */
-  color: #dc3545; /* Red for delete action */
+  margin-right: 0;
+  /* Remove margin from the last action link */
+  color: #dc3545;
+  /* Red for delete action */
 }
+
 #table-description {
-  position: relative; /* needed for absolute positioning of the image */
+  position: relative;
+  /* needed for absolute positioning of the image */
   font-size: 0.5em;
   color: #333;
   margin-bottom: 10px;
@@ -682,10 +904,13 @@ td:last-child a:last-child {
 .hover-image {
   display: none;
   position: absolute;
-  top: 0%; /* below the text */
+  top: 0%;
+  /* below the text */
   left: 20%;
-  width: 50px;  /* fixed width */
-  height: auto;  /* maintain aspect ratio */
+  width: 50px;
+  /* fixed width */
+  height: auto;
+  /* maintain aspect ratio */
   border: 1px solid #ccc;
   background-color: white;
   padding: 5px;

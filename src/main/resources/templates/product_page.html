@@ -28,7 +28,7 @@
             </div>
             <div class="header-actions">
                 <div class="cart-image">
-                    <a th:href="@{/dummy}"><img th:src="@{/img/cart.png}" alt="cart" id="cart"></a>
+                    <a th:href="@{/cart}"><img th:src="@{/img/cart.png}" alt="cart" id="cart"></a>
                 </div>
             </div>
         </div>
@@ -153,6 +153,37 @@
 
     <script th:src="@{/js/script.js}"></script>
 
+    <!--Add to Cart-->
+    <script type="module">
+        document.addEventListener("DOMContentLoaded", () => {
+            const addToCartBtn = document.querySelector(".add-to-cart-btn");
+            const qtyInput = document.getElementById("product-qty");
+
+            if (addToCartBtn && qtyInput) {
+                addToCartBtn.addEventListener("click", () => {
+                    const qty = parseInt(qtyInput.value);
+                    const productId = window.location.pathname.split("/").pop();
+
+                    fetch("/api/cart", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: `productId=${productId}&quantity=${qty}`
+                    })
+                        .then(res => {
+                            if (!res.ok) throw new Error("Failed to add to cart");
+                            return res.text();
+                        })
+                        .then(msg => alert(msg))
+                        .catch(err => alert("Error: " + err.message));
+                });
+            }
+        });
+
+    </script>
+
+
 
     <!--Related Products-->
     <script type="module">
@@ -182,25 +213,6 @@
             .catch(err => {
                 console.error("Error fetching products:", err);
             });
-
-
-
-        if (form) {
-            form.addEventListener('submit', e => {
-                e.preventDefault();
-
-                addProductAjax(
-                    form,
-                    newProduct => {
-                        productList.insertAdjacentHTML('beforeend', createProductCardHTML(newProduct));
-                        form.reset();
-                    },
-                    () => {
-                        alert('Failed to add product');
-                    }
-                );
-            });
-        }
     </script>
 
     <script>

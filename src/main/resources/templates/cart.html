@@ -5,11 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Poppin Party</title>
-    <link rel="icon" th:href="@{img/logowhite.png}" type="image/png">
+    <link rel="icon" href="img/logowhite.png" type="image/png">
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <script type="module" th:src="@{/js/add-to-cart.js}"></script>
 </head>
 
 <body>
@@ -25,9 +26,6 @@
                 </button>
             </div>
             <div class="header-actions">
-                <div class="cart-image">
-                    <a th:href="@{/cart}"><img th:src="@{/img/cart.png}" alt="cart" id="cart"></a>
-                </div>
                 <div class="account-button">
                     <a th:href="@{/account}">
                         <img th:src="@{/img/account.png}" alt="user" id="user">
@@ -36,54 +34,32 @@
             </div>
         </div>
     </header>
-
     <main>
-
-        <div class="productlist">
+        <div class="categories-section">
+            <p class="categories-title">YOUR CART</p>
         </div>
+        <br>
+        <div class="cart-container" id="cartContainer">
+            <!-- AJAX will inject cart-item HTML here -->
+            <div class="cart-total">
+                <h3>Total: ₱<span id="cartTotal">0</span></h3>
+            </div>
+        </div>
+
+        
+
+        
+
+        <div>
+            <div class="checkout-container">
+                <button class="checkout-button" th:onclick="'location.href=\'' + @{/order/checkout} + '\';'">PROCEED TO
+                    CHECKOUT</button>
+            </div>
+        </div>
+        <br>
+        <br>
+        <br>
     </main>
-
-    <script type="module">
-        import { createProductCardHTML, addProductAjax } from '/js/ajax.js';
-
-
-        const productList = document.querySelector('.productlist');
-        const form = document.getElementById('addProductForm');
-
-        fetch('/api/products')
-            .then(res => {
-                console.log("Raw response:", res);
-                return res.json();
-            })
-            .then(products => {
-                console.log("Parsed products:", products); // <== this should show the array
-                products.forEach(product => {
-                    console.log("Rendering product:", product);
-                    productList.insertAdjacentHTML('beforeend', createProductCardHTML(product));
-                });
-            })
-            .catch(err => {
-                console.error("Error in fetch or parsing:", err);
-            });
-
-
-        if (form) {
-            form.addEventListener('submit', e => {
-                e.preventDefault();
-
-                addProductAjax(
-                    form,
-                    newProduct => {
-                        productList.insertAdjacentHTML('beforeend', createProductCardHTML(newProduct));
-                        form.reset();
-                    },
-                    () => {
-                        alert('Failed to add product');
-                    }
-                );
-            });
-        }
-    </script>
 
     <footer>
         <div class="footer-container">

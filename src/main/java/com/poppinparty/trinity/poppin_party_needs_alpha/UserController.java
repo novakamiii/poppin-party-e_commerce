@@ -1,6 +1,7 @@
 package com.poppinparty.trinity.poppin_party_needs_alpha;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,6 +10,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -40,6 +42,13 @@ import jakarta.validation.Valid;
 @Controller
 public class UserController {
 
+    private List<OrderItem> orderItems; // Define orderItems
+
+    @Autowired
+    public UserController(OrderItemRepository orderItemRepository) {
+        this.orderItems = orderItemRepository.findAll(); // Initialize orderItems
+    }
+
     @Autowired
     private UserRepository userRepository;
 
@@ -48,6 +57,9 @@ public class UserController {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
@@ -271,9 +283,13 @@ public class UserController {
         String oldImagePath = user.getImagePath();
         if (oldImagePath != null && !oldImagePath.equals("/img/default-profile.png")) {
             Path oldFile = Paths.get("uploads", oldImagePath.replace("/uploads/", ""));
-            if (Files.exists(oldFile)) {
-                Files.delete(oldFile);
-                System.out.println("Deleted old image: " + oldFile);
+            if (Files.exists(oldFile) && Files.isRegularFile(oldFile)) { // ✅ ensures it's a file
+                try {
+                    Files.delete(oldFile);
+                    System.out.println("Deleted old image: " + oldFile);
+                } catch (IOException e) {
+                    System.err.println("Failed to delete old image: " + e.getMessage());
+                }
             }
         }
 
@@ -310,7 +326,6 @@ public class UserController {
     public String orderBanner() {
         return "customtarp";
     }
-    
 
     @GetMapping("/product-page")
     public String productPage() {
@@ -548,4 +563,111 @@ public class UserController {
         productRepository.deleteById(id);
         return "redirect:/products";
     }
+
+    // ========== ORDER MANAGEMENT ==========
+    @GetMapping("/cart")
+    public String viewCart() {
+        return "cart"; // cart.html
+    }
+
+    @GetMapping("/order/checkout")
+    public String viewCheckout() {
+        return "checkout";
+    }
+    
+
+    @GetMapping("/api/cart")
+    @ResponseBody
+    public List<CartItemDTO> getCartItems(Principal principal) {
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return orderItemRepository.findByUserId(user.getId())
+                .stream()
+                .map(orderItem -> {
+                    Product product = productRepository.findByItemName(orderItem.getProductRef())
+                            .orElseThrow();
+                    CartItemDTO dto = new CartItemDTO();
+                    dto.setProductId(product.getId());
+                    dto.setItemName(product.getItemName());
+                    dto.setImageLoc(product.getImageLoc());
+                    dto.setUnitPrice(orderItem.getUnitPrice().doubleValue());
+                    dto.setQuantity(orderItem.getQuantity());
+                    return dto;
+                })
+                .toList();
+    }
+
+    @PostMapping("/api/cart")
+    @ResponseBody
+    public ResponseEntity<?> addToCart(
+            @RequestParam Long productId,
+            @RequestParam int quantity,
+            Principal principal) {
+
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        String productRef = product.getItemName();
+
+        OrderItem item = orderItemRepository.findByUserIdAndProductRef(user.getId(), productRef)
+                .orElseGet(() -> {
+                    OrderItem newItem = new OrderItem();
+                    newItem.setUserId(user.getId());
+                    newItem.setProductRef(productRef);
+                    newItem.setQuantity(0);
+                    newItem.setUnitPrice(BigDecimal.valueOf(product.getPrice()));
+                    return newItem;
+                });
+
+        item.setQuantity(item.getQuantity() + quantity);
+        orderItemRepository.save(item);
+
+        return ResponseEntity.ok("Item added to cart");
+    }
+
+    @PostMapping("/api/cart/update")
+    @ResponseBody
+    public ResponseEntity<?> updateCartQuantity(
+            @RequestParam Long productId,
+            @RequestParam int quantity,
+            Principal principal) {
+
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        String productRef = product.getItemName();
+
+        OrderItem item = orderItemRepository.findByUserIdAndProductRef(user.getId(), productRef)
+                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+
+        item.setQuantity(quantity);
+        orderItemRepository.save(item);
+
+        return ResponseEntity.ok("Quantity updated");
+    }
+
+    @PostMapping("/api/cart/remove")
+    @ResponseBody
+    public ResponseEntity<?> removeItemFromCart(@RequestParam Long productId, Principal principal) {
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        String productRef = product.getItemName();
+
+        orderItemRepository.findByUserIdAndProductRef(user.getId(), productRef)
+                .ifPresent(orderItemRepository::delete);
+
+        return ResponseEntity.ok("Item removed");
+    }
+
 }

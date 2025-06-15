@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poppin Party</title>
+    <link rel="icon" href="img/logowhite.png" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header class="sticky-header">
+        <div class="header-inner">
+            <div class="logo">
+                <a th:href="@{/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
+            </div>
+            <div class="search">
+                <input type="text" class="search-input" placeholder="Search">
+                <button class="search-button">
+                    <img th:src="@{/img/search.png}" alt="search">
+                </button>
+            </div>
+            <div class="header-actions">
+                <div class="cart-image">
+                    <a th:href="@{/dummy}"><img th:src="@{/img/cart.png}" alt="cart" id="cart"></a>
+                </div>
+                <div class="account-button">
+                    <a th:href="@{/account}">
+                        <img th:src="@{/img/account.png}" alt="user" id="user">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="categories-section">
+            <p class="categories-title">CHECKOUT</p>
+        </div>
+        <br>
+        <div class="checkout-items">
+            <div class="checkout-item">
+                <div class="item-image">
+                    <img th:src="@{/img/bluemasq.png}" alt="Blue Masquerade Mask">
+                </div>
+                <div class="item-details">
+                    <h3 class="item-name">BLUE MASQUERADE MASK FOR WOMEN SHINY GLITTER SEQUINS FOR PARTIES</h3>
+                    <p class="item-price">₱85</p>
+                </div>
+                <div class="item-quantity">
+                    <input type="number" class="quantity-input" value="1" min="1">
+                </div>
+                <div class="item-actions">
+                    <button class="action-btn"><img th:src="@{/img/edit.png}" alt="edit"></button>
+                    <button class="action-btn"><img th:src="@{/img/x.png}" alt="remove"></button>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="checkout-details">
+            <div class="detail-section shipping-section">
+                <div class="section-header">
+                    <h3>SHIPPING OPTION:</h3>
+                    <button id="openShippingPopup">Choose Shipping Option</button>
+
+                    <div id="shippingPopup" class="popup">
+                        <div class="popup-content">
+                            <span id="closeShippingPopup" class="close-button">&times;</span>
+                            <h2>Select Shipping Option</h2>
+                            <ul class="shipping-options">
+                                <li>
+                                    <input type="radio" id="standard" name="shipping" value="standard" checked>
+                                    <label for="standard">Standard Shipping</label>
+                                </li>
+                                <li>
+                                    <input type="radio" id="express" name="shipping" value="express">
+                                    <label for="express">Express Shipping</label>
+                                </li>
+                                <li>
+                                    <input type="radio" id="overnight" name="shipping" value="overnight">
+                                    <label for="overnight">Overnight Delivery</label>
+                                </li>
+                            </ul>
+                            <button id="selectShippingButton">Select</button>
+                        </div>
+                    </div>
+
+                </div>
+                <p><strong>OVERSEAS SHIPPING</strong></p>
+                <p>FED EX</p>
+                <p>GET BY APRIL 5</p>
+            </div>
+
+            <div class="detail-section address-section">
+                <div class="section-header">
+                    <h3>ADDRESS:</h3>
+                    <button class="change-button">CHANGE</button>
+                </div>
+                <p>HOME</p>
+                <p>BLOCK 9 LOT 56, NIGERIA ST.</p>
+                <p>BRGY. SAN ROMERO, FLORIDA</p>
+            </div>
+
+            <div class="detail-section voucher-section">
+                <div class="section-header">
+                    <h3>VOUCHERS:</h3>
+                    <button class="select-vouchers-button">SELECT VOUCHERS</button>
+                </div>
+            </div>
+
+            <div class="detail-section payment-section">
+                <div class="section-header">
+                    <h3>PAYMENT OPTION:</h3>
+                    <div class="payment-method">
+                        <span id="selectedPayment">PAYPAL</span>
+                    </div>
+                    <button id="openPaymentPopup">Choose Payment Method</button>
+
+                    <div id="paymentPopup" class="popup">
+                        <div class="popup-content">
+                            <span id="closePaymentPopup" class="close-button">&times;</span>
+                            <h2>Select Payment Method</h2>
+                            <ul class="payment-options">
+                                <li>
+                                    <input type="radio" id="paypal" name="payment" value="paypal">
+                                    <label for="paypal">PayPal</label>
+                                </li>
+                                <li>
+                                    <input type="radio" id="creditcard" name="payment" value="creditcard">
+                                    <label for="creditcard">Credit Card</label>
+                                </li>
+                                <li>
+                                    <input type="radio" id="gcash" name="payment" value="gcash">
+                                    <label for="gcash">GCash</label>
+                                </li>
+                                <li>
+                                    <input type="radio" id="banktransfer" name="payment" value="banktransfer">
+                                    <label for="banktransfer">Bank Transfer</label>
+                                </li>
+                            </ul>
+                            <button id="selectPaymentButton">Select</button>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+            <div class="detail-section order-summary">
+                <h3>ORDER SUMMARY</h3>
+                <div class="summary-item">
+                    <span>MERCHANDISE SUBTOTAL</span>
+                    <span>₱885.00</span>
+                </div>
+                <div class="summary-item">
+                    <span>SHIPPING SUBTOTAL</span>
+                    <span>₱75.00</span>
+                </div>
+                <div class="summary-item">
+                    <span>SALES TAX</span>
+                    <span>₱106.20</span>
+                </div>
+                <div class="summary-item total">
+                    <span>TOTAL PAYMENT:</span>
+                    <span>₱1066.20</span>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="checkout-container">
+                <button class="checkout-button">PLACE ORDER</button>
+            </div>
+        </div>
+        <br>
+        <br>
+        <br>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-logo">
+                <img th:src="@{/img/logowhite.png}" alt="Poppin Party Logo">
+                <p>POPPIN PARTY</p>
+                <p>CELEBRATION NEEDS</p>
+            </div>
+            <div class="footer-section">
+                <h3>CUSTOMER SERVICE</h3>
+                <ul>
+                    <li>HELP CENTRE</li>
+                    <li>CONTACT US</li>
+                    <li>RETURN AND REFUND</li>
+                    <li>POPPIN' GUARANTEE</li>
+                    <li>FREE SHIPPING</li>
+                    <li>PAYMENT METHODS</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>ABOUT POPPIN' PARTY</h3>
+                <ul>
+                    <li>ABOUT US</li>
+                    <li>PRIVACY POLICY</li>
+                    <li>POPPIN' DEALS</li>
+                    <li>MEDIA CONTACT</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>PAYMENT</h3>
+                <ul>
+                    <li>GCASH</li>
+                    <li>PAYPAL</li>
+                    <li>CASHAPP</li>
+                    <li>VISA</li>
+                    <li>MASTERCARD</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>LOGISTICS</h3>
+                <ul>
+                    <li>GOGO EXPRESS</li>
+                    <li>NINJAVAN</li>
+                    <li>UPS</li>
+                    <li>FEDEX</li>
+                    <li>LBC</li>
+                    <li>DHL</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>FOLLOW US</h3>
+                <ul>
+                    <li>FACEBOOK</li>
+                    <li>INSTAGRAM</li>
+                    <li>X</li>
+                    <li>TIKTOK</li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
+        </div>
+    </footer>
+
+    <script>
+        // Get references to the elements (including the new span)
+        const openPaymentPopup = document.getElementById('openPaymentPopup');
+        const paymentPopup = document.getElementById('paymentPopup');
+        const closePaymentPopupButton = document.getElementById('closePaymentPopup');
+        const selectPaymentButton = document.getElementById('selectPaymentButton');
+        const paymentOptions = document.querySelectorAll('input[name="payment"]');
+        const selectedPaymentDisplay = document.getElementById('selectedPayment'); // Get the span
+
+        // Function to show the popup (remains the same)
+        function showPaymentPopup() {
+            paymentPopup.style.display = 'flex';
+        }
+
+        // Function to hide the popup (remains the same)
+        function hidePaymentPopup() {
+            paymentPopup.style.display = 'none';
+        }
+
+        // Event listener to open the popup (remains the same)
+        openPaymentPopup.addEventListener('click', showPaymentPopup);
+
+        // Event listener to close the popup when the close button is clicked (remains the same)
+        if (closePaymentPopupButton) {
+            closePaymentPopupButton.addEventListener('click', hidePaymentPopup);
+        }
+
+        // Event listener to close the popup when clicking outside the content (remains the same)
+        window.addEventListener('click', (event) => {
+            if (event.target === paymentPopup) {
+                hidePaymentPopup();
+            }
+        });
+
+        // Event listener for the "Select" button (modified to update the display)
+        selectPaymentButton.addEventListener('click', () => {
+            let selectedPaymentValue;
+            let selectedPaymentLabel;
+            paymentOptions.forEach(option => {
+                if (option.checked) {
+                    selectedPaymentValue = option.value;
+                    selectedPaymentLabel = document.querySelector(`label[for="${option.id}"]`).textContent;
+                }
+            });
+
+            if (selectedPaymentValue) {
+                selectedPaymentDisplay.textContent = selectedPaymentLabel; // Update the text
+                hidePaymentPopup();
+            } else {
+                alert('Please select a payment method.');
+            }
+        });
+
+        // Initially set the displayed payment method (optional - if you have a default)
+        // const initialChecked = document.querySelector('input[name="payment"]:checked');
+        // if (initialChecked) {
+        //   selectedPaymentDisplay.textContent = document.querySelector(`label[for="${initialChecked.id}"]`).textContent;
+        // }
+
+
+
+
+        // Get references to the elements
+        const openShippingPopup = document.getElementById('openShippingPopup');
+        const shippingPopup = document.getElementById('shippingPopup');
+        const closeShippingPopupButton = document.getElementById('closeShippingPopup');
+        const selectShippingButton = document.getElementById('selectShippingButton');
+        const shippingOptions = document.querySelectorAll('input[name="shipping"]');
+
+        // Function to show the popup
+        function showShippingPopup() {
+            shippingPopup.style.display = 'flex';
+        }
+
+        // Function to hide the popup
+        function hideShippingPopup() {
+            shippingPopup.style.display = 'none';
+        }
+
+        // Event listener to open the popup
+        openShippingPopup.addEventListener('click', showShippingPopup);
+
+        // Event listener to close the popup when the close button is clicked
+        if (closeShippingPopupButton) {
+            closeShippingPopupButton.addEventListener('click', hideShippingPopup);
+        }
+
+        // Event listener to close the popup when clicking outside the content
+        window.addEventListener('click', (event) => {
+            if (event.target === shippingPopup) {
+                hideShippingPopup();
+            }
+        });
+
+        // Event listener for the "Select" button (handle shipping selection)
+        selectShippingButton.addEventListener('click', () => {
+            let selectedShipping;
+            let selectedShippingLabel;
+            shippingOptions.forEach(option => {
+                if (option.checked) {
+                    selectedShipping = option.value;
+                    selectedShippingLabel = document.querySelector(`label[for="${option.id}"]`).textContent;
+                }
+            });
+
+            if (selectedShipping) {
+                // Update the UI with the selected shipping option
+                // For example, update a span with the selected option:
+                const selectedShippingDisplay = document.getElementById('selectedShippingOption');
+                if (selectedShippingDisplay) {
+                    selectedShippingDisplay.textContent = selectedShippingLabel;
+                }
+
+                alert(`You selected: ${selectedShippingLabel}`);
+                // Here you would typically update the UI or proceed with the checkout process.
+                hideShippingPopup();
+            } else {
+                alert('Please select a shipping option.');
+            }
+        });
+    </script>
+</body>
+
+</html>
