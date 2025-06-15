@@ -1,0 +1,309 @@
+
+/* CHECKOUT DETAILS */
+/* CHECKOUT DETAILS */
+/* CHECKOUT DETAILS */
+
+.checkout-details {
+    border-top: 1px solid #eee;
+    /* Separator between items */
+    background-color: #d9d9d9;
+    /* Light gray background */
+    padding: 20px;
+    margin-bottom: 20px;
+    /* Add some space below */
+    border-radius: 5px;
+    /* Optional: Rounded corners */
+    font-family: "Bebas Neue", sans-serif;
+    width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .detail-section {
+    padding: 15px 0;
+    border-bottom: 1px solid #ddd;
+    /* Separator between sections */
+    font-family: "Bebas Neue", sans-serif;
+    border-bottom: 1px solid #eee;
+    /* Separator between items */
+  }
+  
+  .detail-section:last-child {
+    border-bottom: none;
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .section-header h3 {
+    margin: 0;
+    font-size: 2em;
+    color: #333;
+  }
+  
+  .change-button,
+  .select-vouchers-button {
+    background: none;
+    color: #b944fd;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 1.5em;
+    font-family: "Bebas Neue", sans-serif;
+  }
+  
+  .shipping-section p,
+  .address-section p {
+    margin: 5px 0;
+    font-size: 1.5em;
+    color: #555;
+  }
+  
+  .payment-section .section-header {
+    display: flex;
+    align-items: center;
+  }
+  
+  .payment-section .payment-method {
+    font-weight: bold;
+    margin-left: 10px;
+    margin-right: auto;
+    color: #333;
+    font-size: 2em;
+  }
+  
+  /* Order Summary Styles */
+  .order-summary h3 {
+    font-size: 2em;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 1.5em;
+    color: #555;
+  }
+  
+  .summary-item span:last-child {
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .summary-item.total span {
+    font-size: 1em;
+    color: #000;
+  }
+  
+  .summary-item.total span:last-child {
+    color: #b944fd;
+    /* Purple for the total */
+  }
+  
+  /* POPUP STYLE */
+  /* POPUP STYLE */
+  /* POPUP STYLE */
+  
+  /* Style for the button that opens the popup */
+  #openPaymentPopup {
+    /* Your button styles */
+    padding: 10px 20px;
+    background-color: #b944fd;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 1.5em;
+  }
+  
+  /* Style for the popup container (initially hidden) */
+  .popup {
+    display: none;
+    /* Initially hidden */
+    position: fixed;
+    /* Stay in place even when scrolling */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Semi-transparent background */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Ensure it's on top of everything */
+  }
+  
+  /* Style for the content area of the popup */
+  .popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+    /* For the close button positioning */
+    width: 80%;
+    /* Adjust width as needed */
+    max-width: 400px;
+    text-align: center;
+  }
+  
+  /* Style for the close button */
+  .close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+  }
+  
+  /* Style for the heading */
+  .popup-content h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  /* Style for the list of payment options */
+  .payment-options {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+  }
+  
+  .payment-options li {
+    margin-bottom: 10px;
+    text-align: left;
+  }
+  
+  .payment-options input[type="radio"] {
+    margin-right: 10px;
+  }
+  
+  /* Style for the select button */
+  #selectPaymentButton {
+    padding: 10px 20px;
+    background-color: #b944fd;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1em;
+  }
+  
+  #selectPaymentButton:hover {
+    background-color: #8e31c9;
+  }
+  
+  /* Style for the button that opens the popup */
+  #openShippingPopup {
+    /* Your button styles */
+    padding: 10px 20px;
+    background-color: #b944fd;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  /* Style for the popup container (initially hidden) */
+  .popup {
+    display: none;
+    /* Initially hidden */
+    position: fixed;
+    /* Stay in place even when scrolling */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Semi-transparent background */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Ensure it's on top of everything */
+  }
+  
+  /* Style for the content area of the popup */
+  .popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+    /* For the close button positioning */
+    width: 80%;
+    /* Adjust width as needed */
+    max-width: 400px;
+    text-align: center;
+  }
+  
+  /* Style for the close button */
+  .close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+  }
+  
+  /* Style for the heading */
+  .popup-content h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  /* Style for the list of shipping options */
+  .shipping-options {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+  }
+  
+  .shipping-options li {
+    margin-bottom: 10px;
+    text-align: left;
+  }
+  
+  .shipping-options input[type="radio"] {
+    margin-right: 10px;
+  }
+  
+  /* Style for the select button */
+  #selectShippingButton {
+    padding: 10px 20px;
+    background-color: #b944fd;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1em;
+    font-family: "Bebas Neue", sans-serif;
+  }
+  
+  #selectShippingButton:hover {
+    background-color: #8e31c9;
+  }
+  
+  #openPaymentPopup {
+    padding: 10px 20px;
+    background-color: #b944fd;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-family: "Bebas Neue", sans-serif;
+  }

@@ -1,9 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const cartContainer = document.getElementById("cartContainer");
-    const cartTotal = document.getElementById("cartTotal");
-  
-    function renderCartItem(item) {
-      return `
+  const cartContainer = document.getElementById("cartContainer");
+  const cartTotal = document.getElementById("cartTotal");
+
+  function renderCartItem(item) {
+    return `
         <div class="cart-item" data-product-id="${item.productId}">
           <img src="${item.imageLoc}" alt="${item.itemName}" class="cartpage-image" />
           <div class="product-details">
@@ -23,107 +23,121 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         </div>
       `;
-    }
-  
-    function updateTotal() {
-      let total = 0;
-      document.querySelectorAll(".cart-item").forEach(item => {
-        const isChecked = item.querySelector(".item-check").checked;
-        const unitPrice = parseFloat(item.querySelector(".price").textContent.replace("₱", ""));
-        const qty = parseInt(item.querySelector(".quantity-input").value);
-        if (isChecked) {
-          total += unitPrice * qty;
+  }
+
+  function updateTotal() {
+    let total = 0;
+    document.querySelectorAll(".cart-item").forEach(item => {
+      const isChecked = item.querySelector(".item-check").checked;
+      const unitPrice = parseFloat(item.querySelector(".price").textContent.replace("₱", ""));
+      const qty = parseInt(item.querySelector(".quantity-input").value);
+      if (isChecked) {
+        total += unitPrice * qty;
+      }
+    });
+    cartTotal.textContent = total.toFixed(2);
+  }
+
+  function updateQuantity(productId, newQty) {
+    fetch("/api/cart/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `productId=${productId}&quantity=${newQty}`
+    }).then(res => {
+      if (!res.ok) throw new Error("Failed to update quantity");
+      updateTotal();
+    }).catch(err => {
+      alert("Error updating quantity.");
+      console.error(err);
+    });
+  }
+
+  function removeItem(productId, cartItemElement) {
+    fetch("/api/cart/remove", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `productId=${productId}`
+    }).then(res => {
+      if (!res.ok) throw new Error("Failed to remove item");
+      cartItemElement.remove();
+      updateTotal();
+    }).catch(err => {
+      alert("Error removing item.");
+      console.error(err);
+    });
+  }
+
+  fetch("/api/cart")
+    .then(res => {
+      if (!res.ok) throw new Error("Failed to fetch cart");
+      return res.json();
+    })
+    .then(items => {
+      items.forEach(item => {
+        cartContainer.insertAdjacentHTML("beforeend", renderCartItem(item));
+      });
+
+      updateTotal();
+
+      cartContainer.addEventListener("click", e => {
+        const cartItem = e.target.closest(".cart-item");
+        if (!cartItem) return;
+        const productId = cartItem.getAttribute("data-product-id");
+        const input = cartItem.querySelector(".quantity-input");
+        let qty = parseInt(input.value);
+
+        if (e.target.classList.contains("plus")) {
+          input.value = ++qty;
+          updateQuantity(productId, qty);
         }
-      });
-      cartTotal.textContent = total.toFixed(2);
-    }
-  
-    function updateQuantity(productId, newQty) {
-      fetch("/api/cart/update", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `productId=${productId}&quantity=${newQty}`
-      }).then(res => {
-        if (!res.ok) throw new Error("Failed to update quantity");
-        updateTotal();
-      }).catch(err => {
-        alert("Error updating quantity.");
-        console.error(err);
-      });
-    }
-  
-    function removeItem(productId, cartItemElement) {
-      fetch("/api/cart/remove", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `productId=${productId}`
-      }).then(res => {
-        if (!res.ok) throw new Error("Failed to remove item");
-        cartItemElement.remove();
-        updateTotal();
-      }).catch(err => {
-        alert("Error removing item.");
-        console.error(err);
-      });
-    }
-  
-    fetch("/api/cart")
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to fetch cart");
-        return res.json();
-      })
-      .then(items => {
-        items.forEach(item => {
-          cartContainer.insertAdjacentHTML("beforeend", renderCartItem(item));
-        });
-  
-        updateTotal();
-  
-        cartContainer.addEventListener("click", e => {
-          const cartItem = e.target.closest(".cart-item");
-          if (!cartItem) return;
-          const productId = cartItem.getAttribute("data-product-id");
-          const input = cartItem.querySelector(".quantity-input");
-          let qty = parseInt(input.value);
-  
-          if (e.target.classList.contains("plus")) {
-            input.value = ++qty;
+
+        if (e.target.classList.contains("minus")) {
+          if (qty > 1) {
+            input.value = --qty;
             updateQuantity(productId, qty);
           }
-  
-          if (e.target.classList.contains("minus")) {
-            if (qty > 1) {
-              input.value = --qty;
-              updateQuantity(productId, qty);
-            }
+        }
+
+        if (e.target.closest(".remove-btn")) {
+          if (confirm("Remove this item from your cart?")) {
+            removeItem(productId, cartItem);
           }
-  
-          if (e.target.closest(".remove-btn")) {
-            if (confirm("Remove this item from your cart?")) {
-              removeItem(productId, cartItem);
-            }
-          }
-        });
-  
-        cartContainer.addEventListener("input", e => {
-          const cartItem = e.target.closest(".cart-item");
-          if (e.target.classList.contains("quantity-input")) {
-            const productId = cartItem.getAttribute("data-product-id");
-            const newQty = parseInt(e.target.value);
-            if (newQty > 0) updateQuantity(productId, newQty);
-          }
-          updateTotal();
-        });
-  
-        cartContainer.addEventListener("change", e => {
-          if (e.target.classList.contains("item-check")) {
-            updateTotal();
-          }
-        });
-      })
-      .catch(err => {
-        console.error("Error loading cart:", err);
-        cartContainer.innerHTML = "<p>Failed to load cart.</p>";
+        }
       });
+
+      cartContainer.addEventListener("input", e => {
+        const cartItem = e.target.closest(".cart-item");
+        if (e.target.classList.contains("quantity-input")) {
+          const productId = cartItem.getAttribute("data-product-id");
+          const newQty = parseInt(e.target.value);
+          if (newQty > 0) updateQuantity(productId, newQty);
+        }
+        updateTotal();
+      });
+
+      cartContainer.addEventListener("change", e => {
+        if (e.target.classList.contains("item-check")) {
+          updateTotal();
+        }
+      });
+    })
+    .catch(err => {
+      console.error("Error loading cart:", err);
+      cartContainer.innerHTML = "<p>Failed to load cart.</p>";
+    });
+
+  document.querySelector(".checkout-button").addEventListener("click", () => {
+    const selectedItems = [];
+    document.querySelectorAll(".cart-item").forEach(item => {
+      if (item.querySelector(".item-check").checked) {
+        selectedItems.push({
+          productId: item.getAttribute("data-product-id"),
+          quantity: item.querySelector(".quantity-input").value
+        });
+      }
+    });
+
+    localStorage.setItem("checkoutItems", JSON.stringify(selectedItems));
+    window.location.href = "/order/checkout";
   });
-  
+});

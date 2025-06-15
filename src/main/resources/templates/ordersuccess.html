@@ -1,123 +1,136 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poppin Party</title>
-    <link rel="icon" href="img/logowhite.png" type="image/png">
-    <link rel="stylesheet" th:href="@{/css/styles.css}">   
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
-</head>
-<body>
-    <header class="sticky-header">
-    <div class="header-inner">
-        <div class="logo">
-            <a href="landing.html"><img src="img/logowhite.png" alt="logo" id="logo"></a>
-        </div>
-        <div class="search">
-            <input type="text" class="search-input" placeholder="Search">
-            <button class="search-button">
-                <img src="img/search.png" alt="search">
-            </button>
-        </div>
-        <div class="header-actions">
-            <div class="cart-image">
-                <a href="cart.html"><img src="img/cart.png" alt="cart" id="cart"></a>
-            </div>
-            <div class="account-button">
-                <a href="account.html">
-                    <img src="img/account.png" alt="user" id="user">
-                </a>
-            </div>
-        </div>
-    </div>
-    </header>
-    <main>
 
-      <img src="img/circlecheck.png" alt="Circle Check" class="circlecheck">
-      <div class="success-message">
-        <p>Your order has been placed successfully!</p>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poppin Party</title>
+  <link rel="icon" th:href="@{/img/logowhite.png}" type="image/png">
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <header class="sticky-header">
+    <div class="header-inner">
+      <div class="logo">
+        <a th:href="@{/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
       </div>
-      <a href="landing.html">
-        <div class="continue-shopping-button">
+      <div class="search">
+        <input type="text" class="search-input" placeholder="Search">
+        <button class="search-button">
+          <img th:src="@{/img/search.png}" alt="search">
+        </button>
+      </div>
+      <div class="header-actions">
+        <div class="cart-image">
+          <a th:href="@{/cart}"><img th:src="@{/img/cart.png}" alt="cart" id="cart"></a>
+        </div>
+        <div class="account-button">
+          <a th:href="@{/account}">
+            <img th:src="@{/img/account.png}" alt="user" id="user">
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main>
+
+    <img th:src="@{/img/circlecheck.png}" alt="Circle Check" class="circlecheck">
+    <div class="success-message">
+      <p>Your order has been placed successfully!</p>
+      <small>Tracking ID: <span th:text="${trackingNumber}">N/A</span></small>
+    </div>
+
+    <a th:href="@{/home}">
+      <div class="continue-shopping-button">
         <button class="continue-shopping-button">Continue Shopping</button>
-        </div>
-      </a>
-      <br>
-      <a href="orderstatus.html">
-        <div class="continue-shopping-button">
+      </div>
+    </a>
+    <br>
+    <a th:href="@{/orderstatus}">
+      <div class="continue-shopping-button">
         <button class="continue-shopping-button">Order Status</button>
-        </div>
-      </a>
-      <br>
-      <br>
+      </div>
+    </a>
+    <br>
+    <br>
   </main>
 
-    <footer>
-        <div class="footer-container">
-          <div class="footer-logo">
-            <img src="img/logowhite.png" alt="Poppin Party Logo">
-            <p>POPPIN PARTY</p>
-            <p>CELEBRATION NEEDS</p>
-          </div>
-          <div class="footer-section">
-            <h3>CUSTOMER SERVICE</h3>
-            <ul>
-              <li>HELP CENTRE</li>
-              <li>CONTACT US</li>
-              <li>RETURN AND REFUND</li>
-              <li>POPPIN' GUARANTEE</li>
-              <li>FREE SHIPPING</li>
-              <li>PAYMENT METHODS</li>
-            </ul>
-          </div>
-          <div class="footer-section">
-            <h3>ABOUT POPPIN' PARTY</h3>
-            <ul>
-              <li>ABOUT US</li>
-              <li>PRIVACY POLICY</li>
-              <li>POPPIN' DEALS</li>
-              <li>MEDIA CONTACT</li>
-            </ul>
-          </div>
-          <div class="footer-section">
-            <h3>PAYMENT</h3>
-            <ul>
-              <li>GCASH</li>
-              <li>PAYPAL</li>
-              <li>CASHAPP</li>
-              <li>VISA</li>
-              <li>MASTERCARD</li>
-            </ul>
-          </div>
-          <div class="footer-section">
-            <h3>LOGISTICS</h3>
-            <ul>
-              <li>GOGO EXPRESS</li>
-              <li>NINJAVAN</li>
-              <li>UPS</li>
-              <li>FEDEX</li>
-              <li>LBC</li>
-              <li>DHL</li>
-            </ul>
-          </div>
-          <div class="footer-section">
-            <h3>FOLLOW US</h3>
-            <ul>
-              <li>FACEBOOK</li>
-              <li>INSTAGRAM</li>
-              <li>X</li>
-              <li>TIKTOK</li>
-            </ul>
-          </div>
-        </div>
-        <div class="copyright">
-          © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
-        </div>
-      </footer>
+  <footer>
+    <div class="footer-container">
+      <div class="footer-logo">
+        <img th:src="@{img/logowhite.png}" alt="Poppin Party Logo">
+        <p>POPPIN PARTY</p>
+        <p>CELEBRATION NEEDS</p>
+      </div>
+      <div class="footer-section">
+        <h3>CUSTOMER SERVICE</h3>
+        <ul>
+          <li>HELP CENTRE</li>
+          <li>CONTACT US</li>
+          <li>RETURN AND REFUND</li>
+          <li>POPPIN' GUARANTEE</li>
+          <li>FREE SHIPPING</li>
+          <li>PAYMENT METHODS</li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>ABOUT POPPIN' PARTY</h3>
+        <ul>
+          <li>ABOUT US</li>
+          <li>PRIVACY POLICY</li>
+          <li>POPPIN' DEALS</li>
+          <li>MEDIA CONTACT</li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>PAYMENT</h3>
+        <ul>
+          <li>GCASH</li>
+          <li>PAYPAL</li>
+          <li>CASHAPP</li>
+          <li>VISA</li>
+          <li>MASTERCARD</li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>LOGISTICS</h3>
+        <ul>
+          <li>GOGO EXPRESS</li>
+          <li>NINJAVAN</li>
+          <li>UPS</li>
+          <li>FEDEX</li>
+          <li>LBC</li>
+          <li>DHL</li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>FOLLOW US</h3>
+        <ul>
+          <li>FACEBOOK</li>
+          <li>INSTAGRAM</li>
+          <li>X</li>
+          <li>TIKTOK</li>
+        </ul>
+      </div>
+    </div>
+    <div class="copyright">
+      © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
+    </div>
+  </footer>
 
-  <script src="script.js"></script>
+  <script th:src="@{/js/script.js}"></script>
+
+  <!--Clear Cart-->
+  <script>
+    localStorage.removeItem("checkoutItems");
+    localStorage.removeItem("shippingOption");
+    localStorage.removeItem("paymentMethod");
+  </script>
+
 </body>
+
 </html>

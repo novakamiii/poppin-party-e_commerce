@@ -5,8 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Poppin Party</title>
-    <link rel="icon" href="img/logowhite.png" type="image/png">
+    <link rel="icon" th:href="@{/img/logowhite.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/checkout.css}">
     <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/style2.css}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
@@ -26,7 +28,7 @@
             </div>
             <div class="header-actions">
                 <div class="cart-image">
-                    <a th:href="@{/dummy}"><img th:src="@{/img/cart.png}" alt="cart" id="cart"></a>
+                    <a th:href="@{/cart}"><img th:src="@{/img/cart.png}" alt="cart" id="cart"></a>
                 </div>
                 <div class="account-button">
                     <a th:href="@{/account}">
@@ -42,22 +44,6 @@
         </div>
         <br>
         <div class="checkout-items">
-            <div class="checkout-item">
-                <div class="item-image">
-                    <img th:src="@{/img/bluemasq.png}" alt="Blue Masquerade Mask">
-                </div>
-                <div class="item-details">
-                    <h3 class="item-name">BLUE MASQUERADE MASK FOR WOMEN SHINY GLITTER SEQUINS FOR PARTIES</h3>
-                    <p class="item-price">₱85</p>
-                </div>
-                <div class="item-quantity">
-                    <input type="number" class="quantity-input" value="1" min="1">
-                </div>
-                <div class="item-actions">
-                    <button class="action-btn"><img th:src="@{/img/edit.png}" alt="edit"></button>
-                    <button class="action-btn"><img th:src="@{/img/x.png}" alt="remove"></button>
-                </div>
-            </div>
         </div>
         <br>
         <div class="checkout-details">
@@ -89,26 +75,14 @@
                     </div>
 
                 </div>
-                <p><strong>OVERSEAS SHIPPING</strong></p>
-                <p>FED EX</p>
-                <p>GET BY APRIL 5</p>
+                <p><span id="selectedShippingOption">Standard Shipping</span></p>
             </div>
 
             <div class="detail-section address-section">
                 <div class="section-header">
                     <h3>ADDRESS:</h3>
-                    <button class="change-button">CHANGE</button>
                 </div>
-                <p>HOME</p>
-                <p>BLOCK 9 LOT 56, NIGERIA ST.</p>
-                <p>BRGY. SAN ROMERO, FLORIDA</p>
-            </div>
-
-            <div class="detail-section voucher-section">
-                <div class="section-header">
-                    <h3>VOUCHERS:</h3>
-                    <button class="select-vouchers-button">SELECT VOUCHERS</button>
-                </div>
+                <p th:text="${address}"></p>
             </div>
 
             <div class="detail-section payment-section">
@@ -171,13 +145,160 @@
         </div>
         <div>
             <div class="checkout-container">
-                <button class="checkout-button">PLACE ORDER</button>
+                <form id="checkoutForm" method="post" action="/order/place">
+                    <input type="hidden" name="shippingOption" id="shippingOptionInput">
+                    <input type="hidden" name="paymentMethod" id="paymentMethodInput">
+                    <input type="hidden" name="itemsJson" id="itemsJsonInput">
+                    <button type="submit" class="checkout-button">PLACE ORDER</button>
+                </form>
             </div>
         </div>
         <br>
         <br>
         <br>
+
+        
     </main>
+
+    <!--ajax-->
+    <script type="module">
+        import { renderCheckoutItems, updateSummary } from '/js/checkout-utils.js';
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderCheckoutItems(".checkout-items", updateSummary);
+        });
+    </script>
+
+
+
+
+    <!--getter for cart-->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const shippingOption = localStorage.getItem("shippingOption") || "standard";
+            const paymentMethod = localStorage.getItem("paymentMethod") || "paypal";
+            const checkoutItems = localStorage.getItem("checkoutItems") || "[]";
+
+            document.getElementById("shippingOptionInput").value = shippingOption;
+            document.getElementById("paymentMethodInput").value = paymentMethod;
+            document.getElementById("itemsJsonInput").value = checkoutItems;
+        });
+    </script>
+
+
+    <script>
+        // Get references to the elements (including the new span)
+        const openPaymentPopup = document.getElementById('openPaymentPopup');
+        const paymentPopup = document.getElementById('paymentPopup');
+        const closePaymentPopupButton = document.getElementById('closePaymentPopup');
+        const selectPaymentButton = document.getElementById('selectPaymentButton');
+        const paymentOptions = document.querySelectorAll('input[name="payment"]');
+        const selectedPaymentDisplay = document.getElementById('selectedPayment'); // Get the span
+
+        // Function to show the popup (remains the same)
+        function showPaymentPopup() {
+            paymentPopup.style.display = 'flex';
+        }
+
+        // Function to hide the popup (remains the same)
+        function hidePaymentPopup() {
+            paymentPopup.style.display = 'none';
+        }
+
+        // Event listener to open the popup (remains the same)
+        openPaymentPopup.addEventListener('click', showPaymentPopup);
+
+        // Event listener to close the popup when the close button is clicked (remains the same)
+        if (closePaymentPopupButton) {
+            closePaymentPopupButton.addEventListener('click', hidePaymentPopup);
+        }
+
+        // Event listener to close the popup when clicking outside the content (remains the same)
+        window.addEventListener('click', (event) => {
+            if (event.target === paymentPopup) {
+                hidePaymentPopup();
+            }
+        });
+
+        // Event listener for the "Select" button (modified to update the display)
+        selectPaymentButton.addEventListener('click', () => {
+            let selectedPaymentValue;
+            let selectedPaymentLabel;
+            paymentOptions.forEach(option => {
+                if (option.checked) {
+                    selectedPaymentValue = option.value;
+                    selectedPaymentLabel = document.querySelector(`label[for="${option.id}"]`).textContent;
+                }
+            });
+
+            if (selectedPaymentValue) {
+                selectedPaymentDisplay.textContent = selectedPaymentLabel; // Update the text
+                hidePaymentPopup();
+            } else {
+                alert('Please select a payment method.');
+            }
+        });
+        // Get references to the elements
+        const openShippingPopup = document.getElementById('openShippingPopup');
+        const shippingPopup = document.getElementById('shippingPopup');
+        const closeShippingPopupButton = document.getElementById('closeShippingPopup');
+        const selectShippingButton = document.getElementById('selectShippingButton');
+        const shippingOptions = document.querySelectorAll('input[name="shipping"]');
+
+        // Function to show the popup
+        function showShippingPopup() {
+            shippingPopup.style.display = 'flex';
+        }
+
+        // Function to hide the popup
+        function hideShippingPopup() {
+            shippingPopup.style.display = 'none';
+        }
+
+        // Event listener to open the popup
+        openShippingPopup.addEventListener('click', showShippingPopup);
+
+        // Event listener to close the popup when the close button is clicked
+        if (closeShippingPopupButton) {
+            closeShippingPopupButton.addEventListener('click', hideShippingPopup);
+        }
+
+        // Event listener to close the popup when clicking outside the content
+        window.addEventListener('click', (event) => {
+            if (event.target === shippingPopup) {
+                hideShippingPopup();
+            }
+        });
+
+        // Event listener for the "Select" button (handle shipping selection)
+        selectShippingButton.addEventListener('click', () => {
+            let selectedShipping;
+            let selectedShippingLabel;
+            shippingOptions.forEach(option => {
+                if (option.checked) {
+                    selectedShipping = option.value;
+                    selectedShippingLabel = document.querySelector(`label[for="${option.id}"]`).textContent;
+                }
+            });
+
+            if (selectedShipping) {
+                // Update the UI with the selected shipping option
+                // For example, update a span with the selected option:
+                const selectedShippingDisplay = document.getElementById('selectedShippingOption');
+                if (selectedShippingDisplay) {
+                    selectedShippingDisplay.textContent = selectedShippingLabel;
+                }
+                document.getElementById("shippingOptionInput").value = selectedShipping;
+
+
+                alert(`You selected: ${selectedShippingLabel}`);
+                // Here you would typically update the UI or proceed with the checkout process.
+                hideShippingPopup();
+            } else {
+                alert('Please select a shipping option.');
+            }
+        });
+    </script>
 
     <footer>
         <div class="footer-container">
@@ -241,128 +362,6 @@
             © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
         </div>
     </footer>
-
-    <script>
-        // Get references to the elements (including the new span)
-        const openPaymentPopup = document.getElementById('openPaymentPopup');
-        const paymentPopup = document.getElementById('paymentPopup');
-        const closePaymentPopupButton = document.getElementById('closePaymentPopup');
-        const selectPaymentButton = document.getElementById('selectPaymentButton');
-        const paymentOptions = document.querySelectorAll('input[name="payment"]');
-        const selectedPaymentDisplay = document.getElementById('selectedPayment'); // Get the span
-
-        // Function to show the popup (remains the same)
-        function showPaymentPopup() {
-            paymentPopup.style.display = 'flex';
-        }
-
-        // Function to hide the popup (remains the same)
-        function hidePaymentPopup() {
-            paymentPopup.style.display = 'none';
-        }
-
-        // Event listener to open the popup (remains the same)
-        openPaymentPopup.addEventListener('click', showPaymentPopup);
-
-        // Event listener to close the popup when the close button is clicked (remains the same)
-        if (closePaymentPopupButton) {
-            closePaymentPopupButton.addEventListener('click', hidePaymentPopup);
-        }
-
-        // Event listener to close the popup when clicking outside the content (remains the same)
-        window.addEventListener('click', (event) => {
-            if (event.target === paymentPopup) {
-                hidePaymentPopup();
-            }
-        });
-
-        // Event listener for the "Select" button (modified to update the display)
-        selectPaymentButton.addEventListener('click', () => {
-            let selectedPaymentValue;
-            let selectedPaymentLabel;
-            paymentOptions.forEach(option => {
-                if (option.checked) {
-                    selectedPaymentValue = option.value;
-                    selectedPaymentLabel = document.querySelector(`label[for="${option.id}"]`).textContent;
-                }
-            });
-
-            if (selectedPaymentValue) {
-                selectedPaymentDisplay.textContent = selectedPaymentLabel; // Update the text
-                hidePaymentPopup();
-            } else {
-                alert('Please select a payment method.');
-            }
-        });
-
-        // Initially set the displayed payment method (optional - if you have a default)
-        // const initialChecked = document.querySelector('input[name="payment"]:checked');
-        // if (initialChecked) {
-        //   selectedPaymentDisplay.textContent = document.querySelector(`label[for="${initialChecked.id}"]`).textContent;
-        // }
-
-
-
-
-        // Get references to the elements
-        const openShippingPopup = document.getElementById('openShippingPopup');
-        const shippingPopup = document.getElementById('shippingPopup');
-        const closeShippingPopupButton = document.getElementById('closeShippingPopup');
-        const selectShippingButton = document.getElementById('selectShippingButton');
-        const shippingOptions = document.querySelectorAll('input[name="shipping"]');
-
-        // Function to show the popup
-        function showShippingPopup() {
-            shippingPopup.style.display = 'flex';
-        }
-
-        // Function to hide the popup
-        function hideShippingPopup() {
-            shippingPopup.style.display = 'none';
-        }
-
-        // Event listener to open the popup
-        openShippingPopup.addEventListener('click', showShippingPopup);
-
-        // Event listener to close the popup when the close button is clicked
-        if (closeShippingPopupButton) {
-            closeShippingPopupButton.addEventListener('click', hideShippingPopup);
-        }
-
-        // Event listener to close the popup when clicking outside the content
-        window.addEventListener('click', (event) => {
-            if (event.target === shippingPopup) {
-                hideShippingPopup();
-            }
-        });
-
-        // Event listener for the "Select" button (handle shipping selection)
-        selectShippingButton.addEventListener('click', () => {
-            let selectedShipping;
-            let selectedShippingLabel;
-            shippingOptions.forEach(option => {
-                if (option.checked) {
-                    selectedShipping = option.value;
-                    selectedShippingLabel = document.querySelector(`label[for="${option.id}"]`).textContent;
-                }
-            });
-
-            if (selectedShipping) {
-                // Update the UI with the selected shipping option
-                // For example, update a span with the selected option:
-                const selectedShippingDisplay = document.getElementById('selectedShippingOption');
-                if (selectedShippingDisplay) {
-                    selectedShippingDisplay.textContent = selectedShippingLabel;
-                }
-
-                alert(`You selected: ${selectedShippingLabel}`);
-                // Here you would typically update the UI or proceed with the checkout process.
-                hideShippingPopup();
-            } else {
-                alert('Please select a shipping option.');
-            }
-        });
-    </script>
 </body>
 
 </html>

@@ -220,13 +220,16 @@ body {
   width: 1100px;
   margin-left: auto;
   margin-right: auto;
-  justify-content: space-between; /* or flex-end to push to far right */
+  justify-content: space-between;
+  /* or flex-end to push to far right */
 }
 
 .cart-total {
   font-family: "Bebas Neue", sans-serif;
-  margin-left: auto;  /* Pushes element to right */
-  width: fit-content; /* Shrinks to content width */
+  margin-left: auto;
+  /* Pushes element to right */
+  width: fit-content;
+  /* Shrinks to content width */
 }
 
 .cart-item {
@@ -307,11 +310,12 @@ body {
 
 .checkout-container {
   display: flex;
+  justify-content: center; /* 💡 centers content horizontally */
   align-items: center;
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 20px 0;
 }
+
 
 .checkout-button {
   background-color: #b944fd;
@@ -325,16 +329,77 @@ body {
   height: 50px;
   width: 300px;
   font-family: "Bebas Neue", sans-serif;
-  align-items: center;
-  margin-left: auto;
-  margin-right: auto;
 }
+
 
 .checkout-button:hover {
   background-color: #a032e6;
 }
 
 
+/* CHECKOUT CARD */
+/* CHECKOUT CARD */
+/* CHECKOUT CARD */
+
+.item-image {
+  width: 120px;
+  /* Adjust as needed */
+  height: 120px;
+  margin-right: 15px;
+}
+
+.item-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  /* Ensure image fits within the container */
+}
+
+.item-details {
+  flex-grow: 1;
+  /* Take up available space */
+}
+
+.item-name {
+  font-size: 30px;
+  font-weight: normal;
+}
+
+.item-price {
+  color: #b944fd;
+  /* Match your theme color */
+  font-size: 25px;
+}
+
+.item-quantity {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  /* Push to the right */
+  margin-right: 20px;
+}
+
+.quantity-input {
+  width: 40px;
+  text-align: center;
+  margin: 0 5px;
+  border: 1px solid #ccc;
+  padding: 5px;
+  font-size: 1em;
+}
+
+.item-actions {
+  margin-left: auto;
+  /* Push to the far right */
+}
+
+.item-actions button {
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  margin-left: 10px;
+}
 /* ORDER SUCCESS PAGE */
 /* ORDER SUCCESS PAGE */
 /* ORDER SUCCESS PAGE */

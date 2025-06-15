@@ -14,6 +14,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -45,11 +48,6 @@ public class UserController {
     private List<OrderItem> orderItems; // Define orderItems
 
     @Autowired
-    public UserController(OrderItemRepository orderItemRepository) {
-        this.orderItems = orderItemRepository.findAll(); // Initialize orderItems
-    }
-
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -60,6 +58,12 @@ public class UserController {
 
     @Autowired
     private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
@@ -570,11 +574,22 @@ public class UserController {
         return "cart"; // cart.html
     }
 
+    @GetMapping("/order/success")
+    public String orderSuccess() {
+        return "ordersuccess";
+    }
+
+    @GetMapping("/order/status")
+    public String viewOrderStatus() {
+        return "orderstatus";
+    }
+
     @GetMapping("/order/checkout")
-    public String viewCheckout() {
+    public String showCheckout(Model model, Principal principal) {
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        model.addAttribute("address", user.getAddress());
         return "checkout";
     }
-    
 
     @GetMapping("/api/cart")
     @ResponseBody
@@ -668,6 +683,114 @@ public class UserController {
                 .ifPresent(orderItemRepository::delete);
 
         return ResponseEntity.ok("Item removed");
+    }
+
+    @PostMapping("/order/place")
+    public String placeOrder(
+            @RequestParam("shippingOption") String shippingOption,
+            @RequestParam("paymentMethod") String paymentMethod,
+            @RequestParam("itemsJson") String itemsJson,
+            Principal principal,
+            RedirectAttributes redirectAttributes) throws JsonProcessingException {
+
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        ObjectMapper mapper = new ObjectMapper();
+        List<Map<String, Object>> items = mapper.readValue(itemsJson, new TypeReference<>() {
+        });
+        BigDecimal subtotal = BigDecimal.ZERO;
+
+        for (Map<String, Object> item : items) {
+            Long productId = Long.valueOf(item.get("productId").toString());
+            int quantity = Integer.parseInt(item.get("quantity").toString());
+
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new RuntimeException("Product not found"));
+
+            BigDecimal price = BigDecimal.valueOf(product.getPrice());
+            subtotal = subtotal.add(price.multiply(BigDecimal.valueOf(quantity)));
+        }
+
+        BigDecimal shippingFee = switch (shippingOption) {
+            case "express" -> BigDecimal.valueOf(75);
+            case "overnight" -> BigDecimal.valueOf(150);
+            default -> BigDecimal.valueOf(45);
+        };
+        BigDecimal tax = subtotal.multiply(BigDecimal.valueOf(0.12));
+        BigDecimal total = subtotal.add(shippingFee).add(tax);
+
+        String trackingNumber = UUID.randomUUID().toString().substring(0, 12).toUpperCase();
+
+        // Save ORDER record
+        Order order = new Order();
+        order.setUserId(user.getId());
+        order.setTotalAmount(total);
+        order.setPaymentMethod(paymentMethod);
+        order.setShippingOption(shippingOption);
+        order.setShippingAddress(user.getAddress());
+        order.setStatus("PENDING");
+        order.setTrackingNumber(trackingNumber);
+        orderRepository.save(order);
+
+        // Save PAYMENT records (one per product)
+        for (Map<String, Object> item : items) {
+            Long productId = Long.valueOf(item.get("productId").toString());
+            int quantity = Integer.parseInt(item.get("quantity").toString());
+
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new RuntimeException("Product not found"));
+
+            BigDecimal price = BigDecimal.valueOf(product.getPrice());
+
+            Payment payment = new Payment();
+            payment.setUser(user);
+            payment.setOrder(order);
+            payment.setProductId(productId.toString());
+            payment.setItemName(product.getItemName());
+            payment.setAmount(price.multiply(BigDecimal.valueOf(quantity)));
+            payment.setTransactionId(trackingNumber);
+            payment.setStatus("PENDING");
+            payment.setShippingOption(shippingOption);
+            payment.setPaymentMethodDetails(paymentMethod);
+            payment.setDaysLeft(5);
+            payment.setQuantity(quantity);
+
+            paymentRepository.save(payment);
+
+        }
+
+        // Remove from cart if needed
+        // orderItemRepository.deleteByUserId(user.getId());
+
+        redirectAttributes.addFlashAttribute("trackingNumber", trackingNumber);
+        return "redirect:/order/success";
+    }
+
+    @GetMapping("/api/orders")
+    @ResponseBody
+    public List<OrderStatusDTO> getOrdersByStatus(
+            @RequestParam("status") String status,
+            Principal principal) {
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return paymentRepository.findByUserIdAndStatus(user.getId(), status).stream()
+                .map(payment -> {
+                    Product product = productRepository.findByItemName(payment.getItemName()).orElseThrow();
+                    return new OrderStatusDTO(
+                            payment.getId(),
+                            payment.getItemName(),
+                            payment.getAmount(),
+                            product.getImageLoc(),
+                            payment.getDaysLeft(),
+                            payment.getShippingOption(),
+                            payment.getStatus(),
+                            payment.getTransactionId(),
+                            payment.getOrder().getId(),
+                            payment.getQuantity());
+                })
+                .toList();
     }
 
 }
