@@ -72,7 +72,7 @@
 
                 <ul class="dashboard-menu">
                     <li><a href="#profile" class="active">My Account</a></li>
-                    <li><a href="#order-status">Order Status</a></li>
+                    <!-- <li><a href="#order-status">Order Status</a></li>-->
                 </ul>
             </div>
 
@@ -141,144 +141,13 @@
                 </section>
             </div>
 
-            <section id="order-status" class="dashboard-section">
-                <h2 class="order-status-title">ORDER STATUS</h2>
-                <div class="status-tabs">
-                    <button class="status-tab active" data-tab="to-ship">TO SHIP</button>
-                    <button class="status-tab" data-tab="to-receive">TO RECEIVE</button>
-                    <button class="status-tab" data-tab="completed">COMPLETED</button>
-                    <button class="status-tab" data-tab="cancelled">CANCELLED</button>
-                </div>
+            <!--<section id="order-status" class="dashboard-section">
+            </section>-->
 
-                <div class="order-item-list" id="to-ship">
-                    <div class="order-item">
-                        <div class="item-image">
-                            <img th:src="@{/img/bluemasq.png}" alt="Blue Masquerade Mask">
-                        </div>
-                        <div class="item-details">
-                            <h3 class="item-name">BLUE MASQUERADE MASK FOR WOMEN SHINY GLITTER SEQUINS FOR PARTIES
-                            </h3>
-                            <p class="item-qty">QTY: 1</p>
-                        </div>
-                        <div class="item-total">
-                            <span class="total-label">TOTAL:</span>
-                            <span class="total-price">₱85</span>
-                        </div>
-                    </div>
-                    <div class="order-item">
-                        <div class="item-image">
-                            <img th:src="@{/img/clownwig.png}" alt="Clown Wig Colorful Hair">
-                        </div>
-                        <div class="item-details">
-                            <h3 class="item-name">CLOWN WIG COLORFUL HAIR MULTICOLOR WIG FOR KIDS' BIRTHDAY PARTIES
-                            </h3>
-                            <p class="item-qty">QTY: 1</p>
-                        </div>
-                        <div class="item-total">
-                            <span class="total-label">TOTAL:</span>
-                            <span class="total-price">₱100</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="order-item-list" id="to-receive">
-                    <div class="order-item">
-                        <div class="item-image">
-                            <img th:src="@{/img/bluemasq.png}" alt="Blue Masquerade Mask">
-                        </div>
-                        <div class="item-details">
-                            <h3 class="item-name">BLUE MASQUERADE MASK FOR WOMEN SHINY GLITTER SEQUINS FOR PARTIES
-                            </h3>
-                            <p class="item-qty">QTY: 1</p>
-                        </div>
-                        <div class="item-total">
-                            <span class="total-label">TOTAL:</span>
-                            <span class="total-price">₱85</span>
-                        </div>
-                    </div>
-                    <div class="order-item">
-                        <div class="item-image">
-                            <img th:src="@{/img/clownwig.png}" alt="Clown Wig Colorful Hair">
-                        </div>
-                        <div class="item-details">
-                            <h3 class="item-name">CLOWN WIG COLORFUL HAIR MULTICOLOR WIG FOR KIDS' BIRTHDAY PARTIES
-                            </h3>
-                            <p class="item-qty">QTY: 1</p>
-                        </div>
-                        <div class="item-total">
-                            <span class="total-label">TOTAL:</span>
-                            <span class="total-price">₱100</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="order-item-list" id="completed">
-                    <div class="order-item">
-                        <div class="item-image">
-                            <img th:src="@{/img/bluemasq.png}" alt="Blue Masquerade Mask">
-                        </div>
-                        <div class="item-details">
-                            <h3 class="item-name">BLUE MASQUERADE MASK FOR WOMEN SHINY GLITTER SEQUINS FOR PARTIES
-                            </h3>
-                            <p class="item-qty">QTY: 1</p>
-                        </div>
-                        <div class="item-total">
-                            <span class="total-label">TOTAL:</span>
-                            <span class="total-price">₱85</span>
-                        </div>
-                    </div>
-                    <div class="order-item">
-                        <div class="item-image">
-                            <img th:src="@{img/clownwig.png}" alt="Clown Wig Colorful Hair">
-                        </div>
-                        <div class="item-details">
-                            <h3 class="item-name">CLOWN WIG COLORFUL HAIR MULTICOLOR WIG FOR KIDS' BIRTHDAY PARTIES
-                            </h3>
-                            <p class="item-qty">QTY: 1</p>
-                        </div>
-                        <div class="item-total">
-                            <span class="total-label">TOTAL:</span>
-                            <span class="total-price">₱100</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="order-item-list" id="cancelled">
-                    <div class="order-item">
-                        <div class="item-image">
-                            <img th:src="@{img/bluemasq.png}" alt="Blue Masquerade Mask">
-                        </div>
-                        <div class="item-details">
-                            <h3 class="item-name">BLUE MASQUERADE MASK FOR WOMEN SHINY GLITTER SEQUINS FOR PARTIES
-                            </h3>
-                            <p class="item-qty">QTY: 1</p>
-                        </div>
-                        <div class="item-total">
-                            <span class="total-label">TOTAL:</span>
-                            <span class="total-price">₱85</span>
-                        </div>
-                    </div>
-                    <div class="order-item">
-                        <div class="item-image">
-                            <img th:src="@{img/clownwig.png}" alt="Clown Wig Colorful Hair">
-                        </div>
-                        <div class="item-details">
-                            <h3 class="item-name">CLOWN WIG COLORFUL HAIR MULTICOLOR WIG FOR KIDS' BIRTHDAY PARTIES
-                            </h3>
-                            <p class="item-qty">QTY: 1</p>
-                        </div>
-                        <div class="item-total">
-                            <span class="total-label">TOTAL:</span>
-                            <span class="total-price">₱100</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
         </div>
         </div>
     </main>
-
     <footer>
         <div class="footer-container">
             <div class="footer-logo">
@@ -367,107 +236,79 @@
 
 
     <script>
-        const dashboardMenuLinks = document.querySelectorAll('.dashboard-menu a');
-        const dashboardSections = document.querySelectorAll('.dashboard-section');
-        const orderStatusTabs = document.querySelectorAll('#order-status .status-tab');
-        const orderItemLists = document.querySelectorAll('#order-status .order-item-list');
+        (function () {
+            const sidebarMenuLinks = document.querySelectorAll('.dashboard-menu a'); // instead of dashboardMenuLinks
+            const dashboardSections = document.querySelectorAll('.dashboard-section');
+            const orderStatusTabs = document.querySelectorAll('#order-status .status-tab');
+            const orderItemLists = document.querySelectorAll('#order-status .order-item-list');
 
-        dashboardMenuLinks.forEach(link => {
-            link.addEventListener('click', function (event) {
-                event.preventDefault();
-                const targetId = this.getAttribute('href').substring(1); // Remove the '#'
+            sidebarMenuLinks.forEach(link => {
+                link.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1); // Remove the '#'
 
-                // Deactivate all sections
-                dashboardSections.forEach(section => {
-                    section.classList.remove('active');
-                });
+                    // Deactivate all sections
+                    dashboardSections.forEach(section => {
+                        section.classList.remove('active');
+                    });
 
-                // Activate the target section
-                const targetSection = document.getElementById(targetId);
-                if (targetSection) {
-                    targetSection.classList.add('active');
-                }
-
-                // Update active link in the sidebar (optional)
-                dashboardMenuLinks.forEach(item => item.classList.remove('active'));
-                this.classList.add('active');
-
-                // If Order Status is activated, ensure the correct tab content is shown
-                if (targetId === 'order-status') {
-                    // Initially show 'to-ship' and make its tab active
-                    orderStatusTabs.forEach(tab => tab.classList.remove('active'));
-                    orderItemLists.forEach(list => list.style.display = 'none');
-
-                    const initialTab = document.querySelector('#order-status .status-tab[data-tab="to-ship"]');
-                    const initialContent = document.getElementById('to-ship');
-
-                    if (initialTab && initialContent) {
-                        initialTab.classList.add('active');
-                        initialContent.style.display = 'block';
+                    // Activate the target section
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        targetSection.classList.add('active');
                     }
 
-                    // Add event listeners for order status tabs (if not already present)
-                    orderStatusTabs.forEach(tab => {
-                        tab.addEventListener('click', () => {
-                            orderStatusTabs.forEach(t => t.classList.remove('active'));
-                            orderItemLists.forEach(content => content.style.display = 'none');
+                    // Update active link in the sidebar
+                    sidebarMenuLinks.forEach(item => item.classList.remove('active'));
+                    this.classList.add('active');
 
-                            tab.classList.add('active');
-                            const targetTab = tab.getAttribute('data-tab');
-                            const targetContent = document.getElementById(targetTab);
-                            if (targetContent) {
-                                targetContent.style.display = 'block';
-                            }
+                    // Handle order-status logic
+                    if (targetId === 'order-status') {
+                        orderStatusTabs.forEach(tab => tab.classList.remove('active'));
+                        orderItemLists.forEach(list => list.style.display = 'none');
+
+                        const initialTab = document.querySelector('#order-status .status-tab[data-tab="to-ship"]');
+                        const initialContent = document.getElementById('to-ship');
+
+                        if (initialTab && initialContent) {
+                            initialTab.classList.add('active');
+                            initialContent.style.display = 'block';
+                        }
+
+                        orderStatusTabs.forEach(tab => {
+                            tab.addEventListener('click', () => {
+                                orderStatusTabs.forEach(t => t.classList.remove('active'));
+                                orderItemLists.forEach(content => content.style.display = 'none');
+
+                                tab.classList.add('active');
+                                const targetTab = tab.getAttribute('data-tab');
+                                const targetContent = document.getElementById(targetTab);
+                                if (targetContent) {
+                                    targetContent.style.display = 'block';
+                                }
+                            });
                         });
-                    });
-                }
-            });
-        });
-
-        // Initially show the 'profile' section
-        const initialSection = document.getElementById('profile');
-        if (initialSection) {
-            initialSection.classList.add('active');
-        }
-
-        // Initialize the 'to-ship' tab as active on load (if on order status)
-        if (window.location.hash === '#order-status') {
-            const initialTab = document.querySelector('#order-status .status-tab[data-tab="to-ship"]');
-            const initialContent = document.getElementById('to-ship');
-            if (initialTab && initialContent) {
-                initialTab.classList.add('active');
-                initialContent.style.display = 'block';
-            }
-        }
-
-        document.getElementById("uploadProfileImageForm").addEventListener("submit", function (e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-
-            fetch("/account/upload-image", {
-                method: "POST",
-                body: formData,
-                credentials: "same-origin"
-            })
-                .then(res => {
-                    if (!res.ok) throw new Error("Upload failed");
-                    return res.json();
-                })
-                .then(data => {
-                    alert("Profile image uploaded!");
-                    document.getElementById("profilePic").src = data.imageUrl;
-                })
-                .then(res => {
-                    if (!res.ok) return res.text().then(text => { throw new Error(text); });
-                    return res.json();
-                })
-
-                .catch(err => {
-                    alert("Error uploading image: " + err.message);
+                    }
                 });
-        });
+            });
+
+            // Default visible section
+            const initialSection = document.getElementById('profile');
+            if (initialSection) {
+                initialSection.classList.add('active');
+            }
+
+            if (window.location.hash === '#order-status') {
+                const initialTab = document.querySelector('#order-status .status-tab[data-tab="to-ship"]');
+                const initialContent = document.getElementById('to-ship');
+                if (initialTab && initialContent) {
+                    initialTab.classList.add('active');
+                    initialContent.style.display = 'block';
+                }
+            }
+        })();
     </script>
+
 </body>
 
 </html>

@@ -1,14 +1,17 @@
-export function loadOrdersByStatus(status) {
+export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
     fetch(`/api/orders?status=${status}`)
         .then(res => res.json())
         .then(data => {
-            console.log("Fetched response:", data); // 👈 Add this
+            const container = document.getElementById(containerId);
+            if (!container) {
+                console.warn(`Container '${containerId}' not found.`);
+                return;
+            }
 
-            const container = document.getElementById("orderStatusContent");
             container.innerHTML = "";
 
             if (!Array.isArray(data)) {
-                container.innerHTML = "<p>Error: Expected a list of orders but got something else.</p>";
+                container.innerHTML = "<p>Error: Expected a list of orders.</p>";
                 return;
             }
 
@@ -18,7 +21,8 @@ export function loadOrdersByStatus(status) {
             }
 
             data.forEach(order => {
-                const etaDays = order.daysLeft ?? "N/A";
+                const etaDays = order.status === "CANCELLED" ? "Cancelled" : (order.daysLeft ?? "N/A");
+
                 container.insertAdjacentHTML("beforeend", `
                     <div class="order-item">
                         <div class="item-image">
@@ -26,8 +30,9 @@ export function loadOrdersByStatus(status) {
                         </div>
                         <div class="item-details">
                             <h3 class="item-name">${order.itemName}</h3>
+                            <h3 class="tracking-number">${order.transactionId}</h3>
                             <p class="item-qty">QTY: ${order.quantity}</p>
-                            <p class="item-eta">ETA: ${etaDays} day(s) left</p>
+                            <p class="item-eta">ETA: ${etaDays} ${etaDays === "Cancelled" ? "" : "day(s) left"}</p>
                         </div>
                         <div class="item-total">
                             <span class="total-label">TOTAL:</span>
@@ -39,14 +44,31 @@ export function loadOrdersByStatus(status) {
             });
         })
         .catch(err => {
-            document.getElementById("orderStatusContent").innerHTML = "<p>Error loading orders.</p>";
-            console.error("Order fetch error:", err); // 👈 Already present
+            const container = document.getElementById(containerId);
+            if (container) container.innerHTML = "<p>Error loading orders.</p>";
+            console.error("Order fetch error:", err);
         });
 }
+export function initStatusTabs(tabSelector, containerId, defaultStatus = "PENDING") {
+    const tabs = document.querySelectorAll(tabSelector);
+
+    tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            tabs.forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+
+            const status = tab.dataset.tab;
+            loadOrdersByStatus(status, containerId);
+        });
+    });
+
+    // Initial load
+    loadOrdersByStatus(defaultStatus, containerId);
+}
+
 
 document.addEventListener("DOMContentLoaded", () => {
-    const container = document.getElementById("orderStatusContent");
-    container.addEventListener("click", e => {
+    document.body.addEventListener("click", e => {
         if (e.target.classList.contains("cancel-order")) {
             e.preventDefault();
             const orderId = e.target.dataset.id;
@@ -56,13 +78,15 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (!res.ok) throw new Error("Failed to cancel");
                         alert("Order cancelled.");
                         const activeTab = document.querySelector(".status-tab.active");
-                        if (activeTab) loadOrdersByStatus(activeTab.dataset.tab);
+                        const containerId = activeTab.closest(".dashboard-section")?.querySelector(".order-item-list")?.id || "orderStatusContent";
+                        loadOrdersByStatus(activeTab.dataset.tab, containerId);
                     })
                     .catch(err => alert("Error cancelling order."));
             }
         }
     });
 });
+
 export function initializeOrderTabs() {
     const tabs = document.querySelectorAll(".status-tab");
 

@@ -61,7 +61,7 @@ CREATE TABLE `order_items` (
   KEY `fk_order_items_user` (`user_id`),
   CONSTRAINT `fk_order_items_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_product_ref` FOREIGN KEY (`product_ref`) REFERENCES `products` (`item_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -70,7 +70,7 @@ CREATE TABLE `order_items` (
 
 LOCK TABLES `order_items` WRITE;
 /*!40000 ALTER TABLE `order_items` DISABLE KEYS */;
-INSERT INTO `order_items` VALUES (20,22,'teto fatass',10,85.00),(22,29,'Birthday Party Cone Hats',11,250.00),(30,29,'Funny Eyeglasses',1,350.00),(31,29,'Charess Standee',1,25000.00),(32,29,'teto fatass',1,85.00);
+INSERT INTO `order_items` VALUES (22,29,'Birthday Party Cone Hats',11,250.00),(30,29,'Funny Eyeglasses',1,350.00),(31,29,'Charess Standee',1,25000.00),(32,29,'teto fatass',1,85.00),(33,22,'Charess Standee',1,25000.00);
 /*!40000 ALTER TABLE `order_items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -169,7 +169,7 @@ CREATE TABLE `payments` (
   CONSTRAINT `fk_order_id_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
   CONSTRAINT `fk_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `payments_chk_1` CHECK ((`status` in (_utf8mb4'PENDING',_utf8mb4'COMPLETED',_utf8mb4'FAILED',_utf8mb4'REFUNDED')))
+  CONSTRAINT `payments_chk_1` CHECK ((`status` in (_utf8mb4'PENDING',_utf8mb4'TO_SHIP',_utf8mb4'TO_RECEIVE',_utf8mb4'COMPLETED',_utf8mb4'CANCELLED')))
 ) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -179,7 +179,7 @@ CREATE TABLE `payments` (
 
 LOCK TABLES `payments` WRITE;
 /*!40000 ALTER TABLE `payments` DISABLE KEYS */;
-INSERT INTO `payments` VALUES (1,22,25,6,'Cinco de Mayo Piñata',7560.00,'2025-06-15 16:52:26','985748AB-EAF','PENDING','paypal','standard',5,1),(2,22,2,6,'Clown Wig',200.00,'2025-06-15 16:52:26','985748AB-EAF','PENDING','paypal','standard',5,1),(3,22,32,6,'Patio String Lights',1000.00,'2025-06-15 16:52:26','985748AB-EAF','PENDING','paypal','standard',5,1),(4,22,28,6,'Red Confetti Balloon Set',150.00,'2025-06-15 16:52:26','985748AB-EAF','PENDING','paypal','standard',5,1),(5,22,25,7,'Cinco de Mayo Piñata',7560.00,'2025-06-15 16:53:33','94A585F0-E82','PENDING','paypal','express',5,1),(6,22,2,7,'Clown Wig',200.00,'2025-06-15 16:53:33','94A585F0-E82','PENDING','paypal','express',5,1),(7,22,32,7,'Patio String Lights',1000.00,'2025-06-15 16:53:33','94A585F0-E82','PENDING','paypal','express',5,1),(8,22,28,7,'Red Confetti Balloon Set',150.00,'2025-06-15 16:53:33','94A585F0-E82','PENDING','paypal','express',5,1),(9,29,3,8,'Party Confetti',4200.00,'2025-06-15 17:22:19','BE98C6B1-96E','PENDING','paypal','overnight',5,1),(10,29,30,8,'Japanese Paper Lanterns',4400.00,'2025-06-15 17:22:19','BE98C6B1-96E','PENDING','paypal','overnight',5,1),(11,22,21,9,'teto fatass',850.00,'2025-06-15 17:42:19','FFB3AAAB-42D','PENDING','paypal','express',5,1),(12,29,32,10,'Patio String Lights',10000.00,'2025-06-15 18:22:08','E4FC76AD-01F','PENDING','paypal','express',5,1),(13,29,26,11,'Birthday Party Cone Hats',2750.00,'2025-06-15 18:27:12','334E31A1-6AC','PENDING','paypal','overnight',5,1),(14,29,26,12,'Birthday Party Cone Hats',2750.00,'2025-06-15 18:47:20','A93ADE73-6D7','PENDING','paypal','overnight',5,11),(15,29,4,12,'Funny Eyeglasses',350.00,'2025-06-15 18:47:20','A93ADE73-6D7','PENDING','paypal','overnight',5,1),(16,29,31,12,'Charess Standee',25000.00,'2025-06-15 18:47:20','A93ADE73-6D7','PENDING','paypal','overnight',5,1),(17,29,21,12,'teto fatass',85.00,'2025-06-15 18:47:20','A93ADE73-6D7','PENDING','paypal','overnight',5,1);
+INSERT INTO `payments` VALUES (1,22,25,6,'Cinco de Mayo Piñata',7560.00,'2025-06-15 16:52:26','985748AB-EAF','PENDING','paypal','standard',5,1),(2,22,2,6,'Clown Wig',200.00,'2025-06-15 16:52:26','985748AB-EAF','PENDING','paypal','standard',5,1),(3,22,32,6,'Patio String Lights',1000.00,'2025-06-15 16:52:26','985748AB-EAF','PENDING','paypal','standard',5,1),(4,22,28,6,'Red Confetti Balloon Set',150.00,'2025-06-15 16:52:26','985748AB-EAF','PENDING','paypal','standard',5,1),(5,22,25,7,'Cinco de Mayo Piñata',7560.00,'2025-06-15 16:53:33','94A585F0-E82','PENDING','paypal','express',5,1),(6,22,2,7,'Clown Wig',200.00,'2025-06-15 16:53:33','94A585F0-E82','PENDING','paypal','express',5,1),(7,22,32,7,'Patio String Lights',1000.00,'2025-06-15 16:53:33','94A585F0-E82','PENDING','paypal','express',5,1),(8,22,28,7,'Red Confetti Balloon Set',150.00,'2025-06-15 16:53:33','94A585F0-E82','PENDING','paypal','express',5,1),(9,29,3,8,'Party Confetti',4200.00,'2025-06-15 17:22:19','BE98C6B1-96E','PENDING','paypal','overnight',5,1),(10,29,30,8,'Japanese Paper Lanterns',4400.00,'2025-06-15 17:22:19','BE98C6B1-96E','PENDING','paypal','overnight',5,1),(11,22,21,9,'teto fatass',850.00,'2025-06-15 17:42:19','FFB3AAAB-42D','CANCELLED','paypal','express',5,1),(12,29,32,10,'Patio String Lights',10000.00,'2025-06-15 18:22:08','E4FC76AD-01F','PENDING','paypal','express',5,1),(13,29,26,11,'Birthday Party Cone Hats',2750.00,'2025-06-15 18:27:12','334E31A1-6AC','PENDING','paypal','overnight',5,1),(14,29,26,12,'Birthday Party Cone Hats',2750.00,'2025-06-15 18:47:20','A93ADE73-6D7','PENDING','paypal','overnight',5,11),(15,29,4,12,'Funny Eyeglasses',350.00,'2025-06-15 18:47:20','A93ADE73-6D7','PENDING','paypal','overnight',5,1),(16,29,31,12,'Charess Standee',25000.00,'2025-06-15 18:47:20','A93ADE73-6D7','PENDING','paypal','overnight',5,1),(17,29,21,12,'teto fatass',85.00,'2025-06-15 18:47:20','A93ADE73-6D7','CANCELLED','paypal','overnight',0,1);
 /*!40000 ALTER TABLE `payments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -237,10 +237,10 @@ CREATE TABLE `user` (
   `name` varchar(255) DEFAULT NULL,
   `phone` varchar(255) DEFAULT NULL,
   `birth_date` date DEFAULT NULL,
-  `prof_img_loc` varchar(255) NOT NULL,
+  `prof_img_loc` varchar(255) NOT NULL DEFAULT '/img/default-profile.png',
   PRIMARY KEY (`id`),
   CONSTRAINT `user_chk_1` CHECK ((`role` in (_utf8mb4'ADMIN',_utf8mb4'USER')))
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -249,7 +249,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (22,'San Pedro','pauloneil3334@gmail.com','$2a$10$NCmNK2cfPDLx15owfmEFsuW73om6BnCfrafNRrStnw2WBOPyr5sla','ADMIN','Paulo','2025-05-31 18:22:37','2025-06-15 13:33:57','MALE','Paulo Neil','09550367575','2004-08-24','/uploads/profiles/Paulo-6ac67500-3ce4-49a4-9134-0052f02c1c5e-aasdas.PNG'),(23,'GMA','sevillapaulo364@gmail.com','$2a$10$16kKLkyMb8CBM.4w.0wEE.cEgX1g6hL99.7FmEtPKOtG9bgbemuUW','USER','Sevilla','2025-05-31 19:11:32','2025-05-31 19:11:33','MALE','Sevilla','09550367575','2004-08-24',''),(25,'GMA','pauloneil3334@gmail.com','$2a$10$DtWXwtuwhVsyN3tIWE7z0.MGujW3238ri1SVATclxc8F8u5FbIYP2','USER','Paulo2','2025-06-02 00:52:25','2025-06-02 00:52:25','MALE','PauloUser','09550367575','2008-02-02',''),(26,'san pedro','pauloneil3334@mail.com','$2a$10$4o.u69fkeHcKB2.jlQDpYepFljzaAjuihZZ4kcHI5/LExCKIP/rde','USER','usertest','2025-06-02 01:45:23','2025-06-02 01:45:24','MALE','paulo','09550367575','2018-07-27',''),(27,'GMA','pauloneil75@yahoo.com','$2a$10$89GzjBU6CgU./Z.CY4O0VeR24DCC1nXd5U6lRiLEF3Y1sUxrI8Iii','USER','janedoe22','2025-06-08 12:26:27','2025-06-08 12:26:27','FEMALE','Jane','12345','2004-08-24',''),(29,'san pedro','junkemail@email.com','$2a$10$oV7ZUvvMEUPn7rlmrWG1vupQJloi.uHmszHmz3zMxBrk/V6Ux02tO','USER','zhu','2025-06-08 15:43:22','2025-06-08 15:43:22','FEMALE','Zhu Yuan','12345','1977-07-28','/uploads/profiles/zhu-238fa235-c3bb-413c-bde4-8875f4198330-zhu-yuan-zenless-zone-zero.png');
+INSERT INTO `user` VALUES (22,'San Pedro','pauloneil3334@gmail.com','$2a$10$NCmNK2cfPDLx15owfmEFsuW73om6BnCfrafNRrStnw2WBOPyr5sla','ADMIN','Paulo','2025-05-31 18:22:37','2025-06-15 13:33:57','MALE','Paulo Neil','09550367575','2004-08-24','/uploads/profiles/Paulo-7e33a69c-e1bb-46d1-8673-e0a264ed377d-aasdas.PNG'),(23,'GMA','sevillapaulo364@gmail.com','$2a$10$16kKLkyMb8CBM.4w.0wEE.cEgX1g6hL99.7FmEtPKOtG9bgbemuUW','USER','Sevilla','2025-05-31 19:11:32','2025-05-31 19:11:33','MALE','Sevilla','09550367575','2004-08-24',''),(25,'GMA','pauloneil3334@gmail.com','$2a$10$DtWXwtuwhVsyN3tIWE7z0.MGujW3238ri1SVATclxc8F8u5FbIYP2','USER','Paulo2','2025-06-02 00:52:25','2025-06-02 00:52:25','MALE','PauloUser','09550367575','2008-02-02',''),(26,'san pedro','pauloneil3334@mail.com','$2a$10$4o.u69fkeHcKB2.jlQDpYepFljzaAjuihZZ4kcHI5/LExCKIP/rde','USER','usertest','2025-06-02 01:45:23','2025-06-02 01:45:24','MALE','paulo','09550367575','2018-07-27',''),(27,'GMA','pauloneil75@yahoo.com','$2a$10$89GzjBU6CgU./Z.CY4O0VeR24DCC1nXd5U6lRiLEF3Y1sUxrI8Iii','USER','janedoe22','2025-06-08 12:26:27','2025-06-08 12:26:27','FEMALE','Jane','12345','2004-08-24',''),(29,'san pedro','junkemail@email.com','$2a$10$oV7ZUvvMEUPn7rlmrWG1vupQJloi.uHmszHmz3zMxBrk/V6Ux02tO','USER','zhu','2025-06-08 15:43:22','2025-06-08 15:43:22','FEMALE','Zhu Yuan','12345','1977-07-28','/uploads/profiles/zhu-238fa235-c3bb-413c-bde4-8875f4198330-zhu-yuan-zenless-zone-zero.png'),(30,'GMA','junkemail1@email.com','$2a$10$vmGwv4oV0l.K7egHIvwzE.bb2Kx2SEqJ9jgt.a9..dFzQidNvWKBW','USER','yanagi','2025-06-16 04:17:25','2025-06-16 04:17:25','FEMALE','Yanagi','12346','2000-08-23','/img/default-profile.png');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -262,4 +262,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-16  2:50:18
+-- Dump completed on 2025-06-16 12:19:53

@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -44,8 +45,6 @@ import jakarta.validation.Valid;
 
 @Controller
 public class UserController {
-
-    private List<OrderItem> orderItems; // Define orderItems
 
     @Autowired
     private UserRepository userRepository;
@@ -161,7 +160,7 @@ public class UserController {
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
-        model.addAttribute("genders", User.Gender.values()); // Critical!
+        model.addAttribute("genders", User.Gender.values()); // Gender enum
         model.addAttribute("user", new User());
         return "register";
     }
@@ -175,6 +174,10 @@ public class UserController {
             return "register";
         }
 
+        if (user.getImagePath() == null || user.getImagePath().isEmpty()) {
+            user.setImagePath("/img/default-profile.png");
+        }
+ 
         // FIXED: Match exact constraint values
         user.setRole("USER"); // Changed from "ROLE_USER"
         user.setLastLogin(LocalDateTime.now());
@@ -765,6 +768,31 @@ public class UserController {
 
         redirectAttributes.addFlashAttribute("trackingNumber", trackingNumber);
         return "redirect:/order/success";
+    }
+
+    @PostMapping("/api/orders/cancel/{id}")
+    @ResponseBody
+    public ResponseEntity<?> cancelOrder(@PathVariable Long id, Principal principal) {
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Payment payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (!payment.getUser().getId().equals(user.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized");
+        }
+
+        if (!payment.getStatus().equals("PENDING")) {
+            return ResponseEntity.badRequest().body("Only pending orders can be cancelled.");
+        }
+
+        // Update status and ETA
+        payment.setStatus("CANCELLED");
+        payment.setDaysLeft(0); // You can change this to -1 or null if needed
+        paymentRepository.save(payment);
+
+        return ResponseEntity.ok("Order cancelled.");
     }
 
     @GetMapping("/api/orders")
