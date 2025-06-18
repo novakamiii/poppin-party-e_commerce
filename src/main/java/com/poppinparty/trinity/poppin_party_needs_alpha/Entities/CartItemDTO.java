@@ -1,4 +1,4 @@
-package com.poppinparty.trinity.poppin_party_needs_alpha;
+package com.poppinparty.trinity.poppin_party_needs_alpha.Entities;
 
 public class CartItemDTO {
     private Long productId;

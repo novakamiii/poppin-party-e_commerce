@@ -1,4 +1,4 @@
-package com.poppinparty.trinity.poppin_party_needs_alpha;
+package com.poppinparty.trinity.poppin_party_needs_alpha.Entities;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

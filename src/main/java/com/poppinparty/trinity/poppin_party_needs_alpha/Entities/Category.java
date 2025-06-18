@@ -1,4 +1,4 @@
-package com.poppinparty.trinity.poppin_party_needs_alpha;
+package com.poppinparty.trinity.poppin_party_needs_alpha.Entities;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;

@@ -119,10 +119,11 @@
                                 <label for="gender" class="form-label">Gender</label>
                                 <select id="gender" name="gender" class="form-input">
                                     <option
-                                        th:each="genderOpt : ${T(com.poppinparty.trinity.poppin_party_needs_alpha.User.Gender).values()}"
+                                        th:each="genderOpt : ${T(com.poppinparty.trinity.poppin_party_needs_alpha.Entities.User.Gender).values()}"
                                         th:value="${genderOpt.name()}" th:text="${genderOpt.name()}"
                                         th:selected="${genderOpt.name() == user.gender.name()}">
                                     </option>
+
                                 </select>
 
                             </div>

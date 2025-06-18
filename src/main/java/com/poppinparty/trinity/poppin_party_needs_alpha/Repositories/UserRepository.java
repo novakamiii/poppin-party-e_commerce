@@ -1,8 +1,9 @@
-package com.poppinparty.trinity.poppin_party_needs_alpha;
+package com.poppinparty.trinity.poppin_party_needs_alpha.Repositories;
 
-import com.poppinparty.trinity.poppin_party_needs_alpha.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.User;
 
 import java.util.Optional;
 

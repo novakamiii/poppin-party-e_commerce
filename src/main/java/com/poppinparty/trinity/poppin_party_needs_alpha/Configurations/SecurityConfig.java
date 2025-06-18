@@ -1,4 +1,4 @@
-package com.poppinparty.trinity.poppin_party_needs_alpha;
+package com.poppinparty.trinity.poppin_party_needs_alpha.Configurations;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,18 +15,18 @@ public class SecurityConfig {
     private CustomLoginSuccessHandler loginSuccessHandler;
 
     @Bean
-    public UserDetailsService userDetailsService() {
+    UserDetailsService userDetailsService() {
         return new UserDetailsServiceImpl();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    PasswordEncoder passwordEncoder() {
         // Same encoder everywhere
         return new BCryptPasswordEncoder(12); // Strength 10-12 is safe
     }
 
     @Bean
-    public DaoAuthenticationProvider authProvider() {
+    DaoAuthenticationProvider authProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService());
         provider.setPasswordEncoder(passwordEncoder());
@@ -34,29 +34,32 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/dummy", "/home", "/styles.css", "/img/**", "/forgot-password",
-                                "/reset-password", "/login", "/css/**", "/js/**",  "/api/products/**", "/uploads/**", "/product-page/**")
+                        .requestMatchers(
+                                "/register", "/dummy", "/home", "/styles.css", "/img/**",
+                                "/forgot-password", "/reset-password", "/login",
+                                "/css/**", "/js/**", "/api/products/**", "/uploads/**", "/product-page/**")
                         .permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")
                         .anyRequest().authenticated()
-                )
+                ) // <-- Close the lambda for authorizeHttpRequests here
                 //god forbid how this works
                 //huh pano to
                 //what
                 //wag mo na galawin (coping)
                 .formLogin(form -> form
-                        .loginPage("/login") // Custom login page
+                        .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/home", true) // Redirect to /home after successful login
+                        .defaultSuccessUrl("/redirect", true) // 👈 redirect based on role
                         .permitAll())
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/home") // Redirect to /home after logout
+                        .logoutSuccessUrl("/home")
                         .permitAll())
                 .csrf(csrf -> csrf.disable());
         return http.build();
     }
+
 }
