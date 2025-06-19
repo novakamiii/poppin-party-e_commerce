@@ -26,7 +26,7 @@ public class Payment {
     private Order order;
 
     @Column(name = "product_id")
-    private String productId;
+    private Long productId;
 
     @Column(name = "item_name")
     private String itemName;
@@ -49,8 +49,30 @@ public class Payment {
     @Column(name = "days_left")
     private int daysLeft;
 
-    @Column(name= "quantity")
+    @Column(name = "quantity")
     private Integer quantity;
+
+    @Column(name = "custom_product_ref")
+    private String customProductRef;
+
+    @Column(name = "is_custom")
+    private Boolean isCustom = false;
+
+    public String getCustomProductRef() {
+        return customProductRef;
+    }
+
+    public void setCustomProductRef(String customProductRef) {
+        this.customProductRef = customProductRef;
+    }
+
+    public Boolean getIsCustom() {
+        return isCustom;
+    }
+
+    public void setIsCustom(Boolean isCustom) {
+        this.isCustom = isCustom;
+    }
 
     public Long getId() {
         return id;
@@ -76,11 +98,11 @@ public class Payment {
         this.order = order;
     }
 
-    public String getProductId() {
+    public Long getProductId() {
         return productId;
     }
 
-    public void setProductId(String productId) {
+    public void setProductId(Long productId) {
         this.productId = productId;
     }
 
@@ -139,6 +161,7 @@ public class Payment {
     public void setDaysLeft(int daysLeft) {
         this.daysLeft = daysLeft;
     }
+
     public Integer getQuantity() {
         return quantity;
     }
@@ -147,7 +170,5 @@ public class Payment {
         this.quantity = quantity;
     }
 
-
     // Getters and Setters...
 }
-   

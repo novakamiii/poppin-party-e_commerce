@@ -26,10 +26,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.CustomUserDetails;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.User;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.CategoryRepository;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderItemRepository;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderRepository;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.PaymentRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ProductRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.UserRepository;
 

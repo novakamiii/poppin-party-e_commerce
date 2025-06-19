@@ -132,8 +132,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (item.querySelector(".item-check").checked) {
         selectedItems.push({
           productId: item.getAttribute("data-product-id"),
-          quantity: item.querySelector(".quantity-input").value
+          quantity: parseInt(item.querySelector(".quantity-input").value),
+          unitPrice: parseFloat(item.querySelector(".price").textContent.replace("₱", "")),
+          itemName: item.querySelector(".cartpage-title").textContent
         });
+
       }
     });
 

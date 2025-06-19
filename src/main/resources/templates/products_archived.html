@@ -49,39 +49,29 @@
         <th>Description</th> <!-- Add header for description -->
         <th>Actions</th>
       </tr>
-      <tr th:each="product : ${products}">
+      <tr th:each="product : ${archivedProducts}">
         <td th:text="${product.id}"></td>
         <td th:text="${product.itemName}"></td>
         <td th:text="${product.price}"></td>
         <td th:text="${product.stock}"></td>
         <td th:text="${product.category}"></td>
-        <td id="table-description" style="position: relative;">
-
+        <td>
           <img th:src="${product.imageLoc}" alt="Product Image" class="hover-image" />
         </td>
-        <td th:text="${product.description}" id="table-description"></td> <!-- Ensure description is displayed -->
+        <td th:text="${product.description}"></td>
         <td>
-          <!-- ✏️ Edit -->
-          <a th:href="@{'/products/edit/' + ${product.id}}" title="Edit" alt="Edit Product">
-            ✏️
-          </a>
-
-          <!-- 🗑️ Archive (with confirmation) -->
-          <a th:href="@{'/products/delete/' + ${product.id}}"
-            onclick="return confirm('Are you sure you want to archive this product?');" title="Archive/Delete" alt="Archive Product">
-            🗑️
+          <!-- ♻️ Restore (with confirmation) -->
+          <a th:href="@{'/products/restore/' + ${product.id}}"
+            onclick="return confirm('Restore this archived product?');" title="Restore">
+            ♻️
           </a>
         </td>
       </tr>
+
     </table>
     <div class="addproduct-container">
       <a th:href="@{/products/add}">
         <button class="addproduct-button"> Add New Product</button>
-      </a>
-    </div>
-    <div class="addproduct-container">
-      <a th:href="@{/products/archived}">
-        <button class="addproduct-button"> Restore a Product</button>
       </a>
     </div>
   </main>
