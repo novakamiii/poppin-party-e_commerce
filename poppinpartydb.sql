@@ -17,6 +17,113 @@
 /*M!100616 SET @OLD_NOTE_VERBOSITY=@@NOTE_VERBOSITY, NOTE_VERBOSITY=0 */;
 
 --
+-- Table structure for table `archived_order_items`
+--
+
+DROP TABLE IF EXISTS `archived_order_items`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `archived_order_items` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) DEFAULT NULL,
+  `product_ref` varchar(255) DEFAULT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(38,2) DEFAULT NULL,
+  `event_type` varchar(255) DEFAULT NULL,
+  `is_custom` bit(1) DEFAULT NULL,
+  `personalized_message` varchar(255) DEFAULT NULL,
+  `custom_size` varchar(255) DEFAULT NULL,
+  `tarpaulin_finish` varchar(255) DEFAULT NULL,
+  `tarpaulin_thickness` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `archived_order_items`
+--
+
+LOCK TABLES `archived_order_items` WRITE;
+/*!40000 ALTER TABLE `archived_order_items` DISABLE KEYS */;
+set autocommit=0;
+/*!40000 ALTER TABLE `archived_order_items` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
+-- Table structure for table `archived_orders`
+--
+
+DROP TABLE IF EXISTS `archived_orders`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `archived_orders` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) DEFAULT NULL,
+  `tracking_number` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `order_date` datetime(6) DEFAULT NULL,
+  `payment_method` varchar(255) DEFAULT NULL,
+  `total_amount` decimal(38,2) DEFAULT NULL,
+  `shipping_address` varchar(255) DEFAULT NULL,
+  `shipping_option` varchar(255) DEFAULT NULL,
+  `original_order_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `archived_orders`
+--
+
+LOCK TABLES `archived_orders` WRITE;
+/*!40000 ALTER TABLE `archived_orders` DISABLE KEYS */;
+set autocommit=0;
+/*!40000 ALTER TABLE `archived_orders` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
+-- Table structure for table `archived_payments`
+--
+
+DROP TABLE IF EXISTS `archived_payments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `archived_payments` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `order_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `product_id` bigint(20) DEFAULT NULL,
+  `transaction_id` varchar(255) DEFAULT NULL,
+  `item_name` varchar(255) DEFAULT NULL,
+  `amount` decimal(38,2) NOT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `days_left` int(11) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `is_custom` bit(1) DEFAULT NULL,
+  `custom_product_ref` varchar(255) DEFAULT NULL,
+  `payment_method_details` text DEFAULT NULL,
+  `shipping_option` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKt8bweou8eaw7gty9a26bgi9qu` (`user_id`),
+  KEY `FKnd43e624grchennx5s7i5muxl` (`order_id`),
+  CONSTRAINT `FKnd43e624grchennx5s7i5muxl` FOREIGN KEY (`order_id`) REFERENCES `archived_orders` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `archived_payments`
+--
+
+LOCK TABLES `archived_payments` WRITE;
+/*!40000 ALTER TABLE `archived_payments` DISABLE KEYS */;
+set autocommit=0;
+/*!40000 ALTER TABLE `archived_payments` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
 -- Table structure for table `archived_products`
 --
 
@@ -45,6 +152,42 @@ LOCK TABLES `archived_products` WRITE;
 /*!40000 ALTER TABLE `archived_products` DISABLE KEYS */;
 set autocommit=0;
 /*!40000 ALTER TABLE `archived_products` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
+-- Table structure for table `archived_user`
+--
+
+DROP TABLE IF EXISTS `archived_user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `archived_user` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `address` varchar(255) DEFAULT NULL,
+  `birth_date` date DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `gender` enum('FEMALE','MALE','OTHER') DEFAULT NULL,
+  `prof_img_loc` varchar(255) DEFAULT NULL,
+  `last_login` datetime(6) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  `role` varchar(255) DEFAULT NULL,
+  `username` varchar(255) DEFAULT NULL,
+  `original_user_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `archived_user`
+--
+
+LOCK TABLES `archived_user` WRITE;
+/*!40000 ALTER TABLE `archived_user` DISABLE KEYS */;
+set autocommit=0;
+/*!40000 ALTER TABLE `archived_user` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
 
@@ -116,7 +259,7 @@ CREATE TABLE `order_items` (
   KEY `fk_product_ref` (`product_ref`),
   KEY `fk_order_items_user` (`user_id`),
   CONSTRAINT `fk_order_items_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -127,12 +270,11 @@ LOCK TABLES `order_items` WRITE;
 /*!40000 ALTER TABLE `order_items` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `order_items` VALUES
-(22,29,'Birthday Party Cone Hats',11,250.00,0,NULL,NULL,NULL,NULL,NULL),
-(30,29,'Funny Eyeglasses',1,350.00,0,NULL,NULL,NULL,NULL,NULL),
-(31,29,'Charess Standee',1,25000.00,0,NULL,NULL,NULL,NULL,NULL),
-(32,29,'teto fatass',1,85.00,0,NULL,NULL,NULL,NULL,NULL),
 (35,22,'Funny Eyeglasses',1,350.00,0,NULL,NULL,NULL,NULL,NULL),
-(40,22,'Custom Tarpaulin (medium)',1,400.00,1,'medium','birthday','HBD!','matte','standard');
+(70,41,'Cinco de Mayo Piñata',1,840.00,0,NULL,NULL,NULL,NULL,NULL),
+(71,41,'Party Confetti',1,350.00,0,NULL,NULL,NULL,NULL,NULL),
+(72,41,'LED String Lights',1,300.00,0,NULL,NULL,NULL,NULL,NULL),
+(73,41,'Jdent Pascual',1,1.00,0,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `order_items` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -158,7 +300,7 @@ CREATE TABLE `orders` (
   KEY `fk_user_id` (`user_id`),
   CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
   CONSTRAINT `orders_chk_1` CHECK (`status` in (_utf8mb4'PENDING',_utf8mb4'PROCESSING',_utf8mb4'SHIPPED',_utf8mb4'DELIVERED',_utf8mb4'CANCELLED'))
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -176,15 +318,15 @@ INSERT INTO `orders` VALUES
 (5,22,'2025-06-15 16:50:20',10129.20,'PENDING','paypal','San Pedro','A4C4106F-ECA','overnight'),
 (6,22,'2025-06-15 16:52:26',10024.20,'PENDING','paypal','San Pedro','985748AB-EAF','standard'),
 (7,22,'2025-06-15 16:53:33',10054.20,'PENDING','paypal','San Pedro','94A585F0-E82','express'),
-(8,29,'2025-06-15 17:22:20',9782.00,'PENDING','paypal','san pedro','BE98C6B1-96E','overnight'),
 (9,22,'2025-06-15 17:42:20',1027.00,'PENDING','paypal','San Pedro','FFB3AAAB-42D','express'),
-(10,29,'2025-06-15 18:22:09',11275.00,'PENDING','paypal','san pedro','E4FC76AD-01F','express'),
-(11,29,'2025-06-15 18:27:13',3230.00,'PENDING','paypal','san pedro','334E31A1-6AC','overnight'),
-(12,29,'2025-06-15 18:47:21',31717.20,'PENDING','paypal','san pedro','A93ADE73-6D7','overnight'),
 (13,22,'2025-06-18 05:51:36',542.00,'PENDING','paypal','San Pedro','02A7C57A-150','overnight'),
 (14,22,'2025-06-18 07:25:07',542.00,'PENDING','paypal','San Pedro','0771CD78-7BB','overnight'),
 (15,22,'2025-06-19 18:18:34',885.00,'PENDING','paypal','San Pedro','AC92FA58-7E5','standard'),
-(16,22,'2025-06-19 18:35:25',885.00,'PENDING','paypal','San Pedro','65D12DD6-34A','standard');
+(16,22,'2025-06-19 18:35:25',885.00,'PENDING','paypal','San Pedro','65D12DD6-34A','standard'),
+(32,41,'2025-06-20 20:45:08',1377.80,'PENDING','paypal','san pedro','2D65A3CF-A5B','standard'),
+(33,41,'2025-06-20 20:58:23',381.00,'PENDING','paypal','san pedro','5365BF14-7F3','standard'),
+(34,41,'2025-06-20 20:58:42',986.92,'PENDING','paypal','san pedro','D576CB59-CD8','standard'),
+(35,41,'2025-06-20 21:01:16',1714.92,'PENDING','paypal','san pedro','E4D39513-0D1','standard');
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -220,7 +362,7 @@ CREATE TABLE `payments` (
   CONSTRAINT `fk_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
   CONSTRAINT `payments_chk_1` CHECK (`status` in (_utf8mb4'PENDING',_utf8mb4'TO_SHIP',_utf8mb4'TO_RECEIVE',_utf8mb4'COMPLETED',_utf8mb4'CANCELLED'))
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -230,29 +372,6 @@ CREATE TABLE `payments` (
 LOCK TABLES `payments` WRITE;
 /*!40000 ALTER TABLE `payments` DISABLE KEYS */;
 set autocommit=0;
-INSERT INTO `payments` VALUES
-(1,22,25,6,'Cinco de Mayo Piñata',7560.00,'2025-06-15 16:52:26','985748AB-EAF','CANCELLED','paypal','standard',0,1,NULL,0),
-(2,22,2,6,'Clown Wig',200.00,'2025-06-15 16:52:26','985748AB-EAF','CANCELLED','paypal','standard',0,1,NULL,0),
-(3,22,32,6,'Patio String Lights',1000.00,'2025-06-15 16:52:26','985748AB-EAF','CANCELLED','paypal','standard',0,1,NULL,0),
-(4,22,28,6,'Red Confetti Balloon Set',150.00,'2025-06-15 16:52:26','985748AB-EAF','CANCELLED','paypal','standard',0,1,NULL,0),
-(5,22,25,7,'Cinco de Mayo Piñata',7560.00,'2025-06-15 16:53:33','94A585F0-E82','CANCELLED','paypal','express',0,1,NULL,0),
-(6,22,2,7,'Clown Wig',200.00,'2025-06-15 16:53:33','94A585F0-E82','CANCELLED','paypal','express',0,1,NULL,0),
-(7,22,32,7,'Patio String Lights',1000.00,'2025-06-15 16:53:33','94A585F0-E82','CANCELLED','paypal','express',0,1,NULL,0),
-(8,22,28,7,'Red Confetti Balloon Set',150.00,'2025-06-15 16:53:33','94A585F0-E82','CANCELLED','paypal','express',0,1,NULL,0),
-(9,29,3,8,'Party Confetti',4200.00,'2025-06-15 17:22:19','BE98C6B1-96E','PENDING','paypal','overnight',5,1,NULL,0),
-(10,29,30,8,'Japanese Paper Lanterns',4400.00,'2025-06-15 17:22:19','BE98C6B1-96E','PENDING','paypal','overnight',5,1,NULL,0),
-(11,22,21,9,'teto fatass',850.00,'2025-06-15 17:42:19','FFB3AAAB-42D','CANCELLED','paypal','express',5,1,NULL,0),
-(12,29,32,10,'Patio String Lights',10000.00,'2025-06-15 18:22:08','E4FC76AD-01F','PENDING','paypal','express',5,1,NULL,0),
-(13,29,26,11,'Birthday Party Cone Hats',2750.00,'2025-06-15 18:27:12','334E31A1-6AC','PENDING','paypal','overnight',5,1,NULL,0),
-(14,29,26,12,'Birthday Party Cone Hats',2750.00,'2025-06-15 18:47:20','A93ADE73-6D7','PENDING','paypal','overnight',5,11,NULL,0),
-(15,29,4,12,'Funny Eyeglasses',350.00,'2025-06-15 18:47:20','A93ADE73-6D7','PENDING','paypal','overnight',5,1,NULL,0),
-(16,29,31,12,'Charess Standee',25000.00,'2025-06-15 18:47:20','A93ADE73-6D7','PENDING','paypal','overnight',5,1,NULL,0),
-(17,29,21,12,'teto fatass',85.00,'2025-06-15 18:47:20','A93ADE73-6D7','CANCELLED','paypal','overnight',0,1,NULL,0),
-(18,22,4,13,'Funny Eyeglasses',350.00,'2025-06-18 05:51:36','02A7C57A-150','PENDING','paypal','overnight',5,1,NULL,0),
-(19,22,4,14,'Funny Eyeglasses',350.00,'2025-06-18 07:25:07','0771CD78-7BB','PENDING','paypal','overnight',5,1,NULL,0),
-(20,22,4,15,'Funny Eyeglasses',350.00,'2025-06-19 18:18:34','AC92FA58-7E5','PENDING','paypal','standard',5,1,NULL,0),
-(21,22,4,16,'Funny Eyeglasses',350.00,'2025-06-19 18:35:25','65D12DD6-34A','PENDING','paypal','standard',5,1,NULL,0),
-(22,22,1,16,'Custom Tarpaulin (medium)',400.00,'2025-06-19 18:35:25','65D12DD6-34A','PENDING','paypal','standard',5,1,'Custom Tarpaulin (medium)',1);
 /*!40000 ALTER TABLE `payments` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -278,7 +397,7 @@ CREATE TABLE `products` (
   KEY `fk_categ_name` (`category`),
   KEY `fk_item_name` (`item_name`),
   CONSTRAINT `fk_categ_name` FOREIGN KEY (`category`) REFERENCES `categories` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -306,7 +425,7 @@ INSERT INTO `products` VALUES
 (32,'Patio String Lights',1000,500,'String Lights','(100ft) Our weatherproof technology ensures that these durable outdoor string lights can withstand rain, wind, snow, and extreme temperatures up to 158 degrees Fahrenheit, allowing you to confidently leave them outside year-round. Furthermore, the bulb shells are made of hard anti-drop plastic, protecting you and your family while hanging the waterproof backyard string lights, eliminating worries about sudden broken glass shards.','/uploads/4592a1c3-e087-4b54-be0a-c40185cc75cb_71JM1dsFQ1L.__AC_SY445_SX342_QL70_FMwebp_.webp','2025-06-15T04:02:45.514769600'),
 (33,'Anniv Blush Centerpiece',300,120,'Table Centerpiece','This festive, sparkling centerpiece is the perfect ornament to celebrate a birthday in style. Featuring shiny rose gold fringes and decorative \'Happy Birthday\' tags, it instantly adds a touch of glamor to your decor.\r\n\r\nEasy to set up, this attractive centerpiece is ideal for all age groups and will bring a cheerful atmosphere and a personal touch to your festivities.','/uploads/d56473ea-2ec2-4760-8b3c-958a93e7fc58_Centre-de-table_1200x.webp','2025-06-15T04:07:21.319235'),
 (36,'Jdent Pascual',1,1,'Other','jdent pascual','/uploads/66b757a1-ed62-4359-b0b1-34ea77adf4f8_Screenshot_20250619_210141.png','2025-06-19T21:02:12.931155212'),
-(37,'Trigger\'s Cake',999,500,'Other','Huge.','/uploads/da77d90c-c04d-4ee9-b1a9-1aab2f0624f8_6EWDT4Ys_400x400.jpg','2025-06-20T02:39:18.896934959');
+(38,'Trigger\'s Cake',999,500,'Other','Huge.','/uploads/da77d90c-c04d-4ee9-b1a9-1aab2f0624f8_6EWDT4Ys_400x400.jpg','2025-06-20T02:39:18.896934959');
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -334,7 +453,7 @@ CREATE TABLE `user` (
   `prof_img_loc` varchar(255) NOT NULL DEFAULT '/img/default-profile.png',
   PRIMARY KEY (`id`),
   CONSTRAINT `user_chk_1` CHECK (`role` in (_utf8mb4'ADMIN',_utf8mb4'USER'))
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -345,13 +464,12 @@ LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `user` VALUES
-(22,'San Pedro','pauloneil3334@gmail.com','$2a$10$NCmNK2cfPDLx15owfmEFsuW73om6BnCfrafNRrStnw2WBOPyr5sla','ADMIN','Paulo','2025-05-31 18:22:37','2025-06-19 18:37:43','MALE','Paulo Neil','09550367575','2004-08-24','/uploads/profiles/Paulo-7e33a69c-e1bb-46d1-8673-e0a264ed377d-aasdas.PNG'),
+(22,'San Pedro','pauloneil3334@gmail.com','$2a$10$NCmNK2cfPDLx15owfmEFsuW73om6BnCfrafNRrStnw2WBOPyr5sla','ADMIN','Paulo','2025-05-31 18:22:37','2025-06-20 21:19:23','MALE','Paulo Neil','09550367575','2004-08-24','/uploads/profiles/Paulo-7e33a69c-e1bb-46d1-8673-e0a264ed377d-aasdas.PNG'),
 (23,'GMA','sevillapaulo364@gmail.com','$2a$10$16kKLkyMb8CBM.4w.0wEE.cEgX1g6hL99.7FmEtPKOtG9bgbemuUW','USER','Sevilla','2025-05-31 19:11:32','2025-05-31 19:11:33','MALE','Sevilla','09550367575','2004-08-24',''),
 (25,'GMA','pauloneil3334@gmail.com','$2a$10$DtWXwtuwhVsyN3tIWE7z0.MGujW3238ri1SVATclxc8F8u5FbIYP2','USER','Paulo2','2025-06-02 00:52:25','2025-06-02 00:52:25','MALE','PauloUser','09550367575','2008-02-02',''),
 (26,'san pedro','pauloneil3334@mail.com','$2a$10$4o.u69fkeHcKB2.jlQDpYepFljzaAjuihZZ4kcHI5/LExCKIP/rde','USER','usertest','2025-06-02 01:45:23','2025-06-02 01:45:24','MALE','paulo','09550367575','2018-07-27',''),
-(27,'GMA','pauloneil75@yahoo.com','$2a$10$89GzjBU6CgU./Z.CY4O0VeR24DCC1nXd5U6lRiLEF3Y1sUxrI8Iii','USER','janedoe22','2025-06-08 12:26:27','2025-06-08 12:26:27','FEMALE','Jane','12345','2004-08-24',''),
-(29,'san pedro','junkemail@email.com','$2a$10$oV7ZUvvMEUPn7rlmrWG1vupQJloi.uHmszHmz3zMxBrk/V6Ux02tO','USER','zhu','2025-06-08 15:43:22','2025-06-08 15:43:22','FEMALE','Zhu Yuan','12345','1977-07-28','/uploads/profiles/zhu-238fa235-c3bb-413c-bde4-8875f4198330-zhu-yuan-zenless-zone-zero.png'),
-(30,'GMA','junkemail1@email.com','$2a$10$vmGwv4oV0l.K7egHIvwzE.bb2Kx2SEqJ9jgt.a9..dFzQidNvWKBW','USER','yanagi','2025-06-16 04:17:25','2025-06-16 04:17:25','FEMALE','Yanagi','12346','2000-08-23','/img/default-profile.png');
+(33,'San Pedro','junkemail3@gmail.com','$2a$10$iNXzGoIOk8x0Isk0yvWQl.PLdYDq1ff3PO7PFKRD8zqihmXxAQ/tu','USER','eve','2025-06-20 18:56:26','2025-06-20 17:34:35','FEMALE','Evelyn','123456','2008-09-24','/img/default-profile.png'),
+(41,'san pedro','junkemail@email.com','$2a$10$oV7ZUvvMEUPn7rlmrWG1vupQJloi.uHmszHmz3zMxBrk/V6Ux02tO','USER','zhu','2025-06-20 21:08:13','2025-06-08 15:43:22','FEMALE','Zhu Yuan','12345','1977-07-28','/uploads/profiles/zhu-238fa235-c3bb-413c-bde4-8875f4198330-zhu-yuan-zenless-zone-zero.png');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -369,4 +487,4 @@ commit;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2025-06-20  3:05:33
+-- Dump completed on 2025-06-21  5:31:28
