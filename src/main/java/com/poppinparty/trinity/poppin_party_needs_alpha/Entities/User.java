@@ -21,7 +21,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    private String name;
+    private String phone;
     private String username;
     private String password;
     private String address;
@@ -29,9 +30,16 @@ public class User {
     private String role;
     @Column(name = "prof_img_loc")
     private String imagePath; 
+    // Account Dashboard
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+        @Column(name = "birth_date")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate birthDate;
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
 
-    //Fix this shit
-    //done na lods
+
     public String getImagePath() {
         return imagePath;
     }
@@ -39,13 +47,6 @@ public class User {
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
     }
-
-    // Account Dashboard
-    private String name;
-    private String phone;
-
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
 
     public Gender getGender() {
         return gender;
@@ -60,10 +61,6 @@ public class User {
         MALE, FEMALE, OTHER // Must match Thymeleaf values EXACTLY
     }
 
-    @Column(name = "birth_date")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate birthDate;
-
     public LocalDate getBirthDate() {
         return birthDate;
     }
@@ -72,8 +69,6 @@ public class User {
         this.birthDate = birthDate;
     }
 
-    @Column(name = "last_login")
-    private LocalDateTime lastLogin;
 
     public LocalDateTime getLastLogin() {
         return lastLogin;

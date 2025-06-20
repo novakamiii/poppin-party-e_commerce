@@ -37,7 +37,13 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
                         <div class="item-total">
                             <span class="total-label">TOTAL:</span>
                             <span class="total-price">₱${order.amount.toFixed(2)}</span>
-                            ${status === "PENDING" ? `<span><a href="#" class="cancel-order" data-id="${order.id}">Cancel</a></span>` : ""}
+                            ${status === "PENDING" ?
+                        `<span><a href="#" class="cancel-order" data-id="${order.id}">Cancel</a></span>` :
+                        order.status === "CANCELLED" ?
+                            `<span><a href="#" class="restore-order" data-id="${order.id}">Undo</a></span>` :
+                            ""
+                    }
+
                         </div>
                     </div>
                 `);
@@ -72,19 +78,53 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target.classList.contains("cancel-order")) {
             e.preventDefault();
             const orderId = e.target.dataset.id;
-            if (confirm("Are you sure you want to cancel this order?")) {
+            if (confirm("Are you sure you want to cancel this item?")) {
                 fetch(`/api/orders/cancel/${orderId}`, { method: "POST" })
-                    .then(res => {
-                        if (!res.ok) throw new Error("Failed to cancel");
-                        alert("Order cancelled.");
-                        const activeTab = document.querySelector(".status-tab.active");
-                        const containerId = activeTab.closest(".dashboard-section")?.querySelector(".order-item-list")?.id || "orderStatusContent";
-                        loadOrdersByStatus(activeTab.dataset.tab, containerId);
+                    .then(async res => {
+                        if (!res.ok) {
+                            const errorMessage = await res.text();
+                            throw new Error(errorMessage || "Cancel failed");
+                        }
+                        alert("Cancelled");
+                        refreshActiveOrders();
                     })
-                    .catch(err => alert("Error cancelling order."));
+                    .catch(err => {
+                        alert("Error cancelling: " + err.message);
+                        console.error("Cancel error:", err);
+                    });
+
+
             }
         }
+
+        if (e.target.classList.contains("restore-order")) {
+            e.preventDefault();
+            const orderId = e.target.dataset.id;
+            fetch(`/api/orders/restore/${orderId}`, { method: "POST" })
+                .then(async res => {
+                    if (!res.ok) {
+                        const errorMessage = await res.text();
+                        throw new Error(errorMessage || "Restore failed");
+                    }
+                    alert("Restored");
+                    refreshActiveOrders();
+                })
+                .catch(err => {
+                    alert("Error restoring: " + err.message);
+                    console.error("Restore error:", err);
+                });
+
+
+        }
     });
+
+    function refreshActiveOrders() {
+        const activeTab = document.querySelector(".status-tab.active");
+        const status = activeTab?.dataset.tab || "PENDING";
+        const containerId = activeTab?.closest(".dashboard-section")?.querySelector(".order-item-list")?.id || "orderStatusContent";
+        loadOrdersByStatus(status, containerId);
+    }
+
 });
 
 export function initializeOrderTabs() {

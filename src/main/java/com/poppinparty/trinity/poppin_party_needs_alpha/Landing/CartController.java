@@ -8,10 +8,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,6 +31,59 @@ import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Payment;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Product;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.User;
 
+/**
+ * Controller for managing shopping cart and order-related operations.
+ * <p>
+ * Handles endpoints for viewing and updating the cart, placing orders,
+ * adding custom tarpaulin products, and retrieving order statuses.
+ * </p>
+ *
+ * <h2>Endpoints:</h2>
+ * <ul>
+ * <li><b>GET /cart</b>: Display the cart page.</li>
+ * <li><b>GET /order/success</b>: Show order success page.</li>
+ * <li><b>GET /order/status</b>: Show order status page.</li>
+ * <li><b>GET /order/checkout</b>: Display checkout page with user's
+ * address.</li>
+ * <li><b>GET /api/cart</b>: Retrieve current user's cart items as JSON.</li>
+ * <li><b>POST /api/cart/update</b>: Update quantity of a product in the
+ * cart.</li>
+ * <li><b>POST /api/cart/remove</b>: Remove a product from the cart.</li>
+ * <li><b>POST /order/place</b>: Place an order with selected items, shipping,
+ * and payment method.</li>
+ * <li><b>POST /api/cart/custom-tarpaulin</b>: Add a custom tarpaulin product to
+ * the cart.</li>
+ * <li><b>GET /api/orders</b>: Retrieve orders/payments by status for the
+ * current user.</li>
+ * </ul>
+ *
+ * <h2>Dependencies:</h2>
+ * <ul>
+ * <li>UserRepository - for user data access</li>
+ * <li>ProductRepository - for product data access</li>
+ * <li>OrderItemRepository - for cart/order item management</li>
+ * <li>OrderRepository - for order records</li>
+ * <li>PaymentRepository - for payment records</li>
+ * </ul>
+ *
+ * <h2>Features:</h2>
+ * <ul>
+ * <li>Supports both regular and custom products (e.g., custom tarpaulins).</li>
+ * <li>Handles cart item CRUD operations via REST endpoints.</li>
+ * <li>Processes order placement, including calculation of subtotal, shipping,
+ * tax, and total.</li>
+ * <li>Creates order and payment records upon order placement.</li>
+ * <li>Provides order status tracking and retrieval.</li>
+ * </ul>
+ *
+ * <h2>Security:</h2>
+ * <ul>
+ * <li>All endpoints require authentication (Principal is used to identify the
+ * user).</li>
+ * </ul>
+ *
+ * @author [Your Name]
+ */
 @Controller
 public class CartController {
 
@@ -108,6 +163,37 @@ public class CartController {
                                 .toList();
         }
 
+        @PostMapping("/api/cart/add")
+        @ResponseBody
+        public ResponseEntity<?> addItemToCart(@RequestParam Long productId,
+                        @RequestParam(required = false, defaultValue = "1") int quantity,
+                        Principal principal) {
+                User user = userRepository.findByUsername(principal.getName())
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+
+                Product product = productRepository.findById(productId)
+                                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+                String productRef = product.getItemName();
+
+                Optional<OrderItem> existing = orderItemRepository.findByUserIdAndProductRef(user.getId(), productRef);
+                if (existing.isPresent()) {
+                        OrderItem item = existing.get();
+                        item.setQuantity(item.getQuantity() + quantity); // ✅ add quantity
+                        orderItemRepository.save(item);
+                } else {
+                        OrderItem newItem = new OrderItem();
+                        newItem.setUserId(user.getId());
+                        newItem.setProductRef(productRef);
+                        newItem.setQuantity(quantity); // ✅ use incoming quantity
+                        newItem.setUnitPrice(BigDecimal.valueOf(product.getPrice()));
+                        newItem.setCustom(false);
+                        orderItemRepository.save(newItem);
+                }
+
+                return ResponseEntity.ok("Item added to cart");
+        }
+
         @PostMapping("/api/cart/update")
         @ResponseBody
         public ResponseEntity<?> updateCartQuantity(
@@ -134,17 +220,33 @@ public class CartController {
 
         @PostMapping("/api/cart/remove")
         @ResponseBody
-        public ResponseEntity<?> removeItemFromCart(@RequestParam Long productId, Principal principal) {
+        public ResponseEntity<?> removeItemFromCart(
+                        @RequestParam(required = false) Long productId,
+                        @RequestParam(required = false) String customSize,
+                        @RequestParam(required = false) String eventType,
+                        @RequestParam(required = false) String message,
+                        @RequestParam(required = false) String thickness,
+                        @RequestParam(required = false) String finish,
+                        Principal principal) {
+
                 User user = userRepository.findByUsername(principal.getName())
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-                Product product = productRepository.findById(productId)
-                                .orElseThrow(() -> new RuntimeException("Product not found"));
+                if (productId != null && productId != -1L) {
+                        // Regular product
+                        Product product = productRepository.findById(productId)
+                                        .orElseThrow(() -> new RuntimeException("Product not found"));
+                        String productRef = product.getItemName();
 
-                String productRef = product.getItemName();
+                        orderItemRepository.findByUserIdAndProductRef(user.getId(), productRef)
+                                        .ifPresent(orderItemRepository::delete);
 
-                orderItemRepository.findByUserIdAndProductRef(user.getId(), productRef)
-                                .ifPresent(orderItemRepository::delete);
+                } else {
+                        // Custom tarpaulin
+                        orderItemRepository.findByUserIdAndCustomFields(
+                                        user.getId(), customSize, eventType, message, thickness, finish)
+                                        .ifPresent(orderItemRepository::delete);
+                }
 
                 return ResponseEntity.ok("Item removed");
         }
@@ -302,6 +404,8 @@ public class CartController {
                         Principal principal) {
                 User user = userRepository.findByUsername(principal.getName())
                                 .orElseThrow(() -> new RuntimeException("User not found"));
+                                System.out.println("Looking for payments for user ID: " + user.getId() + ", status: " + status);
+
 
                 return paymentRepository.findByUserIdAndStatus(user.getId(), status).stream()
                                 .map(payment -> {
@@ -309,6 +413,8 @@ public class CartController {
                                                         .findByItemName(payment.getItemName());
                                         String imageLoc = productOpt.map(Product::getImageLoc)
                                                         .orElse("/img/custom-default.png");
+
+                                        Long orderId = payment.getOrder() != null ? payment.getOrder().getId() : null;
 
                                         return new OrderStatusDTO(
                                                         payment.getId(),
@@ -319,10 +425,62 @@ public class CartController {
                                                         payment.getShippingOption(),
                                                         payment.getStatus(),
                                                         payment.getTransactionId(),
-                                                        payment.getOrder().getId(),
+                                                        orderId,
                                                         payment.getQuantity());
                                 })
                                 .toList();
+        }
+
+        @PostMapping("/api/orders/cancel/{paymentId}")
+        @ResponseBody
+        public ResponseEntity<?> cancelOrder(@PathVariable Long paymentId, Principal principal) {
+                User user = userRepository.findByUsername(principal.getName())
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+
+                Payment payment = paymentRepository.findById(paymentId)
+                                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+                if (!payment.getUser().getId().equals(user.getId())) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized");
+                }
+
+                if (payment.getStatus().equals("TO SHIP") || payment.getStatus().equals("TO RECEIVE")
+                                || payment.getStatus().equals("COMPLETED")) {
+                        return ResponseEntity.badRequest().body("Cannot cancel shipped/completed items.");
+                }
+
+                payment.setStatus("CANCELLED");
+                paymentRepository.save(payment);
+
+                return ResponseEntity.ok("Order item cancelled");
+        }
+
+        @PostMapping("/api/orders/restore/{paymentId}")
+        @ResponseBody
+        public ResponseEntity<?> restoreOrder(@PathVariable Long paymentId, Principal principal) {
+                User user = userRepository.findByUsername(principal.getName())
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+
+                Optional<Payment> optionalPayment = paymentRepository.findById(paymentId);
+                if (optionalPayment.isEmpty()) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                        .body("Payment not found or already removed.");
+                }
+
+                Payment payment = optionalPayment.get();
+
+                if (!payment.getUser().getId().equals(user.getId())) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized");
+                }
+
+                if (!"CANCELLED".equals(payment.getStatus())) {
+                        return ResponseEntity.badRequest().body("Only cancelled items can be restored.");
+                }
+
+                payment.setStatus("PENDING"); // or restore previous status if tracked
+                paymentRepository.save(payment);
+
+                return ResponseEntity.ok("Order item restored");
         }
 
 }

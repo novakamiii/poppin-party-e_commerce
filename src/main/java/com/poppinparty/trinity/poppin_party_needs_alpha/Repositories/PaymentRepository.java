@@ -9,7 +9,7 @@ import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Payment;
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     // Optional: fetch all payments for a specific user
-    List<Payment> findByUserId(Long userId);
+    List<Payment> findByUserId(Long userId); // ✅ Add this line
 
     // Optional: fetch all payments for a specific order
     List<Payment> findByOrderId(Long orderId);
@@ -21,4 +21,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByTransactionId(String transactionId);
 
     List<Payment> findByUserIdAndStatus(Long userId, String status);
+
+    
 }

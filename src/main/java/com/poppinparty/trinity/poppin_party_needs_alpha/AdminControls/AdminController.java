@@ -5,7 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.ui.Model;
@@ -16,12 +18,32 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.ArchivedOrderItems;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.ArchivedProduct;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Category;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Product;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.User;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.ArchivedUsers;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.ArchivedPayments;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Order;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.OrderItem;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Payment;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.ArchivedOrders;
+
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ArchivedProductRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.CategoryRepository;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderItemRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ProductRepository;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.UserRepository;
+
+import jakarta.transaction.Transactional;
+
+import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderRepository;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.PaymentRepository;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ArchivedUserRepository;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ArchivedOrderItemsRepository;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ArchivedPaymentsRepository;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ArchivedOrdersRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -37,6 +59,30 @@ public class AdminController {
     @Autowired
     private ArchivedProductRepository archivedProductRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ArchivedUserRepository archivedUserRepository;
+
+    @Autowired
+    private ArchivedOrderItemsRepository archivedOrderItemsRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private ArchivedPaymentsRepository archivedPaymentsRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private ArchivedOrdersRepository archivedOrdersRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
+
     // ========== PRODUCT MANAGEMENT ==========
 
     @GetMapping("/products")
@@ -46,14 +92,14 @@ public class AdminController {
     }
 
     public List<Category> getAllCategories() {
-        return categoryRepository.findAll(); // or any custom fetch logic
+        return categoryRepository.findAll();
     }
 
     @GetMapping("/products/add")
     public String showAddProductForm(Model model) {
         model.addAttribute("product", new Product()); // For binding the form
-        model.addAttribute("categories", getAllCategories()); // <-- This is crucial
-        return "add_product"; // Name of your Thymeleaf HTML file
+        model.addAttribute("categories", getAllCategories());
+        return "add_product";
     }
 
     @PostMapping("/products/add")
@@ -95,7 +141,6 @@ public class AdminController {
                 product.setImageLoc("/uploads/" + filename); // For rendering via <img>
             } catch (IOException e) {
                 e.printStackTrace();
-                // Optional: Add error handling here
             }
         }
 
@@ -109,7 +154,7 @@ public class AdminController {
     public String showArchivedProducts(Model model) {
         List<ArchivedProduct> archivedProducts = archivedProductRepository.findAll();
         model.addAttribute("archivedProducts", archivedProducts);
-        return "products_archived"; // Make sure this is your Thymeleaf file name
+        return "products_archived";
     }
 
     @GetMapping("/products/edit/{id}")
@@ -178,7 +223,7 @@ public class AdminController {
                 existingProduct.setImageLoc("/uploads/" + filename);
             } catch (IOException e) {
                 e.printStackTrace();
-                // Optional: add error handling here
+
             }
         }
 
@@ -220,9 +265,12 @@ public class AdminController {
                 .orElseThrow(() -> new IllegalArgumentException("Archived product not found: " + id));
 
         Product restored = new Product();
-        //Make a workaround of this
-        //hibernate does not allow to set id of its original id
-        //why the fuck
+        // Make a workaround of this
+        // hibernate does not allow to set id of its original id
+        // why the fuck
+        // I reached a conclusion that it is not possible to set id of an archived
+        // product
+        // let JPA handle it
         // restored.setId(archived.getId());
         restored.setItemName(archived.getItemName());
         restored.setPrice(archived.getPrice());
@@ -236,6 +284,211 @@ public class AdminController {
         archivedProductRepository.deleteById(id); // Remove from archive
 
         return "redirect:/products";
+    }
+
+    // ========== ACCOUNT ADMINS MANAGEMENT ==========
+
+    @GetMapping("/admin/accountManagement")
+    public String showAccounts(Model model) {
+        model.addAttribute("users", userRepository.findAll());
+        return "admin_account_management";
+    }
+
+    @GetMapping("/admin/user/restore")
+    public String showArchivedUsers(Model model) {
+        List<ArchivedUsers> archivedUsers = archivedUserRepository.findAll();
+        model.addAttribute("archivedUsers", archivedUsers);
+        return "accounts_archived";
+    }
+
+    @Transactional
+    @GetMapping("/admin/user/delete/{id}")
+    public String archiveUser(@PathVariable Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id: " + id));
+
+        // Step 1: Archive User
+        ArchivedUsers archivedUser = new ArchivedUsers();
+        archivedUser.setName(user.getName());
+        archivedUser.setPhone(user.getPhone());
+        archivedUser.setUsername(user.getUsername());
+        archivedUser.setPassword(user.getPassword());
+        archivedUser.setAddress(user.getAddress());
+        archivedUser.setEmail(user.getEmail());
+        archivedUser.setRole(user.getRole());
+        archivedUser.setImagePath(user.getImagePath());
+        archivedUser.setGender(user.getGender());
+        archivedUser.setBirthDate(user.getBirthDate());
+        archivedUser.setLastLogin(user.getLastLogin());
+        archivedUser.setOriginalUserId(user.getId());
+        archivedUserRepository.saveAndFlush(archivedUser); // make sure it has an ID
+
+        // Step 2: Archive Orders first (used for mapping to payments)
+        List<Order> orders = orderRepository.findByUserId(id);
+        Map<Long, ArchivedOrders> archivedOrderMap = new HashMap<>();
+        for (Order order : orders) {
+            ArchivedOrders archivedOrder = new ArchivedOrders();
+            archivedOrder.setOriginalOrderId(order.getId());
+            archivedOrder.setUserId(order.getUserId());
+            archivedOrder.setOrderDate(order.getOrderDate());
+            archivedOrder.setTotalAmount(order.getTotalAmount());
+            archivedOrder.setStatus(order.getStatus());
+            archivedOrder.setPaymentMethod(order.getPaymentMethod());
+            archivedOrder.setShippingAddress(order.getShippingAddress());
+            archivedOrder.setTrackingNumber(order.getTrackingNumber());
+            archivedOrder.setShippingOption(order.getShippingOption());
+            archivedOrdersRepository.save(archivedOrder);
+
+            archivedOrderMap.put(order.getId(), archivedOrder);
+        }
+
+        // Step 3: Archive Payments (before deleting orders)
+        List<Payment> payments = paymentRepository.findByUserId(id);
+        for (Payment payment : payments) {
+            ArchivedPayments archivedPayment = new ArchivedPayments();
+            archivedPayment.setUserId(archivedUser.getId()); // ✅ Use the archivedUser ID!
+
+            ArchivedOrders relatedArchivedOrder = archivedOrderMap.get(
+                    payment.getOrder() != null ? payment.getOrder().getId() : null);
+            archivedPayment.setOrder(relatedArchivedOrder);
+
+            archivedPayment.setProductId(payment.getProductId());
+            archivedPayment.setItemName(payment.getItemName());
+            archivedPayment.setAmount(payment.getAmount());
+            archivedPayment.setTransactionId(payment.getTransactionId());
+            archivedPayment.setStatus(payment.getStatus());
+            archivedPayment.setPaymentMethodDetails(payment.getPaymentMethodDetails());
+            archivedPayment.setShippingOption(payment.getShippingOption());
+            archivedPayment.setDaysLeft(payment.getDaysLeft());
+            archivedPayment.setQuantity(payment.getQuantity());
+            archivedPayment.setCustomProductRef(payment.getCustomProductRef());
+            archivedPayment.setIsCustom(payment.getIsCustom());
+
+            archivedPaymentsRepository.save(archivedPayment);
+        }
+
+        // Step 4: Archive Order Items
+        List<OrderItem> orderItems = orderItemRepository.findByUserId(id);
+        for (OrderItem item : orderItems) {
+            ArchivedOrderItems archivedItem = new ArchivedOrderItems();
+            archivedItem.setUserId(user.getId()); // original userId is correct here
+            archivedItem.setProductRef(item.getProductRef());
+            archivedItem.setQuantity(item.getQuantity());
+            archivedItem.setUnitPrice(item.getUnitPrice());
+            archivedItem.setCustom(item.isCustom());
+            archivedItem.setCustomSize(item.getCustomSize());
+            archivedItem.setEventType(item.getEventType());
+            archivedItem.setPersonalizedMessage(item.getPersonalizedMessage());
+            archivedItem.setTarpaulinThickness(item.getTarpaulinThickness());
+            archivedItem.setTarpaulinFinish(item.getTarpaulinFinish());
+            archivedOrderItemsRepository.save(archivedItem);
+        }
+
+        // Step 5: Delete in the correct order
+        paymentRepository.deleteAll(payments);
+        orderItemRepository.deleteAll(orderItems);
+        orderRepository.deleteAll(orders);
+        userRepository.deleteById(id);
+
+        return "redirect:/admin/accountManagement";
+    }
+
+    @Transactional
+    @GetMapping("/admin/user/restore/{id}")
+    public String restoreUser(@PathVariable Long id) {
+        ArchivedUsers archivedUser = archivedUserRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Archived user not found: " + id));
+
+        User restoredUser = new User();
+        restoredUser.setName(archivedUser.getName());
+        restoredUser.setPhone(archivedUser.getPhone());
+        restoredUser.setUsername(archivedUser.getUsername());
+        restoredUser.setPassword(archivedUser.getPassword());
+        restoredUser.setAddress(archivedUser.getAddress());
+        restoredUser.setEmail(archivedUser.getEmail());
+        restoredUser.setRole(archivedUser.getRole());
+        restoredUser.setImagePath(archivedUser.getImagePath());
+        restoredUser.setGender(archivedUser.getGender());
+        restoredUser.setBirthDate(archivedUser.getBirthDate());
+        restoredUser.setLastLogin(archivedUser.getLastLogin());
+        userRepository.save(restoredUser);
+
+        Long originalUserId = archivedUser.getOriginalUserId();
+
+        // Step 1: Restore Orders
+        List<ArchivedOrders> archivedOrders = archivedOrdersRepository.findByUserId(originalUserId);
+        Map<Long, Order> restoredOrderMap = new HashMap<>();
+        for (ArchivedOrders archivedOrder : archivedOrders) {
+            Order order = new Order();
+            order.setUserId(restoredUser.getId());
+            order.setOrderDate(archivedOrder.getOrderDate());
+            order.setTotalAmount(archivedOrder.getTotalAmount());
+            order.setStatus(archivedOrder.getStatus());
+            order.setPaymentMethod(archivedOrder.getPaymentMethod());
+            order.setShippingAddress(archivedOrder.getShippingAddress());
+            order.setTrackingNumber(archivedOrder.getTrackingNumber());
+            order.setShippingOption(archivedOrder.getShippingOption());
+            orderRepository.save(order);
+
+            restoredOrderMap.put(archivedOrder.getOriginalOrderId(), order);
+        }
+
+        // Step 2: Restore Order Items
+        List<ArchivedOrderItems> archivedItems = archivedOrderItemsRepository.findByUserId(originalUserId);
+        for (ArchivedOrderItems archivedItem : archivedItems) {
+            OrderItem item = new OrderItem();
+            item.setUserId(restoredUser.getId());
+            item.setProductRef(archivedItem.getProductRef());
+            item.setQuantity(archivedItem.getQuantity());
+            item.setUnitPrice(archivedItem.getUnitPrice());
+            item.setCustom(archivedItem.isCustom());
+            item.setCustomSize(archivedItem.getCustomSize());
+            item.setEventType(archivedItem.getEventType());
+            item.setPersonalizedMessage(archivedItem.getPersonalizedMessage());
+            item.setTarpaulinThickness(archivedItem.getTarpaulinThickness());
+            item.setTarpaulinFinish(archivedItem.getTarpaulinFinish());
+            orderItemRepository.save(item);
+        }
+
+        // Step 3: Restore Payments
+        List<ArchivedPayments> archivedPayments = archivedPaymentsRepository.findByUserId(originalUserId);
+        for (ArchivedPayments archivedPayment : archivedPayments) {
+            Payment payment = new Payment();
+            payment.setUser(restoredUser);
+
+            ArchivedOrders archivedOrder = archivedPayment.getOrder();
+            if (archivedOrder != null) {
+                Long originalOrderId = archivedOrder.getOriginalOrderId();
+                Order mappedOrder = restoredOrderMap.get(originalOrderId);
+                if (mappedOrder != null) {
+                    payment.setOrder(mappedOrder);
+                } else {
+                    System.err.println("⚠️ Missing mapped order for originalOrderId=" + originalOrderId);
+                    continue;
+                }
+            }
+
+            payment.setProductId(archivedPayment.getProductId());
+            payment.setItemName(archivedPayment.getItemName());
+            payment.setAmount(archivedPayment.getAmount());
+            payment.setTransactionId(archivedPayment.getTransactionId());
+            payment.setStatus(archivedPayment.getStatus());
+            payment.setPaymentMethodDetails(archivedPayment.getPaymentMethodDetails());
+            payment.setShippingOption(archivedPayment.getShippingOption());
+            payment.setDaysLeft(archivedPayment.getDaysLeft());
+            payment.setQuantity(archivedPayment.getQuantity());
+            payment.setCustomProductRef(archivedPayment.getCustomProductRef());
+            payment.setIsCustom(archivedPayment.getIsCustom());
+            paymentRepository.save(payment);
+        }
+
+        // Step 4: Cleanup (delete archived data by archivedUser ID)
+        archivedPaymentsRepository.deleteAllByUserId(originalUserId);
+        archivedOrderItemsRepository.deleteAllByUserId(originalUserId);
+        archivedOrdersRepository.deleteAllByUserId(originalUserId);
+        archivedUserRepository.deleteById(id);
+
+        return "redirect:/admin/accountManagement";
     }
 
 }

@@ -89,7 +89,7 @@ public class UserController {
             return "redirect:/admin/home";
         } else if (authentication.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_USER"))) {
-            return "redirect:/user/home";
+            return "redirect:/home";
         }
 
         return "redirect:/home";

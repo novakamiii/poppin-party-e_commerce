@@ -17,7 +17,35 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public Long getId() {
+    @Column(name = "user_id")
+    private Long userId;
+
+    @Column(name = "order_date")
+    private Timestamp orderDate = new Timestamp(System.currentTimeMillis());
+
+    @Column(name = "total_amount")
+    private BigDecimal totalAmount;
+
+    @Column(name = "status")
+    private String status = "PENDING";
+
+    @Column(name = "payment_method")
+    private String paymentMethod;
+
+    @Column(name = "shipping_address")
+    private String shippingAddress;
+
+    @Column(name = "tracking_number")
+    private String trackingNumber;
+
+    @Column(name = "shipping_option")
+    private String shippingOption;
+
+    public String generateTrackingNumber() {
+        return "PPN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    }
+
+     public Long getId() {
         return id;
     }
 
@@ -87,34 +115,6 @@ public class Order {
 
     public void setShippingOption(String shippingOption) {
         this.shippingOption = shippingOption;
-    }
-
-    @Column(name = "user_id")
-    private Long userId;
-
-    @Column(name = "order_date")
-    private Timestamp orderDate = new Timestamp(System.currentTimeMillis());
-
-    @Column(name = "total_amount")
-    private BigDecimal totalAmount;
-
-    @Column(name = "status")
-    private String status = "PENDING";
-
-    @Column(name = "payment_method")
-    private String paymentMethod;
-
-    @Column(name = "shipping_address")
-    private String shippingAddress;
-
-    @Column(name = "tracking_number")
-    private String trackingNumber;
-
-    @Column(name = "shipping_option")
-    private String shippingOption;
-
-    public String generateTrackingNumber() {
-        return "PPN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
 }
