@@ -6,9 +6,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-
 
 @Entity
 @Table(name = "archived_order_items")
@@ -23,6 +24,11 @@ public class ArchivedOrderItems {
     @Column(name = "product_ref")
     private String productRef;
 
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private ArchivedOrders order;
+
+    @Column(name = "quantity")
     private int quantity;
 
     @Column(name = "unit_price")
@@ -61,6 +67,14 @@ public class ArchivedOrderItems {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public ArchivedOrders getOrder() {
+        return order;
+    }
+
+    public void setOrder(ArchivedOrders order) {
+        this.order = order;
     }
 
     public String getProductRef() {
@@ -135,5 +149,4 @@ public class ArchivedOrderItems {
         this.tarpaulinFinish = tarpaulinFinish;
     }
 
-    
 }

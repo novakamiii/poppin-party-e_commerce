@@ -137,7 +137,7 @@ public class CartController {
                                         if (Boolean.TRUE.equals(orderItem.isCustom())) {
                                                 dto.setCustom(true);
                                                 dto.setItemName("Custom Tarpaulin (" + orderItem.getCustomSize() + ")");
-                                                dto.setImageLoc("/img/custom-tarp-placeholder.png");
+                                                dto.setImageLoc("https://placehold.co/150x100/b944fd/ffffff?font=poppins&text=Tarpulin");
 
                                                 dto.setCustomSize(orderItem.getCustomSize());
                                                 dto.setEventType(orderItem.getEventType());
@@ -412,7 +412,7 @@ public class CartController {
                                         Optional<Product> productOpt = productRepository
                                                         .findByItemName(payment.getItemName());
                                         String imageLoc = productOpt.map(Product::getImageLoc)
-                                                        .orElse("/img/custom-default.png");
+                                                        .orElse("https://placehold.co/150x100/b944fd/ffffff?font=poppins&text=Tarpulin");
 
                                         Long orderId = payment.getOrder() != null ? payment.getOrder().getId() : null;
 

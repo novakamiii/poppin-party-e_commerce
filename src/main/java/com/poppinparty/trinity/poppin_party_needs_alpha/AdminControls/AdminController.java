@@ -1,6 +1,7 @@
 package com.poppinparty.trinity.poppin_party_needs_alpha.AdminControls;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.ArchivedOrderItems;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.ArchivedProduct;
@@ -50,6 +54,8 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class AdminController {
+    private static final Logger log = LoggerFactory.getLogger(AdminController.class);
+
     @Autowired
     private ProductRepository productRepository;
 
@@ -394,11 +400,16 @@ public class AdminController {
     }
 
     @Transactional
-    @GetMapping("/admin/user/restore/{id}")
+    @PostMapping("/admin/user/restore/{id}")
     public String restoreUser(@PathVariable Long id) {
+        // 1. Find archived user
         ArchivedUsers archivedUser = archivedUserRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Archived user not found: " + id));
 
+        log.info("Starting restoration of user. Archived ID: {}, Original ID: {}", id,
+                archivedUser.getOriginalUserId());
+
+        // 2. Restore User
         User restoredUser = new User();
         restoredUser.setName(archivedUser.getName());
         restoredUser.setPhone(archivedUser.getPhone());
@@ -411,33 +422,40 @@ public class AdminController {
         restoredUser.setGender(archivedUser.getGender());
         restoredUser.setBirthDate(archivedUser.getBirthDate());
         restoredUser.setLastLogin(archivedUser.getLastLogin());
-        userRepository.save(restoredUser);
+
+        User savedUser = userRepository.save(restoredUser);
+        log.info("Restored user with new ID: {}", savedUser.getId());
 
         Long originalUserId = archivedUser.getOriginalUserId();
 
-        // Step 1: Restore Orders
+        // 3. Restore Orders
         List<ArchivedOrders> archivedOrders = archivedOrdersRepository.findByUserId(originalUserId);
-        Map<Long, Order> restoredOrderMap = new HashMap<>();
+        Map<Long, Order> orderIdMapping = new HashMap<>();
+        log.info("Found {} orders to restore", archivedOrders.size());
+
         for (ArchivedOrders archivedOrder : archivedOrders) {
             Order order = new Order();
-            order.setUserId(restoredUser.getId());
+            order.setUserId(savedUser.getId());
             order.setOrderDate(archivedOrder.getOrderDate());
             order.setTotalAmount(archivedOrder.getTotalAmount());
-            order.setStatus(archivedOrder.getStatus());
+            order.setStatus(archivedOrder.getStatus() != null ? archivedOrder.getStatus() : "PENDING");
             order.setPaymentMethod(archivedOrder.getPaymentMethod());
             order.setShippingAddress(archivedOrder.getShippingAddress());
             order.setTrackingNumber(archivedOrder.getTrackingNumber());
             order.setShippingOption(archivedOrder.getShippingOption());
-            orderRepository.save(order);
 
-            restoredOrderMap.put(archivedOrder.getOriginalOrderId(), order);
+            Order savedOrder = orderRepository.save(order);
+            orderIdMapping.put(archivedOrder.getId(), savedOrder);
+            log.debug("Restored order ID {} (original {})", savedOrder.getId(), archivedOrder.getId());
         }
 
-        // Step 2: Restore Order Items
+        // 4. Restore Order Items
         List<ArchivedOrderItems> archivedItems = archivedOrderItemsRepository.findByUserId(originalUserId);
+        log.info("Found {} order items to restore", archivedItems.size());
+
         for (ArchivedOrderItems archivedItem : archivedItems) {
             OrderItem item = new OrderItem();
-            item.setUserId(restoredUser.getId());
+            item.setUserId(savedUser.getId());
             item.setProductRef(archivedItem.getProductRef());
             item.setQuantity(archivedItem.getQuantity());
             item.setUnitPrice(archivedItem.getUnitPrice());
@@ -447,48 +465,69 @@ public class AdminController {
             item.setPersonalizedMessage(archivedItem.getPersonalizedMessage());
             item.setTarpaulinThickness(archivedItem.getTarpaulinThickness());
             item.setTarpaulinFinish(archivedItem.getTarpaulinFinish());
-            orderItemRepository.save(item);
-        }
 
-        // Step 3: Restore Payments
-        List<ArchivedPayments> archivedPayments = archivedPaymentsRepository.findByUserId(originalUserId);
-        for (ArchivedPayments archivedPayment : archivedPayments) {
-            Payment payment = new Payment();
-            payment.setUser(restoredUser);
-
-            ArchivedOrders archivedOrder = archivedPayment.getOrder();
-            if (archivedOrder != null) {
-                Long originalOrderId = archivedOrder.getOriginalOrderId();
-                Order mappedOrder = restoredOrderMap.get(originalOrderId);
-                if (mappedOrder != null) {
-                    payment.setOrder(mappedOrder);
+            if (archivedItem.getOrder() != null) {
+                Order newOrder = orderIdMapping.get(archivedItem.getOrder().getId());
+                if (newOrder != null) {
+                    item.setOrder(newOrder);
                 } else {
-                    System.err.println("⚠️ Missing mapped order for originalOrderId=" + originalOrderId);
-                    continue;
+                    log.warn("Could not find restored order for item {}", archivedItem.getId());
                 }
             }
 
+            orderItemRepository.save(item);
+        }
+
+        // 5. Restore Payments - FIXED QUERY
+        List<ArchivedPayments> archivedPayments = archivedPaymentsRepository.findByUserId(id); // Using archived user ID
+        log.info("Found {} payments to restore for archived user ID {}", archivedPayments.size(), id);
+
+        for (ArchivedPayments archivedPayment : archivedPayments) {
+            Payment payment = new Payment();
+            payment.setUser(savedUser);
+
+            // Link to restored order if available
+            if (archivedPayment.getOrder() != null) {
+                Order newOrder = orderIdMapping.get(archivedPayment.getOrder().getId());
+                if (newOrder != null) {
+                    payment.setOrder(newOrder);
+                    log.debug("Linked payment to order {}", newOrder.getId());
+                } else {
+                    log.warn("Could not find restored order for payment {}", archivedPayment.getId());
+                }
+            }
+
+            // Copy all payment fields with null checks
+            payment.setStatus(archivedPayment.getStatus() != null ? archivedPayment.getStatus() : "PENDING");
             payment.setProductId(archivedPayment.getProductId());
             payment.setItemName(archivedPayment.getItemName());
-            payment.setAmount(archivedPayment.getAmount());
+            payment.setAmount(archivedPayment.getAmount() != null ? archivedPayment.getAmount() : BigDecimal.ZERO);
             payment.setTransactionId(archivedPayment.getTransactionId());
-            payment.setStatus(archivedPayment.getStatus());
             payment.setPaymentMethodDetails(archivedPayment.getPaymentMethodDetails());
             payment.setShippingOption(archivedPayment.getShippingOption());
             payment.setDaysLeft(archivedPayment.getDaysLeft());
-            payment.setQuantity(archivedPayment.getQuantity());
+            payment.setQuantity(archivedPayment.getQuantity() != null ? archivedPayment.getQuantity() : 0);
             payment.setCustomProductRef(archivedPayment.getCustomProductRef());
-            payment.setIsCustom(archivedPayment.getIsCustom());
-            paymentRepository.save(payment);
+            payment.setIsCustom(archivedPayment.getIsCustom() != null ? archivedPayment.getIsCustom() : false);
+
+            Payment savedPayment = paymentRepository.save(payment);
+            log.debug("Restored payment ID {}", savedPayment.getId());
         }
 
-        // Step 4: Cleanup (delete archived data by archivedUser ID)
-        archivedPaymentsRepository.deleteAllByUserId(originalUserId);
-        archivedOrderItemsRepository.deleteAllByUserId(originalUserId);
-        archivedOrdersRepository.deleteAllByUserId(originalUserId);
-        archivedUserRepository.deleteById(id);
+        // 6. Cleanup archived data
+        // 6. Cleanup archived data
+        try {
+            archivedPaymentsRepository.deleteAllByUserId(id);
+            archivedOrderItemsRepository.deleteAllByUserId(originalUserId);
+            archivedOrdersRepository.deleteAllByUserId(originalUserId);
+            archivedUserRepository.deleteById(id);
 
-        return "redirect:/admin/accountManagement";
+            log.info("Cleanup completed for archived user ID {}", id);
+        } catch (Exception e) {
+            log.error("Error during cleanup: ", e);
+            throw new RuntimeException("Cleanup failed", e);
+        }
+
+        return "redirect:/admin/accountManagement?restoreSuccess=true";
     }
-
 }

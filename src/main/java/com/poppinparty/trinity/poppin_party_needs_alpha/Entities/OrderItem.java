@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 
@@ -48,7 +50,18 @@ public class OrderItem {
     @Column(name = "tarpaulin_finish")
     private String tarpaulinFinish;
 
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
 
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
+    }
 
     public String getCustomSize() {
         return customSize;
