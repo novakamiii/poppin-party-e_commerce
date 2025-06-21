@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +18,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +44,7 @@ import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.CategoryRep
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderItemRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ProductRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.UserRepository;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Services.OrderStatusService;
 
 import jakarta.transaction.Transactional;
 
@@ -50,6 +56,7 @@ import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ArchivedPay
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ArchivedOrdersRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -88,6 +95,9 @@ public class AdminController {
 
     @Autowired
     private PaymentRepository paymentRepository;
+
+    @Autowired
+    private OrderStatusService orderStatusService;
 
     // ========== PRODUCT MANAGEMENT ==========
 
@@ -513,8 +523,6 @@ public class AdminController {
             Payment savedPayment = paymentRepository.save(payment);
             log.debug("Restored payment ID {}", savedPayment.getId());
         }
-
-        // 6. Cleanup archived data
         // 6. Cleanup archived data
         try {
             archivedPaymentsRepository.deleteAllByUserId(id);

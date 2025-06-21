@@ -29,6 +29,12 @@ public class Order {
     @Column(name = "status")
     private String status = "PENDING";
 
+    public static final String PENDING = "PENDING";
+    public static final String TO_SHIP = "TO_SHIP";
+    public static final String TO_RECEIVE = "TO_RECEIVE";
+    public static final String COMPLETED = "COMPLETED";
+    public static final String CANCELLED = "CANCELLED";
+
     @Column(name = "payment_method")
     private String paymentMethod;
 

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Poppin Party</title>
+
+    <link rel="icon" th:href="@{/img/logowhite.png}" type="image/png" />
+
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+    <header class="sticky-header">
+        <div class="header-inner">
+            <div class="logo">
+                <a th:href="@{/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
+            </div>
+            <div class="search">
+                <input type="text" class="search-input" placeholder="Search">
+                <button class="search-button">
+                    <img th:src="@{/img/search.png}" alt="search">
+                </button>
+            </div>
+            <div class="header-actions">
+                <div class="account-button">
+                    <a th:href="@{/account}">
+                        <img th:src="@{/img/account.png}" alt="user" id="user">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="filter-section">
+        <label>Filter by status:</label>
+        <select onchange="location = this.value;">
+            <option th:value="@{/admin/transaction-approval?filter=all}" th:selected="${currentFilter == 'all'}">All
+                Orders</option>
+            <option th:value="@{/admin/transaction-approval?filter=PENDING}"
+                th:selected="${currentFilter == 'PENDING'}">Pending
+            </option>
+            <option th:value="@{/admin/transaction-approval?filter=TO_RECEIVE}"
+                th:selected="${currentFilter == 'TO_RECEIVE'}">
+                To Receive</option>
+            <option th:value="@{/admin/transaction-approval?filter=TO_SHIP}"
+                th:selected="${currentFilter == 'TO_SHIP'}">Shipped
+            </option>
+            <option th:value="@{/admin/transaction-approval?filter=COMPLETED}"
+                th:selected="${currentFilter == 'COMPLETED'}">Completed
+            </option>
+            <option th:value="@{/admin/transaction-approval?filter=CANCELLED}"
+                th:selected="${currentFilter == 'CANCELLED'}">Cancelled
+            </option>
+        </select>
+    </div>
+
+    <table class="table-section">
+        <tr>
+            <th>ID</th>
+            <th>User ID</th>
+            <th>Username</th>
+            <th>Order ID</th>
+            <th>Item Name</th>
+            <th>Quantity</th>
+            <th>Amount</th>
+            <th>Tracking Number</th>
+            <th>Payment Method</th>
+            <th>Shipping Status</th>
+            <th>Order Date</th>
+            <th>Actions</th>
+        </tr>
+        <tr th:each="payment : ${payments}" th:data-status="${payment.status}">
+            <td th:text="${payment.id}"></td>
+            <td th:text="${payment.user.id}"></td>
+            <td th:text="${payment.user.username}"></td>
+            <td th:text="${payment.order.id}"></td>
+            <td th:text="${payment.itemName}"></td>
+            <td th:text="${payment.quantity}"></td>
+            <td th:text="${#numbers.formatDecimal(payment.amount, 1, 2)}"></td>
+            <td th:text="${payment.order.trackingNumber}"></td>
+            <td th:text="${payment.order.paymentMethod}"></td>
+            <td th:text="${payment.status}"></td>
+            <td th:text="${#dates.format(payment.order.orderDate, 'yyyy-MM-dd HH:mm')}"></td>
+            <td>
+                <div class="buttonst">
+                    <a href="#" th:onclick="|updateStatus(${payment.order.id}, 'TO_SHIP')|"
+                        title="Mark as To Ship">📝</a>
+                    <a href="#" th:onclick="|updateStatus(${payment.order.id}, 'TO_RECEIVE')|"
+                        title="Mark as To Receive">📦</a>
+                    <a href="#" th:onclick="|updateStatus(${payment.order.id}, 'COMPLETED')|"
+                        title="Mark as Completed">✅</a>
+                    <a href="#" th:onclick="|updateStatus(${payment.order.id}, 'CANCELLED')|"
+                        title="Mark as Cancelled">❌</a>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <script th:inline="javascript">
+        function updateStatus(orderId, newStatus) {
+            fetch(`/admin/transaction/${orderId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ newStatus: newStatus })
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    response.text().then(text => alert('Error: ' + text));
+                }
+            });
+        }
+    </script>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-logo">
+                <img th:src="@{/img/logowhite.png}" alt="Poppin Party Logo">
+                <p>POPPIN PARTY</p>
+                <p>CELEBRATION NEEDS</p>
+            </div>
+            <div class="footer-section">
+                <h3>CUSTOMER SERVICE</h3>
+                <ul>
+                    <li><a th:href="@{/home}">MAIN PAGE</a></li>
+                    <li><a th:href="@{/logout}">LOG-OUT</a></li>
+                </ul>
+            </div>
+            <div class="copyright">
+                © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
+            </div>
+    </footer>
+</body>
+<style>
+    .buttons {
+        display: flex;
+        size: 10em;
+    }
+</style>
+
+</html>
