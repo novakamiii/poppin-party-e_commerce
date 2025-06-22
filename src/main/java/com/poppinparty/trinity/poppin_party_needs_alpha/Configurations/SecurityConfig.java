@@ -9,26 +9,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * SecurityConfig is a Spring Security configuration class that sets up authentication and authorization
- * for the application. It defines beans for user details service, password encoding, and authentication provider.
- * The security filter chain configures HTTP security, specifying which endpoints are publicly accessible,
- * which require specific roles, and which require authentication. It also sets up form-based login and logout,
- * disables CSRF protection, and uses BCrypt for password encoding.
- *
- * Key Features:
- * <ul>
- *   <li>Defines public endpoints (e.g., registration, login, static resources).</li>
- *   <li>Restricts access to "/admin/**" for users with the ADMIN role and "/user/**" for users with the USER role.</li>
- *   <li>Configures form login with a custom login page and success redirect.</li>
- *   <li>Configures logout to redirect to the home page.</li>
- *   <li>Disables CSRF protection for simplicity (not recommended for production).</li>
- *   <li>Uses BCryptPasswordEncoder with strength 12 for secure password hashing.</li>
- * </ul>
- */
 @Configuration
 public class SecurityConfig {
 
+    //this doesnt do anything
     private CustomLoginSuccessHandler loginSuccessHandler;
 
     @Bean
@@ -42,6 +26,8 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(12); // Strength 10-12 is safe
     }
 
+    //do you really need this?
+    //what the hell even is this?
     @Bean
     DaoAuthenticationProvider authProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();

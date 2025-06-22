@@ -37,6 +37,11 @@
         </div>
     </header>
     <main>
+        <div class="addproduct-container">
+            <a th:href="@{/admin/accountManagement}">
+                <button class="addproduct-button">← Back to Active Users</button>
+            </a>
+        </div>
         <table class="table-section">
             <tr>
                 <th>ID</th>
@@ -77,12 +82,6 @@
                 </td>
             </tr>
         </table>
-
-        <div class="addproduct-container">
-            <a th:href="@{/admin/accountManagement}">
-                <button class="addproduct-button">← Back to Active Users</button>
-            </a>
-        </div>
     </main>
 
     <footer>

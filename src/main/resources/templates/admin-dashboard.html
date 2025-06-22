@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Poppin Party</title>
+    <link rel="icon" th:href="@{/img/logowhite.png}" type="image/png">
+    <style>
+        body {
+            font-family: 'Bebas Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .admin-header {
+            background-color: #b944fd;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .welcome-message {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .dashboard-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .addproduct-button {
+            background-color: #b944fd;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Bebas Neue', sans-serif;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .addproduct-button:hover {
+            background-color: #9a2ae0;
+        }
+
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #b944fd;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="admin-header">
+        <h1>Admin Dashboard</h1>
+        <div class="welcome-message">Welcome, <span th:text="${#authentication.principal.username}">Admin</span>!</div>
+    </header>
+
+    <main class="dashboard-container">
+        <div class="dashboard-card">
+            <div class="icon">📦</div>
+            <h2>Product Management</h2>
+            <div class="addproduct-container">
+                <a th:href="@{/products}">
+                    <button class="addproduct-button">Manage Products</button>
+                </a>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="icon">👥</div>
+            <h2>User Management</h2>
+            <div class="addproduct-container">
+                <a th:href="@{/admin/accountManagement}">
+                    <button class="addproduct-button">Account Management</button>
+                </a>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="icon">💳</div>
+            <h2>Transactions</h2>
+            <div class="addproduct-container">
+                <a th:href="@{/admin/transaction-approval}">
+                    <button class="addproduct-button">Transaction Approval</button>
+                </a>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <!-- <img th:src="@{/img/logowhite.png}" alt="LandingPage" class="icon"> -->
+             <div class="icon">🛍️</div>
+            <h2>Landing</h2>
+            <div class="addproduct-container">
+                <a th:href="@{/home}">
+                    <button class="addproduct-button">Go to Landing Page</button>
+                </a>
+            </div>
+        </div>
+        <div class="dashboard-card">
+            <div class="icon">👨‍👨‍👦</div>
+            <h2>Account</h2>
+            <div class="addproduct-container">
+                <a th:href="@{/account}">
+                    <button class="addproduct-button">Your Account</button>
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

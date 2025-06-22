@@ -284,37 +284,12 @@
 
 <!-- Move this script right before closing </body> tag -->
 <script type="module">
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM loaded - initializing cart counter");
+        import { updateCartCounter } from '/js/ajax.js';
 
-    // Simple non-module version that will work immediately
-    function updateCartCounter() {
-      fetch('/api/cart/count')
-        .then(res => {
-          if (!res.ok) throw new Error('Failed to fetch cart count');
-          return res.json();
-        })
-        .then(count => {
-          const counter = document.getElementById('cart-counter');
-          if (counter) {
-            console.log(`Updating cart counter to ${count}`);
-            counter.textContent = count;
-            counter.style.display = count > 0 ? 'block' : 'none';
-
-            // Add pulse animation
-            counter.classList.add('pulse');
-            setTimeout(() => counter.classList.remove('pulse'), 500);
-          }
-        })
-        .catch(err => console.error('Cart counter error:', err));
-    }
-
-    // Initial load
-    updateCartCounter();
-
-    // Refresh every 30 seconds
-    setInterval(updateCartCounter, 30000);
-  });
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOM fully loaded");
+            updateCartCounter();
+        });
 </script>
 
 

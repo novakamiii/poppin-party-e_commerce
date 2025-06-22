@@ -18,7 +18,7 @@
   <header class="sticky-header">
     <div class="header-inner">
       <div class="logo">
-        <a th:href="@{/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
+        <a th:href="@{/admin/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
       </div>
       <div class="search">
         <input type="text" class="search-input" placeholder="Search">
@@ -38,6 +38,16 @@
 
 
   <main>
+    <div class="addproduct-container">
+      <a th:href="@{/products/add}">
+        <button class="addproduct-button"> Add New Product</button>
+      </a>
+    </div>
+    <div class="addproduct-container">
+      <a th:href="@{/products/archived}">
+        <button class="addproduct-button"> Restore a Product</button>
+      </a>
+    </div>
     <table class="table-section">
       <tr>
         <th>ID</th>
@@ -68,32 +78,14 @@
 
           <!-- 🗑️ Archive (with confirmation) -->
           <a th:href="@{'/products/delete/' + ${product.id}}"
-            onclick="return confirm('Are you sure you want to archive this product?');" title="Archive/Delete" alt="Archive Product">
+            onclick="return confirm('Are you sure you want to archive this product?');" title="Archive/Delete"
+            alt="Archive Product">
             🗑️
           </a>
         </td>
       </tr>
     </table>
-    <div class="addproduct-container">
-      <a th:href="@{/products/add}">
-        <button class="addproduct-button"> Add New Product</button>
-      </a>
-    </div>
-    <div class="addproduct-container">
-      <a th:href="@{/products/archived}">
-        <button class="addproduct-button"> Restore a Product</button>
-      </a>
-    </div>
-    <div class="addproduct-container">
-      <a th:href="@{/admin/accountManagement}">
-        <button class="addproduct-button"> Account Management</button>
-      </a>
-    </div>
-    <div class="addproduct-container">
-      <a th:href="@{/admin/transaction-approval}">
-        <button class="addproduct-button"> Transaction Approval</button>
-      </a>
-    </div>
+
   </main>
   <footer>
     <div class="footer-container">

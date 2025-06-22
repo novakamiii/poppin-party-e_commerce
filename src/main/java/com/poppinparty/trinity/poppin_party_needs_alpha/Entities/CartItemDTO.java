@@ -112,7 +112,4 @@ public class CartItemDTO {
         this.tarpaulinFinish = tarpaulinFinish;
     }
 
-    // Custom Product Tarp
-
-    
 }

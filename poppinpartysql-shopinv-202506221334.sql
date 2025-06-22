@@ -263,7 +263,7 @@ CREATE TABLE `order_items` (
   KEY `fk_product_ref` (`product_ref`),
   KEY `fk_order_items_user` (`user_id`),
   CONSTRAINT `fk_order_items_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=170 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=173 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -273,6 +273,10 @@ CREATE TABLE `order_items` (
 LOCK TABLES `order_items` WRITE;
 /*!40000 ALTER TABLE `order_items` DISABLE KEYS */;
 set autocommit=0;
+INSERT INTO `order_items` VALUES
+(170,22,'Party Confetti',2,350.00,0,NULL,NULL,NULL,NULL,NULL,NULL),
+(171,22,'teto fatass',1,85.00,0,NULL,NULL,NULL,NULL,NULL,NULL),
+(172,22,'Anniv Blush Centerpiece',1,300.00,0,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `order_items` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -483,7 +487,7 @@ LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `user` VALUES
-(22,'San Pedro','pauloneil3334@gmail.com','$2a$10$NCmNK2cfPDLx15owfmEFsuW73om6BnCfrafNRrStnw2WBOPyr5sla','ADMIN','Paulo','2025-05-31 18:22:37','2025-06-22 00:54:26','MALE','Paulo Neil','09550367575','2004-08-24','/uploads/profiles/Paulo-7e33a69c-e1bb-46d1-8673-e0a264ed377d-aasdas.PNG'),
+(22,'San Pedro','pauloneil3334@gmail.com','$2a$10$NCmNK2cfPDLx15owfmEFsuW73om6BnCfrafNRrStnw2WBOPyr5sla','ADMIN','Paulo','2025-05-31 18:22:37','2025-06-22 05:21:17','MALE','Paulo Neil','09550367575','2004-08-24','/uploads/profiles/Paulo-7e33a69c-e1bb-46d1-8673-e0a264ed377d-aasdas.PNG'),
 (23,'GMA','sevillapaulo364@gmail.com','$2a$10$16kKLkyMb8CBM.4w.0wEE.cEgX1g6hL99.7FmEtPKOtG9bgbemuUW','USER','Sevilla','2025-05-31 19:11:32','2025-05-31 19:11:33','MALE','Sevilla','09550367575','2004-08-24',''),
 (25,'GMA','pauloneil3334@gmail.com','$2a$10$DtWXwtuwhVsyN3tIWE7z0.MGujW3238ri1SVATclxc8F8u5FbIYP2','USER','Paulo2','2025-06-02 00:52:25','2025-06-02 00:52:25','MALE','PauloUser','09550367575','2008-02-02',''),
 (26,'san pedro','pauloneil3334@mail.com','$2a$10$4o.u69fkeHcKB2.jlQDpYepFljzaAjuihZZ4kcHI5/LExCKIP/rde','USER','usertest','2025-06-02 01:45:23','2025-06-02 01:45:24','MALE','paulo','09550367575','2018-07-27',''),
@@ -506,4 +510,4 @@ commit;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2025-06-22  8:59:50
+-- Dump completed on 2025-06-22 13:34:12
