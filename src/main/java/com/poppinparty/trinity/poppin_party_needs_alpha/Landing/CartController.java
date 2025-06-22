@@ -35,7 +35,7 @@ public class CartController {
         private ProductRepository productRepository;
         @Autowired
         private UserRepository userRepository;
-        
+
         // ========== ORDER MANAGEMENT ==========
         @GetMapping("/cart")
         public String viewCart() {
@@ -158,6 +158,51 @@ public class CartController {
                 }
 
                 return ResponseEntity.ok("Item added to cart");
+        }
+
+        @PostMapping("/api/cart/validate-checkout")
+        @ResponseBody
+        public ResponseEntity<?> validateCheckout(
+                        @RequestBody Map<String, Object> payload,
+                        Principal principal) {
+
+                try {
+                        User user = userRepository.findByUsername(principal.getName())
+                                        .orElseThrow(() -> new RuntimeException("User not found"));
+
+                        List<Map<String, Object>> items = (List<Map<String, Object>>) payload.get("items");
+
+                        if (items == null || items.isEmpty()) {
+                                return ResponseEntity.badRequest()
+                                                .body(Map.of("error", "No items selected for checkout"));
+                        }
+
+                        // Validate stock for each item
+                        for (Map<String, Object> item : items) {
+                                Long productId = Long.valueOf(item.get("productId").toString());
+                                int quantity = Integer.parseInt(item.get("quantity").toString());
+
+                                if (productId != -1) { // Skip custom products
+                                        Product product = productRepository.findById(productId)
+                                                        .orElseThrow(() -> new RuntimeException("Product not found"));
+
+                                        if (product.getStock() < quantity) {
+                                                return ResponseEntity.badRequest()
+                                                                .body(Map.of(
+                                                                                "error",
+                                                                                "Insufficient stock for "
+                                                                                                + product.getItemName(),
+                                                                                "product", product.getItemName(),
+                                                                                "available", product.getStock()));
+                                        }
+                                }
+                        }
+
+                        return ResponseEntity.ok(Map.of("success", true));
+                } catch (Exception e) {
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                        .body(Map.of("error", "Validation error: " + e.getMessage()));
+                }
         }
 
         @PostMapping("/api/cart/update")

@@ -3,39 +3,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const cartTotal = document.getElementById("cartTotal");
 
   function renderCartItem(item) {
-    const isCustom = item.custom;
-    const baseAttributes = `data-product-id="${item.productId}"`;
-
-    const customAttributes = isCustom
-      ? `data-size="${item.customSize}"
-       data-event-type="${item.eventType}"
-       data-message="${item.personalizedMessage}"
-       data-thickness="${item.tarpaulinThickness}"
-       data-finish="${item.tarpaulinFinish}"`
-      : "";
-
     return `
-    <div class="cart-item" ${baseAttributes} ${customAttributes}>
-      <img src="${item.imageLoc}" alt="${item.itemName}" class="cartpage-image" />
-      <div class="product-details">
-        <p class="cartpage-title">${item.itemName}</p>
-        <div class="price-quantity">
-          <span class="price">₱${item.unitPrice.toFixed(2)}</span>
-          <div class="quantity-controls">
-            <button class="quantity-btn minus">-</button>
-            <input type="number" value="${item.quantity}" min="1" class="quantity-input"/>
-            <button class="quantity-btn plus">+</button>
+        <div class="cart-item" data-product-id="${item.productId}">
+          <img src="${item.imageLoc}" alt="${item.itemName}" class="cartpage-image" />
+          <div class="product-details">
+            <p class="cartpage-title">${item.itemName}</p>
+            <div class="price-quantity">
+              <span class="price">₱${item.unitPrice.toFixed(2)}</span>
+              <div class="quantity-controls">
+                <button class="quantity-btn minus">-</button>
+                <input type="number" value="${item.quantity}" min="1" class="quantity-input"/>
+                <button class="quantity-btn plus">+</button>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <div class="actions">
-        <input class="action-btn item-check" type="checkbox" checked />
-        <button class="action-btn remove-btn"><img src="/img/x.png" alt="remove"></button>
-      </div>
-    </div>
-  `;
+          <div class="actions">
+            <input class="action-btn item-check" type="checkbox" checked />
+            <button class="action-btn remove-btn"><img src="/img/x.png" alt="remove"></button>
+          </div>
+        </div>  
+      `;
   }
-
 
   function updateTotal() {
     let total = 0;
@@ -65,33 +53,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function removeItem(productId, cartItemElement) {
-    let body;
-
-    if (productId === "-1" || productId === -1) {
-      // Custom tarpaulin removal – gather custom fields from DOM attributes
-      const customSize = cartItemElement.dataset.size;
-      const eventType = cartItemElement.dataset.eventType;
-      const message = cartItemElement.dataset.message;
-      const thickness = cartItemElement.dataset.thickness;
-      const finish = cartItemElement.dataset.finish;
-
-      body = new URLSearchParams({
-        productId,
-        customSize,
-        eventType,
-        message,
-        thickness,
-        finish
-      });
-    } else {
-      // Normal product removal
-      body = new URLSearchParams({ productId });
-    }
-
     fetch("/api/cart/remove", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: body.toString()
+      body: `productId=${productId}`
     }).then(res => {
       if (!res.ok) throw new Error("Failed to remove item");
       cartItemElement.remove();
@@ -101,7 +66,6 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error(err);
     });
   }
-
 
   fetch("/api/cart")
     .then(res => {
@@ -170,13 +134,22 @@ document.addEventListener("DOMContentLoaded", () => {
           productId: item.getAttribute("data-product-id"),
           quantity: parseInt(item.querySelector(".quantity-input").value),
           unitPrice: parseFloat(item.querySelector(".price").textContent.replace("₱", "")),
-          itemName: item.querySelector(".cartpage-title").textContent
+          itemName: item.querySelector(".cartpage-title").textContent,
+          imageLoc: item.querySelector(".cartpage-image").src
         });
-
       }
     });
+
+    if (selectedItems.length === 0) {
+      alert("Please select at least one item to proceed to checkout.");
+      window.location.href = "/cart";
+      return;
+    }
 
     localStorage.setItem("checkoutItems", JSON.stringify(selectedItems));
     window.location.href = "/order/checkout";
   });
+
+  
+
 });

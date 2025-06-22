@@ -49,9 +49,7 @@
         </div>
     </main>
 
-    <
-
-    <footer>
+    < <footer>
         <div class="footer-container">
             <div class="footer-logo">
                 <img th:src="@{/img/logowhite.png}" alt="Poppin Party Logo">
@@ -112,86 +110,140 @@
         <div class="copyright">
             © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
         </div>
-    </footer>
+        </footer>
 
 
 </body>
 
-<!-- Move this script right before closing </body> tag -->
 <script type="module">
+    import { updateCartCounter } from '/js/ajax.js';
+
     document.addEventListener('DOMContentLoaded', () => {
-        console.log("DOM loaded - initializing cart counter");
-
-        // Simple non-module version that will work immediately
-        function updateCartCounter() {
-            fetch('/api/cart/count')
-                .then(res => {
-                    if (!res.ok) throw new Error('Failed to fetch cart count');
-                    return res.json();
-                })
-                .then(count => {
-                    const counter = document.getElementById('cart-counter');
-                    if (counter) {
-                        console.log(`Updating cart counter to ${count}`);
-                        counter.textContent = count;
-                        counter.style.display = count > 0 ? 'block' : 'none';
-
-                        // Add pulse animation
-                        counter.classList.add('pulse');
-                        setTimeout(() => counter.classList.remove('pulse'), 500);
-                    }
-                })
-                .catch(err => console.error('Cart counter error:', err));
-        }
-
-        // Initial load
+        console.log("DOM fully loaded");
         updateCartCounter();
-
-        // Refresh every 30 seconds
-        setInterval(updateCartCounter, 30000);
     });
 </script>
 
 <script type="module">
-        import { createProductCardHTML, addProductAjax } from '/js/ajax.js';
+    import { createProductCardHTML, addProductAjax } from '/js/ajax.js';
 
-
+    document.addEventListener('DOMContentLoaded', () => {
         const productList = document.querySelector('.productlist');
         const form = document.getElementById('addProductForm');
+        const searchInput = document.querySelector('.search-input');
+        const searchButton = document.querySelector('.search-button');
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchQuery = urlParams.get('search');
+        let allProducts = [];
 
-        fetch('/api/products')
-            .then(res => {
-                console.log("Raw response:", res);
-                return res.json();
-            })
-            .then(products => {
-                console.log("Parsed products:", products); // <== this should show the array
-                products.forEach(product => {
-                    console.log("Rendering product:", product);
-                    productList.insertAdjacentHTML('beforeend', createProductCardHTML(product));
+        // Initial product load
+        function loadProducts() {
+            fetch('/api/products')
+                .then(res => {
+                    console.log("Raw response:", res);
+                    return res.json();
+                })
+                .then(products => {
+                    console.log("Parsed products:", products);
+                    allProducts = products;
+
+                    // Apply search filter if query exists in URL
+                    if (searchQuery) {
+                        searchInput.value = searchQuery;
+                        performSearch();
+                    } else {
+                        renderProducts(products);
+                    }
+                })
+                .catch(err => {
+                    console.error("Error fetching products:", err);
                 });
-            })
-            .catch(err => {
-                console.error("Error in fetch or parsing:", err);
+        }
+
+        // Enhanced renderProducts function with "no results" message
+        function renderProducts(products) {
+            productList.innerHTML = '';
+
+            if (products.length === 0) {
+                productList.innerHTML = `
+                    <div class="no-products-found">
+                        <img src="/img/no-results.png" alt="No products found">
+                        <p>No products match your search</p>
+                        <button class="clear-search">Show All Products</button>
+                    </div>
+                `;
+
+                // Add event listener to the clear search button
+                const clearSearchBtn = productList.querySelector('.clear-search');
+                if (clearSearchBtn) {
+                    clearSearchBtn.addEventListener('click', () => {
+                        searchInput.value = '';
+                        window.history.pushState({}, '', '/products/see-more');
+                        renderProducts(allProducts);
+                    });
+                }
+                return;
+            }
+
+            products.forEach(product => {
+                productList.insertAdjacentHTML('beforeend', createProductCardHTML(product));
+            });
+        }
+
+        // Enhanced search functionality
+        function performSearch() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+
+            // Update URL without reloading
+            if (searchTerm) {
+                window.history.pushState({}, '', `/products/see-more?search=${encodeURIComponent(searchTerm)}`);
+            } else {
+                window.history.pushState({}, '', '/products/see-more');
+            }
+
+            if (!searchTerm) {
+                renderProducts(allProducts);
+                return;
+            }
+
+            const filteredProducts = allProducts.filter(product => {
+                return (
+                    product.itemName.toLowerCase().includes(searchTerm) ||
+                    (product.description && product.description.toLowerCase().includes(searchTerm))
+                );
             });
 
+            renderProducts(filteredProducts);
+        }
+
+        // Event listeners
+        if (searchButton && searchInput) {
+            searchButton.addEventListener('click', performSearch);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+        }
 
         if (form) {
             form.addEventListener('submit', e => {
                 e.preventDefault();
-
                 addProductAjax(
                     form,
                     newProduct => {
-                        productList.insertAdjacentHTML('beforeend', createProductCardHTML(newProduct));
+                        allProducts.unshift(newProduct); // Add to our stored products
+                        renderProducts(allProducts); // Re-render all products
                         form.reset();
                     },
-                    () => {
-                        alert('Failed to add product');
-                    }
+                    () => alert('Failed to add product')
                 );
             });
         }
-    </script>
+
+        // Initial load
+        loadProducts();
+    });
+</script>
+
+
 
 </html>

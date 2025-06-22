@@ -27,9 +27,18 @@
                 </button>
             </div>
             <div class="header-actions">
+                <div class="notif-button">
+                    <img th:src="@{/img/notif.png}" alt="notification" id="notif">
+                </div>
                 <div class="account-button">
                     <a th:href="@{/account}">
                         <img th:src="@{/img/account.png}" alt="user" id="user">
+                    </a>
+                </div>
+                <div class="cart-image">
+                    <a th:href="@{/cart}">
+                        <img th:src="@{/img/cart.png}" alt="cart" id="cart">
+                        <span id="cart-counter" class="cart-counter">0</span>
                     </a>
                 </div>
             </div>
@@ -143,5 +152,55 @@
         size: 10em;
     }
 </style>
+
+<script type="module">
+    import { updateCartCounter } from '/js/ajax.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log("DOM fully loaded");
+        updateCartCounter();
+    });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.querySelector('.search-input');
+    const searchButton = document.querySelector('.search-button');
+    const transactionRows = document.querySelectorAll('.table-section tr:not(:first-child)');
+
+    function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+
+        transactionRows.forEach(row => {
+            const orderId = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+            const username = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+            const itemName = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+            const trackingNumber = row.querySelector('td:nth-child(8)').textContent.toLowerCase();
+
+            const shouldShow = orderId.includes(searchTerm) ||
+                             username.includes(searchTerm) ||
+                             itemName.includes(searchTerm) ||
+                             trackingNumber.includes(searchTerm);
+
+            row.style.display = shouldShow ? '' : 'none';
+        });
+    }
+
+    // Add debounce to prevent rapid firing
+    let debounceTimer;
+    function debounceSearch() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(performSearch, 300);
+    }
+
+    searchButton.addEventListener('click', performSearch);
+    searchInput.addEventListener('input', debounceSearch);
+
+    // Also search when filter changes
+    document.querySelector('.filter-section select').addEventListener('change', () => {
+        setTimeout(performSearch, 500); // Wait for page to load new data
+    });
+});
+</script>
 
 </html>

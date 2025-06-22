@@ -40,7 +40,7 @@ import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.UserReposit
 
 @Controller
 public class OrdersController {
-// === ORDER MANAGEMENT ===
+        // === ORDER MANAGEMENT ===
         @Autowired
         private OrderItemRepository orderItemRepository;
         @Autowired
@@ -127,113 +127,134 @@ public class OrdersController {
                         @RequestParam String paymentMethod,
                         @RequestParam String itemsJson,
                         Principal principal,
-                        RedirectAttributes redirectAttributes) throws JsonProcessingException {
+                        RedirectAttributes redirectAttributes) {
 
-                User user = userRepository.findByUsername(principal.getName())
-                                .orElseThrow(() -> new RuntimeException("User not found"));
+                try {
+                        User user = userRepository.findByUsername(principal.getName())
+                                        .orElseThrow(() -> new RuntimeException("User not found"));
 
-                ObjectMapper mapper = new ObjectMapper();
-                List<Map<String, Object>> items = mapper.readValue(itemsJson, new TypeReference<>() {
-                });
-                BigDecimal subtotal = BigDecimal.ZERO;
+                        ObjectMapper mapper = new ObjectMapper();
+                        List<Map<String, Object>> items = mapper.readValue(itemsJson, new TypeReference<>() {
+                        });
 
-                // STOCK VALIDATION PHASE
-                for (Map<String, Object> item : items) {
-                        Long productId = Long.valueOf(safeGet(item, "productId"));
-                        int quantity = Integer.parseInt(safeGet(item, "quantity"));
+                        // Final validation
+                        if (items.isEmpty()) {
+                                redirectAttributes.addFlashAttribute("error", "No items selected for checkout");
+                                return "redirect:/cart";
+                        }
 
-                        if (!isCustomProduct(productId)) {
-                                Product product = productRepository.findById(productId)
-                                                .orElseThrow(() -> new RuntimeException("Product not found"));
+                        // Calculate subtotal
+                        BigDecimal subtotal = items.stream()
+                                        .map(item -> new BigDecimal(item.get("unitPrice").toString())
+                                                        .multiply(BigDecimal.valueOf(Integer
+                                                                        .parseInt(item.get("quantity").toString()))))
+                                        .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                                if (product.getStock() < quantity) {
-                                        redirectAttributes.addFlashAttribute("error",
-                                                        "Insufficient stock for " + product.getItemName() +
-                                                                        ". Only " + product.getStock() + " left.");
-                                        return "redirect:/cart";
+                        // STOCK VALIDATION PHASE
+                        for (Map<String, Object> item : items) {
+                                Long productId = Long.valueOf(safeGet(item, "productId"));
+                                int quantity = Integer.parseInt(safeGet(item, "quantity"));
+
+                                if (!isCustomProduct(productId)) {
+                                        Product product = productRepository.findById(productId)
+                                                        .orElseThrow(() -> new RuntimeException("Product not found"));
+
+                                        if (product.getStock() < quantity) {
+                                                redirectAttributes.addFlashAttribute("error",
+                                                                "Insufficient stock for " + product.getItemName() +
+                                                                                ". Only " + product.getStock()
+                                                                                + " left.");
+                                                return "redirect:/cart";
+                                        }
                                 }
                         }
-                }
 
-                // STOCK DEDUCTION PHASE
-                for (Map<String, Object> item : items) {
-                        Long productId = Long.valueOf(safeGet(item, "productId"));
-                        int quantity = Integer.parseInt(safeGet(item, "quantity"));
+                        // STOCK DEDUCTION PHASE
+                        for (Map<String, Object> item : items) {
+                                Long productId = Long.valueOf(safeGet(item, "productId"));
+                                int quantity = Integer.parseInt(safeGet(item, "quantity"));
 
-                        if (!isCustomProduct(productId)) {
-                                Product product = productRepository.findById(productId)
-                                                .orElseThrow(() -> new RuntimeException("Product not found"));
+                                if (!isCustomProduct(productId)) {
+                                        Product product = productRepository.findById(productId)
+                                                        .orElseThrow(() -> new RuntimeException("Product not found"));
 
-                                product.setStock(product.getStock() - quantity);
-                                productRepository.save(product);
-                        }
-                }
-
-                BigDecimal shippingFee = switch (shippingOption) {
-                        case "express" -> BigDecimal.valueOf(75);
-                        case "overnight" -> BigDecimal.valueOf(150);
-                        default -> BigDecimal.valueOf(45);
-                };
-                BigDecimal tax = subtotal.multiply(BigDecimal.valueOf(0.12));
-                BigDecimal total = subtotal.add(shippingFee).add(tax);
-
-                String trackingNumber = UUID.randomUUID().toString().substring(0, 12).toUpperCase();
-
-                // Save ORDER record
-                Order order = new Order();
-                order.setUserId(user.getId());
-                order.setTotalAmount(total);
-                order.setPaymentMethod(paymentMethod);
-                order.setShippingOption(shippingOption);
-                order.setShippingAddress(user.getAddress());
-                order.setStatus("PENDING");
-                order.setTrackingNumber(trackingNumber);
-                orderRepository.save(order);
-
-                // Save PAYMENT records (one per product)
-                for (Map<String, Object> item : items) {
-                        Long productId = Long.valueOf(safeGet(item, "productId"));
-                        int quantity = Integer.parseInt(safeGet(item, "quantity"));
-                        BigDecimal price = new BigDecimal(safeGet(item, "unitPrice"));
-                        String itemName = safeGet(item, "itemName");
-
-                        //String imageLoc; Irrelevant
-
-                        // 📝 Create Payment record
-                        Payment payment = new Payment();
-                        payment.setUser(user);
-                        payment.setOrder(order);
-                        payment.setItemName(itemName);
-                        payment.setAmount(price.multiply(BigDecimal.valueOf(quantity)));
-                        payment.setTransactionId(trackingNumber);
-                        payment.setStatus("PENDING");
-                        payment.setShippingOption(shippingOption);
-                        payment.setPaymentMethodDetails(paymentMethod);
-                        payment.setDaysLeft(5);
-                        payment.setQuantity(quantity);
-
-                        if (productId == -1L) {
-                                // Custom product
-                                payment.setProductId(1L); // You can use a dummy product like ID 1 = "Placeholder" OR
-                                                          // skip setting productId at all if not @NotNull
-                                payment.setIsCustom(true);
-                                payment.setCustomProductRef(itemName); // descriptive like "Custom Tarpaulin (2x3 ft)"
-                        } else {
-                                // Regular product
-                                Product product = productRepository.findById(productId)
-                                                .orElseThrow(() -> new RuntimeException("Product not found"));
-                                payment.setProductId(product.getId());
-                                payment.setIsCustom(false);
-                                payment.setCustomProductRef(null);
+                                        product.setStock(product.getStock() - quantity);
+                                        productRepository.save(product);
+                                }
                         }
 
-                        paymentRepository.save(payment);
+                        BigDecimal shippingFee = switch (shippingOption) {
+                                case "express" -> BigDecimal.valueOf(75);
+                                case "overnight" -> BigDecimal.valueOf(150);
+                                default -> BigDecimal.valueOf(45);
+                        };
+                        BigDecimal tax = subtotal.multiply(BigDecimal.valueOf(0.12));
+                        BigDecimal total = subtotal.add(shippingFee).add(tax);
+
+                        String trackingNumber = UUID.randomUUID().toString().substring(0, 12).toUpperCase();
+
+                        // Save ORDER record
+                        Order order = new Order();
+                        order.setUserId(user.getId());
+                        order.setTotalAmount(total);
+                        order.setPaymentMethod(paymentMethod);
+                        order.setShippingOption(shippingOption);
+                        order.setShippingAddress(user.getAddress());
+                        order.setStatus("PENDING");
+                        order.setTrackingNumber(trackingNumber);
+                        orderRepository.save(order);
+
+                        // Save PAYMENT records (one per product)
+                        for (Map<String, Object> item : items) {
+                                Long productId = Long.valueOf(safeGet(item, "productId"));
+                                int quantity = Integer.parseInt(safeGet(item, "quantity"));
+                                BigDecimal price = new BigDecimal(safeGet(item, "unitPrice"));
+                                String itemName = safeGet(item, "itemName");
+
+                                // String imageLoc; Irrelevant
+
+                                // 📝 Create Payment record
+                                Payment payment = new Payment();
+                                payment.setUser(user);
+                                payment.setOrder(order);
+                                payment.setItemName(itemName);
+                                payment.setAmount(price.multiply(BigDecimal.valueOf(quantity)));
+                                payment.setTransactionId(trackingNumber);
+                                payment.setStatus("PENDING");
+                                payment.setShippingOption(shippingOption);
+                                payment.setPaymentMethodDetails(paymentMethod);
+                                payment.setDaysLeft(5);
+                                payment.setQuantity(quantity);
+
+                                if (productId == -1L) {
+                                        // Custom product
+                                        payment.setProductId(1L); // You can use a dummy product like ID 1 =
+                                                                  // "Placeholder" OR
+                                                                  // skip setting productId at all if not @NotNull
+                                        payment.setIsCustom(true);
+                                        payment.setCustomProductRef(itemName); // descriptive like "Custom Tarpaulin
+                                                                               // (2x3 ft)"
+                                } else {
+                                        // Regular product
+                                        Product product = productRepository.findById(productId)
+                                                        .orElseThrow(() -> new RuntimeException("Product not found"));
+                                        payment.setProductId(product.getId());
+                                        payment.setIsCustom(false);
+                                        payment.setCustomProductRef(null);
+                                }
+
+                                paymentRepository.save(payment);
+                        }
+
+                        orderItemRepository.deleteByUserId(user.getId());
+
+                        redirectAttributes.addFlashAttribute("trackingNumber", trackingNumber);
+                        return "redirect:/order/success";
+
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("error", "Order processing failed: " + e.getMessage());
+                        return "redirect:/cart";
                 }
-
-                orderItemRepository.deleteByUserId(user.getId());
-
-                redirectAttributes.addFlashAttribute("trackingNumber", trackingNumber);
-                return "redirect:/order/success";
         }
 
         private boolean isCustomProduct(Long productId) {

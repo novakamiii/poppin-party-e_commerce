@@ -524,6 +524,43 @@ body {
   height: 20px;
 }
 
+.no-products-found {
+  text-align: center;
+  font-family: "Bebas Neue", sans-serif;
+  padding: 40px;
+  margin: 0 auto;
+  max-width: 500px;
+}
+
+.no-products-found img {
+  width: 150px;
+  height: 150px;
+  margin-bottom: 20px;
+  opacity: 0.7;
+}
+
+.no-products-found p {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.no-products-found button.clear-search {
+  background-color: #b944fd;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Bebas Neue', sans-serif;
+  transition: background-color 0.3s;
+}
+
+.no-products-found button.clear-search:hover {
+  background-color: #9a2ae0;
+}
+
+
 /* Header Actions Container */
 .header-actions {
   display: flex;

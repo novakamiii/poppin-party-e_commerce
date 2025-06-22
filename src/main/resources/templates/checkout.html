@@ -148,7 +148,7 @@
         </div>
         <div>
             <div class="checkout-container">
-                <form id="checkoutForm" method="post" action="/order/place">
+                <form id="checkoutForm" method="post" action="/order/place" onsubmit="return validateCheckoutForm()">
                     <input type="hidden" name="shippingOption" id="shippingOptionInput">
                     <input type="hidden" name="paymentMethod" id="paymentMethodInput">
                     <input type="hidden" name="itemsJson" id="itemsJsonInput">
@@ -228,15 +228,6 @@
         </div>
     </footer>
 </body>
-<!--ajax-->
-<script type="module">
-    import { renderCheckoutItems, updateSummary } from '/js/checkout-utils.js';
-
-    document.addEventListener("DOMContentLoaded", () => {
-        renderCheckoutItems(".checkout-items", updateSummary);
-    });
-</script>
-
 
 <script type="module">
     import { renderCheckoutItems, updateSummary } from '/js/checkout-utils.js';
@@ -314,7 +305,7 @@
     function validateCheckoutForm() {
         const items = JSON.parse(localStorage.getItem("checkoutItems") || "[]");
         if (items.length === 0) {
-            alert("Your cart is empty!");
+            alert("Your cart is empty! Please add items before checking out.");
             return false;
         }
         return true;

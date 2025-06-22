@@ -18,7 +18,7 @@
   <header class="sticky-header">
     <div class="header-inner">
       <div class="logo">
-        <a th:href="@{/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
+        <a th:href="@{/admin/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
       </div>
       <div class="search">
         <input type="text" class="search-input" placeholder="Search">
@@ -27,9 +27,18 @@
         </button>
       </div>
       <div class="header-actions">
+        <div class="notif-button">
+          <img th:src="@{/img/notif.png}" alt="notification" id="notif">
+        </div>
         <div class="account-button">
           <a th:href="@{/account}">
             <img th:src="@{/img/account.png}" alt="user" id="user">
+          </a>
+        </div>
+        <div class="cart-image">
+          <a th:href="@{/cart}">
+            <img th:src="@{/img/cart.png}" alt="cart" id="cart">
+            <span id="cart-counter" class="cart-counter">0</span>
           </a>
         </div>
       </div>
@@ -38,6 +47,11 @@
 
 
   <main>
+    <div class="addproduct-container">
+      <a th:href="@{/products}">
+        <button class="addproduct-button"> Return Back</button>
+      </a>
+    </div>
     <table class="table-section">
       <tr>
         <th>ID</th>
@@ -55,7 +69,8 @@
         <td th:text="${product.price}"></td>
         <td th:text="${product.stock}"></td>
         <td th:text="${product.category}"></td>
-        <td>
+        <td id="table-description" style="position: relative;">
+
           <img th:src="${product.imageLoc}" alt="Product Image" class="hover-image" />
         </td>
         <td th:text="${product.description}"></td>
@@ -69,11 +84,6 @@
       </tr>
 
     </table>
-    <div class="addproduct-container">
-      <a th:href="@{/products/add}">
-        <button class="addproduct-button"> Add New Product</button>
-      </a>
-    </div>
   </main>
   <footer>
     <div class="footer-container">
@@ -94,5 +104,39 @@
       </div>
   </footer>
 </body>
+<script type="module">
+    import { updateCartCounter } from '/js/ajax.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log("DOM fully loaded");
+        updateCartCounter();
+    });
+</script>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.querySelector('.search-input');
+    const searchButton = document.querySelector('.search-button');
+    const productRows = document.querySelectorAll('.table-section tr:not(:first-child)');
+
+    function performSearch() {
+      const searchTerm = searchInput.value.toLowerCase().trim();
+
+      productRows.forEach(row => {
+        const productName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        const productDesc = row.querySelector('td:nth-child(7)').textContent.toLowerCase();
+        const shouldShow = productName.includes(searchTerm) ||
+          productDesc.includes(searchTerm);
+
+        row.style.display = shouldShow ? '' : 'none';
+      });
+    }
+
+    searchButton.addEventListener('click', performSearch);
+    searchInput.addEventListener('input', performSearch);
+  });
+</script>
+
 
 </html>
