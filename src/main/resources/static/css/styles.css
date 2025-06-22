@@ -310,7 +310,8 @@ body {
 
 .checkout-container {
   display: flex;
-  justify-content: center; /* 💡 centers content horizontally */
+  justify-content: center;
+  /* 💡 centers content horizontally */
   align-items: center;
   width: 100%;
   margin: 20px 0;
@@ -400,6 +401,7 @@ body {
   cursor: pointer;
   margin-left: 10px;
 }
+
 /* ORDER SUCCESS PAGE */
 /* ORDER SUCCESS PAGE */
 /* ORDER SUCCESS PAGE */
@@ -526,15 +528,51 @@ body {
 .header-actions {
   display: flex;
   align-items: center;
+  gap: 15px;
+  /* Consistent spacing between icons */
 }
 
-/* Cart icon */
-.cart-image img {
+/* Standardize all action buttons */
+.cart-image,
+.account-button,
+.notif-button {
+  position: relative;
   width: 50px;
   height: 50px;
-  margin-right: 15px;
-  /* Add some spacing between cart and account */
 }
+
+/* Standardize all action images */
+.cart-image img,
+.account-button img,
+.notif-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* Ensures images maintain aspect ratio */
+}
+
+.cart-counter {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 13px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  z-index: 2;
+  font-family: Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+
 
 /* Account Button Styling */
 

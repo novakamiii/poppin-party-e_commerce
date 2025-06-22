@@ -25,12 +25,18 @@
                 </button>
             </div>
             <div class="header-actions">
-                <div class="cart-image">
-                    <a th:href="@{/cart}"><img th:src="@{/img/cart.png}" alt="cart" id="cart"></a>
+                <div class="notif-button">
+                    <img th:src="@{/img/notif.png}" alt="notification" id="notif">
                 </div>
                 <div class="account-button">
                     <a th:href="@{/account}">
                         <img th:src="@{/img/account.png}" alt="user" id="user">
+                    </a>
+                </div>
+                <div class="cart-image">
+                    <a th:href="@{/cart}">
+                        <img th:src="@{/img/cart.png}" alt="cart" id="cart">
+                        <span id="cart-counter" class="cart-counter">0</span>
                     </a>
                 </div>
             </div>
@@ -43,47 +49,7 @@
         </div>
     </main>
 
-    <script type="module">
-        import { createProductCardHTML, addProductAjax } from '/js/ajax.js';
-
-
-        const productList = document.querySelector('.productlist');
-        const form = document.getElementById('addProductForm');
-
-        fetch('/api/products')
-            .then(res => {
-                console.log("Raw response:", res);
-                return res.json();
-            })
-            .then(products => {
-                console.log("Parsed products:", products); // <== this should show the array
-                products.forEach(product => {
-                    console.log("Rendering product:", product);
-                    productList.insertAdjacentHTML('beforeend', createProductCardHTML(product));
-                });
-            })
-            .catch(err => {
-                console.error("Error in fetch or parsing:", err);
-            });
-
-
-        if (form) {
-            form.addEventListener('submit', e => {
-                e.preventDefault();
-
-                addProductAjax(
-                    form,
-                    newProduct => {
-                        productList.insertAdjacentHTML('beforeend', createProductCardHTML(newProduct));
-                        form.reset();
-                    },
-                    () => {
-                        alert('Failed to add product');
-                    }
-                );
-            });
-        }
-    </script>
+    <
 
     <footer>
         <div class="footer-container">
@@ -150,5 +116,82 @@
 
 
 </body>
+
+<!-- Move this script right before closing </body> tag -->
+<script type="module">
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log("DOM loaded - initializing cart counter");
+
+        // Simple non-module version that will work immediately
+        function updateCartCounter() {
+            fetch('/api/cart/count')
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to fetch cart count');
+                    return res.json();
+                })
+                .then(count => {
+                    const counter = document.getElementById('cart-counter');
+                    if (counter) {
+                        console.log(`Updating cart counter to ${count}`);
+                        counter.textContent = count;
+                        counter.style.display = count > 0 ? 'block' : 'none';
+
+                        // Add pulse animation
+                        counter.classList.add('pulse');
+                        setTimeout(() => counter.classList.remove('pulse'), 500);
+                    }
+                })
+                .catch(err => console.error('Cart counter error:', err));
+        }
+
+        // Initial load
+        updateCartCounter();
+
+        // Refresh every 30 seconds
+        setInterval(updateCartCounter, 30000);
+    });
+</script>
+
+<script type="module">
+        import { createProductCardHTML, addProductAjax } from '/js/ajax.js';
+
+
+        const productList = document.querySelector('.productlist');
+        const form = document.getElementById('addProductForm');
+
+        fetch('/api/products')
+            .then(res => {
+                console.log("Raw response:", res);
+                return res.json();
+            })
+            .then(products => {
+                console.log("Parsed products:", products); // <== this should show the array
+                products.forEach(product => {
+                    console.log("Rendering product:", product);
+                    productList.insertAdjacentHTML('beforeend', createProductCardHTML(product));
+                });
+            })
+            .catch(err => {
+                console.error("Error in fetch or parsing:", err);
+            });
+
+
+        if (form) {
+            form.addEventListener('submit', e => {
+                e.preventDefault();
+
+                addProductAjax(
+                    form,
+                    newProduct => {
+                        productList.insertAdjacentHTML('beforeend', createProductCardHTML(newProduct));
+                        form.reset();
+                    },
+                    () => {
+                        alert('Failed to add product');
+                    }
+                );
+            });
+        }
+    </script>
 
 </html>
