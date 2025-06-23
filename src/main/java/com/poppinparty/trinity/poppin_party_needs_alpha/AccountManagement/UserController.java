@@ -1,3 +1,34 @@
+/**
+ * Controller for handling user account management operations such as login, registration,
+ * password reset, and role-based redirection.
+ *
+ * <p>This controller provides endpoints for:
+ * <ul>
+ *   <li>Login and authentication checks</li>
+ *   <li>Role-based redirection after login</li>
+ *   <li>Admin and user home pages</li>
+ *   <li>User registration</li>
+ *   <li>Forgot password and password reset functionality</li>
+ * </ul>
+ *
+ * <p>It also updates the user's last login time upon accessing certain endpoints.
+ *
+ * <p>Dependencies:
+ * <ul>
+ *   <li>{@link UserRepository} for user data access</li>
+ *   <li>{@link ProductRepository} for product data access (admin dashboard)</li>
+ * </ul>
+ *
+ * <p>Security:
+ * <ul>
+ *   <li>Uses Spring Security for authentication and role management</li>
+ *   <li>Passwords are encoded using {@link BCryptPasswordEncoder}</li>
+ * </ul>
+ *
+ * <p>Views returned are typically Thymeleaf templates (e.g., "login", "register", "index").
+ *
+ * @author (Your Name)
+ */
 package com.poppinparty.trinity.poppin_party_needs_alpha.AccountManagement;
 
 import java.security.Principal;

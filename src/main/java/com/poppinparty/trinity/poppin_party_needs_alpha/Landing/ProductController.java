@@ -1,3 +1,37 @@
+/**
+ * Controller for handling product-related web and API requests.
+ * <p>
+ * This controller provides endpoints for:
+ * <ul>
+ *   <li>Viewing products by category</li>
+ *   <li>Rendering product-related pages (see more, custom tarp, product page)</li>
+ *   <li>REST API for managing products (add, list, get by ID)</li>
+ * </ul>
+ * 
+ * <h2>Web Endpoints:</h2>
+ * <ul>
+ *   <li><b>/products/category</b> - View products filtered by category</li>
+ *   <li><b>/products/see-more</b> - Render the "see more" page</li>
+ *   <li><b>/products/customtarp</b> - Render the custom tarp order page</li>
+ *   <li><b>/product-page</b> - Render the general product page</li>
+ *   <li><b>/product-page/{id}</b> - Render a specific product's page</li>
+ * </ul>
+ * 
+ * <h2>REST API Endpoints (under /api/products):</h2>
+ * <ul>
+ *   <li><b>POST /api/products</b> - Add a new product with image upload (multipart/form-data)</li>
+ *   <li><b>GET /api/products</b> - Retrieve all products as DTOs</li>
+ *   <li><b>GET /api/products/{id}</b> - Retrieve a product by its ID</li>
+ * </ul>
+ * 
+ * <p>
+ * Image uploads are stored in the <code>uploads/</code> directory with a unique filename.
+ * </p>
+ * 
+ * <p>
+ * Uses {@link ProductRepository} for data access and supports both HTML view rendering and RESTful API responses.
+ * </p>
+ */
 package com.poppinparty.trinity.poppin_party_needs_alpha.Landing;
 
 import java.io.IOException;
