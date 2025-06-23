@@ -22,8 +22,11 @@ public class ArchivedPayments {
     @Column(name = "user_id")
     private Long userId;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "order_id")
+    @Column(name = "order_id", nullable = false)
+    private Long orderId;
+
+    @ManyToOne
+    @JoinColumn(name = "order_id", insertable = false, updatable = false)
     private ArchivedOrders order;
 
     @Column(name = "product_id")
@@ -58,6 +61,8 @@ public class ArchivedPayments {
 
     @Column(name = "is_custom")
     private Boolean isCustom = false;
+
+    
 
     public Long getId() {
         return id;
@@ -169,6 +174,14 @@ public class ArchivedPayments {
 
     public void setIsCustom(Boolean isCustom) {
         this.isCustom = isCustom;
+    }
+
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
     }
 
 }

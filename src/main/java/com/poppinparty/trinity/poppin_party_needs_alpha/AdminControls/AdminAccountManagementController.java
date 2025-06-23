@@ -44,7 +44,6 @@
  */
 package com.poppinparty.trinity.poppin_party_needs_alpha.AdminControls;
 
-
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -69,7 +68,6 @@ import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.OrderItem;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Payment;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.ArchivedOrders;
 
-
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderItemRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.UserRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderRepository;
@@ -78,8 +76,6 @@ import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ArchivedUse
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ArchivedOrderItemsRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ArchivedPaymentsRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ArchivedOrdersRepository;
-
-
 
 @Controller
 public class AdminAccountManagementController {
@@ -103,14 +99,14 @@ public class AdminAccountManagementController {
 
     @Autowired
     private ArchivedPaymentsRepository archivedPaymentsRepository;
-    
+
     @Autowired
     private OrderItemRepository orderItemRepository;
 
     @Autowired
     private ArchivedOrderItemsRepository archivedOrderItemsRepository;
 
-// ========== ACCOUNT ADMINS MANAGEMENT ==========
+    // ========== ACCOUNT ADMINS MANAGEMENT ==========
 
     @GetMapping("/admin/accountManagement")
     public String showAccounts(Model model) {
@@ -131,7 +127,7 @@ public class AdminAccountManagementController {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user Id: " + id));
 
-        //Archive User
+        // Archive User
         ArchivedUsers archivedUser = new ArchivedUsers();
         archivedUser.setName(user.getName());
         archivedUser.setPhone(user.getPhone());
@@ -147,13 +143,13 @@ public class AdminAccountManagementController {
         archivedUser.setOriginalUserId(user.getId());
         archivedUserRepository.saveAndFlush(archivedUser); // make sure it has an ID
 
-        //Archive Orders
+        // Archive Orders
         List<Order> orders = orderRepository.findByUserId(id);
         Map<Long, ArchivedOrders> archivedOrderMap = new HashMap<>();
         for (Order order : orders) {
             ArchivedOrders archivedOrder = new ArchivedOrders();
             archivedOrder.setOriginalOrderId(order.getId());
-            archivedOrder.setUserId(order.getId());
+            archivedOrder.setUserId(order.getUser().getId());
             archivedOrder.setOrderDate(order.getOrderDate());
             archivedOrder.setTotalAmount(order.getTotalAmount());
             archivedOrder.setStatus(order.getStatus());
@@ -166,15 +162,23 @@ public class AdminAccountManagementController {
             archivedOrderMap.put(order.getId(), archivedOrder);
         }
 
-        //Archive Payments
+        // Archive Payments
         List<Payment> payments = paymentRepository.findByUserId(id);
         for (Payment payment : payments) {
+            if (payment.getOrder() == null) {
+                log.warn("Skipping payment {}: no order_id (required by archived_payments)", payment.getId());
+                continue; // Skip this payment
+            }
             ArchivedPayments archivedPayment = new ArchivedPayments();
-            archivedPayment.setUserId(archivedUser.getId()); // ✅ Use the archivedUser ID!
-
-            ArchivedOrders relatedArchivedOrder = archivedOrderMap.get(
-                    payment.getOrder() != null ? payment.getOrder().getId() : null);
-            archivedPayment.setOrder(relatedArchivedOrder);
+            archivedPayment.setUserId(archivedUser.getId());
+            ArchivedOrders relatedArchivedOrder = archivedOrderMap.get(payment.getOrder().getId());
+            if (relatedArchivedOrder != null) {
+                archivedPayment.setOrder(relatedArchivedOrder);
+                archivedPayment.setOrderId(relatedArchivedOrder.getId());
+            } else {
+                log.warn("Skipping payment {}: related archived order not found", payment.getId());
+                continue;
+            }
 
             archivedPayment.setProductId(payment.getProductId());
             archivedPayment.setItemName(payment.getItemName());
@@ -191,7 +195,7 @@ public class AdminAccountManagementController {
             archivedPaymentsRepository.save(archivedPayment);
         }
 
-        //Archive Order Items
+        // Archive Order Items
         List<OrderItem> orderItems = orderItemRepository.findByUserId(id);
         for (OrderItem item : orderItems) {
             ArchivedOrderItems archivedItem = new ArchivedOrderItems();
@@ -208,7 +212,7 @@ public class AdminAccountManagementController {
             archivedOrderItemsRepository.save(archivedItem);
         }
 
-        //Delete in the correct order
+        // Delete in the correct order
         paymentRepository.deleteAll(payments);
         orderItemRepository.deleteAll(orderItems);
         orderRepository.deleteAll(orders);
@@ -220,7 +224,7 @@ public class AdminAccountManagementController {
     @Transactional
     @PostMapping("/admin/user/restore/{id}")
     public String restoreUser(@PathVariable Long id) {
-        //Find archived user
+        // Find archived user
         ArchivedUsers archivedUser = archivedUserRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Archived user not found: " + id));
 
@@ -246,14 +250,14 @@ public class AdminAccountManagementController {
 
         Long originalUserId = archivedUser.getOriginalUserId();
 
-        //Restore Orders
+        // Restore Orders
         List<ArchivedOrders> archivedOrders = archivedOrdersRepository.findByUserId(originalUserId);
         Map<Long, Order> orderIdMapping = new HashMap<>();
         log.info("Found {} orders to restore", archivedOrders.size());
 
         for (ArchivedOrders archivedOrder : archivedOrders) {
             Order order = new Order();
-            order.setId(savedUser.getId());
+            order.setUser(savedUser);
             order.setOrderDate(archivedOrder.getOrderDate());
             order.setTotalAmount(archivedOrder.getTotalAmount());
             order.setStatus(archivedOrder.getStatus() != null ? archivedOrder.getStatus() : "PENDING");
@@ -267,7 +271,7 @@ public class AdminAccountManagementController {
             log.debug("Restored order ID {} (original {})", savedOrder.getId(), archivedOrder.getId());
         }
 
-        //Restore Order Items
+        // Restore Order Items
         List<ArchivedOrderItems> archivedItems = archivedOrderItemsRepository.findByUserId(originalUserId);
         log.info("Found {} order items to restore", archivedItems.size());
 
@@ -296,7 +300,7 @@ public class AdminAccountManagementController {
             orderItemRepository.save(item);
         }
 
-        //Restore Payments
+        // Restore Payments
         List<ArchivedPayments> archivedPayments = archivedPaymentsRepository.findByUserId(id); // Using archived user ID
         log.info("Found {} payments to restore for archived user ID {}", archivedPayments.size(), id);
 
@@ -304,14 +308,11 @@ public class AdminAccountManagementController {
             Payment payment = new Payment();
             payment.setUser(savedUser);
 
-            // Link to restored order if available
-            if (archivedPayment.getOrder() != null) {
-                Order newOrder = orderIdMapping.get(archivedPayment.getOrder().getId());
+            /// Handle order reference
+            if (archivedPayment.getOrderId() != null) { // Check order_id directly
+                Order newOrder = orderIdMapping.get(archivedPayment.getOrderId());
                 if (newOrder != null) {
                     payment.setOrder(newOrder);
-                    log.debug("Linked payment to order {}", newOrder.getId());
-                } else {
-                    log.warn("Could not find restored order for payment {}", archivedPayment.getId());
                 }
             }
 
@@ -331,7 +332,7 @@ public class AdminAccountManagementController {
             Payment savedPayment = paymentRepository.save(payment);
             log.debug("Restored payment ID {}", savedPayment.getId());
         }
-        //Cleanup
+        // Cleanup
         try {
             archivedPaymentsRepository.deleteAllByUserId(id);
             archivedOrderItemsRepository.deleteAllByUserId(originalUserId);
@@ -347,4 +348,3 @@ public class AdminAccountManagementController {
         return "redirect:/admin/accountManagement?restoreSuccess=true";
     }
 }
-

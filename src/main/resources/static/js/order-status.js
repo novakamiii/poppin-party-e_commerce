@@ -1,39 +1,64 @@
+
+
 /**
- * Loads orders by their status and renders them into a specified container.
- * Fetches order data from the server and updates the DOM accordingly.
+ * Handles URL parameters to activate the correct order status tab and optionally highlight a specific order.
+ * Looks for 'order' and 'status' parameters in the URL, activates the corresponding tab,
+ * loads orders for that status, and highlights the specified order if present.
+ */
+//export function handleUrlParams() {}
+
+/**
+ * Loads orders by status and renders them into the specified container.
+ * Fetches orders from the API, displays them, and adds appropriate action buttons based on status.
  *
  * @param {string} status - The status of orders to load (e.g., "PENDING", "CANCELLED", "TO_RECEIVE").
- * @param {string} [containerId="orderStatusContent"] - The ID of the container element to render orders into.
- * @returns {void}
+ * @param {string} [containerId="orderStatusContent"] - The ID of the container to render orders into.
  */
-export function loadOrdersByStatus(status, containerId = "orderStatusContent") {}
+//export function loadOrdersByStatus(status, containerId = "orderStatusContent") {}
 
 /**
  * Initializes status tabs for order filtering.
- * Sets up click event listeners on tab elements and loads orders for the default status.
+ * Adds click event listeners to tabs, loads orders for the selected status, and sets the default tab.
  *
- * @param {string} tabSelector - CSS selector for the tab elements.
- * @param {string} containerId - The ID of the container element to render orders into.
+ * @param {string} tabSelector - CSS selector for the status tabs.
+ * @param {string} containerId - The ID of the container to render orders into.
  * @param {string} [defaultStatus="PENDING"] - The default status to load on initialization.
- * @returns {void}
  */
-export function initStatusTabs(tabSelector, containerId, defaultStatus = "PENDING") {}
+//export function initStatusTabs(tabSelector, containerId, defaultStatus = "PENDING") {}
 
 /**
- * Initializes order status tabs with click event listeners.
- * Loads orders for the selected status tab.
- *
- * @returns {void}
+ * Initializes order status tabs and sets up click handlers.
+ * Loads orders for the selected tab and sets the default tab to "PENDING".
+ * (Legacy function, use `initStatusTabs` for more flexibility.)
  */
-export function initializeOrderTabs() {}
+//export function initializeOrderTabs() {}
 
-/**
- * Handles URL parameters to activate a specific order status tab and optionally highlight a specific order.
- * Supports 'order' and 'status' query parameters.
- *
- * @returns {void}
- */
-export function handleUrlParams() {}
+
+export function handleUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('order');
+    const status = urlParams.get('status');
+
+    if (orderId && status) {
+        // Find and activate the correct tab
+        const tab = document.querySelector(`.status-tab[data-tab="${status}"]`);
+        if (tab) {
+            document.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            loadOrdersByStatus(status);
+
+            // Optional: Scroll to or highlight the specific order
+            setTimeout(() => {
+                const orderElement = document.querySelector(`[data-order-id="${orderId}"]`);
+                if (orderElement) {
+                    orderElement.scrollIntoView({ behavior: 'smooth' });
+                    orderElement.classList.add('highlighted');
+                    setTimeout(() => orderElement.classList.remove('highlighted'), 2000);
+                }
+            }, 500);
+        }
+    }
+}
 export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
     fetch(`/api/orders?status=${status}`)
         .then(res => res.json())
@@ -213,33 +238,6 @@ export function initializeOrderTabs() {
     // Initial load
     loadOrdersByStatus("PENDING");
 }
-
-export function handleUrlParams() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const orderId = urlParams.get('order');
-    const status = urlParams.get('status');
-
-    if (orderId && status) {
-        // Find and activate the correct tab
-        const tab = document.querySelector(`.status-tab[data-tab="${status}"]`);
-        if (tab) {
-            document.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            loadOrdersByStatus(status);
-
-            // Optional: Scroll to or highlight the specific order
-            setTimeout(() => {
-                const orderElement = document.querySelector(`[data-order-id="${orderId}"]`);
-                if (orderElement) {
-                    orderElement.scrollIntoView({ behavior: 'smooth' });
-                    orderElement.classList.add('highlighted');
-                    setTimeout(() => orderElement.classList.remove('highlighted'), 2000);
-                }
-            }, 500);
-        }
-    }
-}
-
 // Add this to your DOMContentLoaded event:
 document.addEventListener("DOMContentLoaded", () => {
     initStatusTabs(".status-tab", "orderStatusContent", "PENDING");
