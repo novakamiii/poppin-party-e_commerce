@@ -6,9 +6,14 @@
  *
  * @param {string} containerSelector - The CSS selector for the container element.
  * @param {function} [afterRenderCallback] - Optional function to call after items are rendered.
+ * An object representing the shipping fees for different delivery options.
+ * @typedef {Object} ShippingFees
+ * @property {number} standard - The fee for standard shipping.
+ * @property {number} express - The fee for express shipping.
+ * @property {number} overnight - The fee for overnight shipping.
+ *
+ * @type {ShippingFees}
  */
-// /js/checkout-utils.js
-
 export const shippingFees = {
   standard: 45,
   express: 75,

@@ -1,7 +1,18 @@
-document.addEventListener("DOMContentLoaded", () => {
+  /**
+   * Displays the empty cart UI in the cart container.
+   * Updates the cart container with a message and image indicating the cart is empty,
+   * resets the cart total to "0.00", and hides the checkout button.
+   *
+   * Assumes the existence of the following global variables:
+   * - cartContainer: The DOM element where the cart contents are displayed.
+   * - cartTotal: The DOM element displaying the cart's total price.
+   * - checkoutButton: The DOM element for the checkout button.
+   */
+  document.addEventListener("DOMContentLoaded", () => {
   const cartContainer = document.getElementById("cartContainer");
   const cartTotal = document.getElementById("cartTotal");
   const checkoutButton = document.querySelector(".checkout-button");
+
 
   function showEmptyCart() {
     cartContainer.innerHTML = `

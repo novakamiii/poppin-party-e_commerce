@@ -1,3 +1,47 @@
+/**
+ * Controller for managing admin account operations, including user archiving and restoration.
+ * 
+ * <p>
+ * This controller provides endpoints for:
+ * <ul>
+ *   <li>Viewing all active users</li>
+ *   <li>Viewing archived (deleted) users</li>
+ *   <li>Archiving (soft-deleting) a user and all their related data (orders, payments, order items)</li>
+ *   <li>Restoring an archived user and all their related data</li>
+ * </ul>
+ * 
+ * <h2>Archiving Process</h2>
+ * <ol>
+ *   <li>Copies user data to the archived users table</li>
+ *   <li>Copies all related orders, payments, and order items to their respective archived tables</li>
+ *   <li>Deletes the original user and related data from active tables</li>
+ * </ol>
+ * 
+ * <h2>Restoration Process</h2>
+ * <ol>
+ *   <li>Restores user data from the archived users table to the active users table</li>
+ *   <li>Restores all related orders, payments, and order items, maintaining relationships</li>
+ *   <li>Removes the restored data from the archived tables</li>
+ * </ol>
+ * 
+ * <p>
+ * All operations are transactional to ensure data consistency.
+ * </p>
+ * 
+ * <p>
+ * Endpoints:
+ * <ul>
+ *   <li><b>GET /admin/accountManagement</b> - Show all active users</li>
+ *   <li><b>GET /admin/user/restore</b> - Show all archived users</li>
+ *   <li><b>GET /admin/user/delete/{id}</b> - Archive a user and related data</li>
+ *   <li><b>POST /admin/user/restore/{id}</b> - Restore an archived user and related data</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>
+ * Logging is used to trace the restoration and archiving process for debugging and audit purposes.
+ * </p>
+ */
 package com.poppinparty.trinity.poppin_party_needs_alpha.AdminControls;
 
 

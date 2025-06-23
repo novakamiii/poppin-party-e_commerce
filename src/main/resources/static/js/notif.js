@@ -1,3 +1,29 @@
+/**
+ * Handles notification dropdown UI and logic.
+ * 
+ * Features:
+ * - Toggles notification dropdown visibility.
+ * - Loads notifications from `/api/notifications`.
+ * - Renders notifications and updates unread counter.
+ * - Marks individual or all notifications as read.
+ * - Redirects to order status page on notification click (if applicable).
+ * - Handles empty/error states for notifications.
+ * - Polls for new notifications every 30 seconds.
+ * - Cleans up polling interval on page unload.
+ * 
+ * Elements used:
+ * - `.notif-button`: Button to open/close notification dropdown.
+ * - `#notification-counter`: Displays unread notification count.
+ * - `#notif-content`: Container for notification items.
+ * - `#mark-all-read`: Button to mark all notifications as read.
+ * 
+ * API Endpoints:
+ * - GET `/api/notifications`: Fetch notifications and unread count.
+ * - POST `/api/notifications/:id/read`: Mark a notification as read.
+ * - POST `/api/notifications/mark-all-read`: Mark all notifications as read.
+ * 
+ * @module notif
+ */
 document.addEventListener('DOMContentLoaded', () => {
   const notifButton = document.querySelector('.notif-button');
   const notifCounter = document.getElementById('notification-counter');

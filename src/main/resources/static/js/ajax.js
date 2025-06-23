@@ -1,4 +1,6 @@
 
+
+
 /**
  * Sends form data (including image) to backend to add a product,
  * then calls a callback with the new product data to update UI.
@@ -6,6 +8,13 @@
  * @param {HTMLFormElement} formElement - The form containing product data.
  * @param {function} onSuccess - Callback function(product) called after successful addition.
  * @param {function} onError - Callback function() called on failure.
+ */
+/**
+ * Sends an AJAX POST request to add a new product using the provided form element.
+ *
+ * @param {HTMLFormElement} formElement - The form element containing product data to submit.
+ * @param {function(Object): void} onSuccess - Callback function invoked with the created product object on success.
+ * @param {function(): void} [onError] - Optional callback function invoked if the request fails.
  */
 export function addProductAjax(formElement, onSuccess, onError) {
   const formData = new FormData(formElement);
