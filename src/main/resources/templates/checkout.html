@@ -41,6 +41,9 @@
     <main>
         <div class="categories-section">
             <p class="categories-title">CHECKOUT</p>
+            <a id="restore-cart-btn" th:href="@{/order/restore-cart}" style="display:none;">Restore Cart</a>
+
+            <!-- Notice will be inserted here by JavaScript -->
         </div>
         <br>
         <div class="checkout-items">
@@ -145,7 +148,7 @@
         </div>
         <div>
             <div class="checkout-container">
-                <form id="checkoutForm" method="post" action="/order/place">
+                <form id="checkoutForm" method="post" action="/order/place" onsubmit="return validateCheckoutForm()">
                     <input type="hidden" name="shippingOption" id="shippingOptionInput">
                     <input type="hidden" name="paymentMethod" id="paymentMethodInput">
                     <input type="hidden" name="itemsJson" id="itemsJsonInput">
@@ -157,148 +160,10 @@
         <br>
         <br>
 
-        
+
     </main>
 
-    <!--ajax-->
-    <script type="module">
-        import { renderCheckoutItems, updateSummary } from '/js/checkout-utils.js';
 
-        document.addEventListener("DOMContentLoaded", () => {
-            renderCheckoutItems(".checkout-items", updateSummary);
-        });
-    </script>
-
-
-
-
-    <!--getter for cart-->
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const shippingOption = localStorage.getItem("shippingOption") || "standard";
-            const paymentMethod = localStorage.getItem("paymentMethod") || "paypal";
-            const checkoutItems = localStorage.getItem("checkoutItems") || "[]";
-
-            document.getElementById("shippingOptionInput").value = shippingOption;
-            document.getElementById("paymentMethodInput").value = paymentMethod;
-            document.getElementById("itemsJsonInput").value = checkoutItems;
-        });
-    </script>
-
-
-    <script>
-        // Get references to the elements (including the new span)
-        const openPaymentPopup = document.getElementById('openPaymentPopup');
-        const paymentPopup = document.getElementById('paymentPopup');
-        const closePaymentPopupButton = document.getElementById('closePaymentPopup');
-        const selectPaymentButton = document.getElementById('selectPaymentButton');
-        const paymentOptions = document.querySelectorAll('input[name="payment"]');
-        const selectedPaymentDisplay = document.getElementById('selectedPayment'); // Get the span
-
-        // Function to show the popup (remains the same)
-        function showPaymentPopup() {
-            paymentPopup.style.display = 'flex';
-        }
-
-        // Function to hide the popup (remains the same)
-        function hidePaymentPopup() {
-            paymentPopup.style.display = 'none';
-        }
-
-        // Event listener to open the popup (remains the same)
-        openPaymentPopup.addEventListener('click', showPaymentPopup);
-
-        // Event listener to close the popup when the close button is clicked (remains the same)
-        if (closePaymentPopupButton) {
-            closePaymentPopupButton.addEventListener('click', hidePaymentPopup);
-        }
-
-        // Event listener to close the popup when clicking outside the content (remains the same)
-        window.addEventListener('click', (event) => {
-            if (event.target === paymentPopup) {
-                hidePaymentPopup();
-            }
-        });
-
-        // Event listener for the "Select" button (modified to update the display)
-        selectPaymentButton.addEventListener('click', () => {
-            let selectedPaymentValue;
-            let selectedPaymentLabel;
-            paymentOptions.forEach(option => {
-                if (option.checked) {
-                    selectedPaymentValue = option.value;
-                    selectedPaymentLabel = document.querySelector(`label[for="${option.id}"]`).textContent;
-                }
-            });
-
-            if (selectedPaymentValue) {
-                selectedPaymentDisplay.textContent = selectedPaymentLabel; // Update the text
-                hidePaymentPopup();
-            } else {
-                alert('Please select a payment method.');
-            }
-        });
-        // Get references to the elements
-        const openShippingPopup = document.getElementById('openShippingPopup');
-        const shippingPopup = document.getElementById('shippingPopup');
-        const closeShippingPopupButton = document.getElementById('closeShippingPopup');
-        const selectShippingButton = document.getElementById('selectShippingButton');
-        const shippingOptions = document.querySelectorAll('input[name="shipping"]');
-
-        // Function to show the popup
-        function showShippingPopup() {
-            shippingPopup.style.display = 'flex';
-        }
-
-        // Function to hide the popup
-        function hideShippingPopup() {
-            shippingPopup.style.display = 'none';
-        }
-
-        // Event listener to open the popup
-        openShippingPopup.addEventListener('click', showShippingPopup);
-
-        // Event listener to close the popup when the close button is clicked
-        if (closeShippingPopupButton) {
-            closeShippingPopupButton.addEventListener('click', hideShippingPopup);
-        }
-
-        // Event listener to close the popup when clicking outside the content
-        window.addEventListener('click', (event) => {
-            if (event.target === shippingPopup) {
-                hideShippingPopup();
-            }
-        });
-
-        // Event listener for the "Select" button (handle shipping selection)
-        selectShippingButton.addEventListener('click', () => {
-            let selectedShipping;
-            let selectedShippingLabel;
-            shippingOptions.forEach(option => {
-                if (option.checked) {
-                    selectedShipping = option.value;
-                    selectedShippingLabel = document.querySelector(`label[for="${option.id}"]`).textContent;
-                }
-            });
-
-            if (selectedShipping) {
-                // Update the UI with the selected shipping option
-                // For example, update a span with the selected option:
-                const selectedShippingDisplay = document.getElementById('selectedShippingOption');
-                if (selectedShippingDisplay) {
-                    selectedShippingDisplay.textContent = selectedShippingLabel;
-                }
-                document.getElementById("shippingOptionInput").value = selectedShipping;
-
-
-                alert(`You selected: ${selectedShippingLabel}`);
-                // Here you would typically update the UI or proceed with the checkout process.
-                hideShippingPopup();
-            } else {
-                alert('Please select a shipping option.');
-            }
-        });
-    </script>
 
     <footer>
         <div class="footer-container">
@@ -363,5 +228,88 @@
         </div>
     </footer>
 </body>
+
+<script type="module">
+    import { renderCheckoutItems, updateSummary } from '/js/checkout-utils.js';
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // Initialize form values
+        document.getElementById("shippingOptionInput").value =
+            localStorage.getItem("shippingOption") || "standard";
+        document.getElementById("paymentMethodInput").value =
+            localStorage.getItem("paymentMethod") || "paypal";
+
+        // Load cart items
+        const storedItems = JSON.parse(localStorage.getItem("checkoutItems") || "[]");
+        if (storedItems.length > 0) {
+            renderCheckoutItems(".checkout-items", updateSummary);
+        } else {
+            fetch('/api/cart')
+                .then(response => response.json())
+                .then(items => {
+                    localStorage.setItem("checkoutItems", JSON.stringify(items));
+                    document.getElementById("itemsJsonInput").value = JSON.stringify(items);
+                    renderCheckoutItems(".checkout-items", updateSummary);
+                })
+                .catch(err => console.error("Cart load error:", err));
+        }
+
+        // Setup popups
+        setupPopup('payment', (selectedValue, selectedLabel) => {
+            document.getElementById("selectedPayment").textContent = selectedLabel;
+            document.getElementById("paymentMethodInput").value = selectedValue;
+            localStorage.setItem("paymentMethod", selectedValue);
+            updateSummary();
+        });
+
+        setupPopup('shipping', (selectedValue, selectedLabel) => {
+            document.getElementById("selectedShippingOption").textContent = selectedLabel;
+            document.getElementById("shippingOptionInput").value = selectedValue;
+            localStorage.setItem("shippingOption", selectedValue);
+            updateSummary();
+        });
+
+        // Form submission
+        document.getElementById("checkoutForm")?.addEventListener("submit", function (e) {
+            if (!validateCheckoutForm()) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    function setupPopup(type, selectCallback) {
+        const openBtn = document.getElementById(`open${type.charAt(0).toUpperCase() + type.slice(1)}Popup`);
+        const popup = document.getElementById(`${type}Popup`);
+        if (!openBtn || !popup) return;
+
+        const closeBtn = popup.querySelector('.close-button');
+        const selectBtn = popup.querySelector('button');
+
+        // Event listeners
+        openBtn.addEventListener('click', () => popup.style.display = 'flex');
+        closeBtn?.addEventListener('click', () => popup.style.display = 'none');
+        window.addEventListener('click', (e) => e.target === popup && (popup.style.display = 'none'));
+
+        selectBtn?.addEventListener('click', () => {
+            const selected = popup.querySelector(`input[name="${type}"]:checked`);
+            if (selected) {
+                const label = document.querySelector(`label[for="${selected.id}"]`)?.textContent;
+                selectCallback(selected.value, label || selected.value);
+                popup.style.display = 'none';
+            } else {
+                alert(`Please select a ${type} option.`);
+            }
+        });
+    }
+
+    function validateCheckoutForm() {
+        const items = JSON.parse(localStorage.getItem("checkoutItems") || "[]");
+        if (items.length === 0) {
+            alert("Your cart is empty! Please add items before checking out.");
+            return false;
+        }
+        return true;
+    }
+</script>
 
 </html>

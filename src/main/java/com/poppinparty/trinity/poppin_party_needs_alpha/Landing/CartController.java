@@ -4,294 +4,297 @@ import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.CartItemDTO;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Order;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.OrderItem;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.OrderStatusDTO;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Payment;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Product;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.User;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.CartItemDTO;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.OrderItem;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Product;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.User;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderItemRepository;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderRepository;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.PaymentRepository;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ProductRepository;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.UserRepository;
 
 @Controller
 public class CartController {
 
-    @Autowired
-    private com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.UserRepository userRepository;
-    @Autowired
-    private com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ProductRepository productRepository;
-    @Autowired
-    private com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderItemRepository orderItemRepository;
-    @Autowired
-    private com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderRepository orderRepository;
-    @Autowired
-    private com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.PaymentRepository paymentRepository;
+        @Autowired
+        private OrderItemRepository orderItemRepository;
+        @Autowired
+        private ProductRepository productRepository;
+        @Autowired
+        private UserRepository userRepository;
 
-    // ========== ORDER MANAGEMENT ==========
-    @GetMapping("/cart")
-    public String viewCart() {
-        return "cart"; // cart.html
-    }
-
-    @GetMapping("/order/success")
-    public String orderSuccess() {
-        return "ordersuccess";
-    }
-
-    @GetMapping("/order/status")
-    public String viewOrderStatus() {
-        return "orderstatus";
-    }
-
-    @GetMapping("/order/checkout")
-    public String showCheckout(Model model, Principal principal) {
-        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-        model.addAttribute("address", user.getAddress());
-        return "checkout";
-    }
-
-    @GetMapping("/api/cart")
-    @ResponseBody
-    public List<CartItemDTO> getCartItems(Principal principal) {
-        User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        return orderItemRepository.findByUserId(user.getId())
-                .stream()
-                .map(orderItem -> {
-                    Product product = productRepository.findByItemName(orderItem.getProductRef())
-                            .orElseThrow();
-                    CartItemDTO dto = new CartItemDTO();
-                    dto.setProductId(product.getId());
-                    dto.setItemName(product.getItemName());
-                    dto.setImageLoc(product.getImageLoc());
-                    dto.setUnitPrice(orderItem.getUnitPrice().doubleValue());
-                    dto.setQuantity(orderItem.getQuantity());
-                    return dto;
-                })
-                .toList();
-    }
-
-    @PostMapping("/api/cart")
-    @ResponseBody
-    public ResponseEntity<?> addToCart(
-            @RequestParam Long productId,
-            @RequestParam int quantity,
-            Principal principal) {
-
-        User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        String productRef = product.getItemName();
-
-        OrderItem item = orderItemRepository.findByUserIdAndProductRef(user.getId(), productRef)
-                .orElseGet(() -> {
-                    OrderItem newItem = new OrderItem();
-                    newItem.setUserId(user.getId());
-                    newItem.setProductRef(productRef);
-                    newItem.setQuantity(0);
-                    newItem.setUnitPrice(BigDecimal.valueOf(product.getPrice()));
-                    return newItem;
-                });
-
-        item.setQuantity(item.getQuantity() + quantity);
-        orderItemRepository.save(item);
-
-        return ResponseEntity.ok("Item added to cart");
-    }
-
-    @PostMapping("/api/cart/update")
-    @ResponseBody
-    public ResponseEntity<?> updateCartQuantity(
-            @RequestParam Long productId,
-            @RequestParam int quantity,
-            Principal principal) {
-
-        User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        String productRef = product.getItemName();
-
-        OrderItem item = orderItemRepository.findByUserIdAndProductRef(user.getId(), productRef)
-                .orElseThrow(() -> new RuntimeException("Cart item not found"));
-
-        item.setQuantity(quantity);
-        orderItemRepository.save(item);
-
-        return ResponseEntity.ok("Quantity updated");
-    }
-
-    @PostMapping("/api/cart/remove")
-    @ResponseBody
-    public ResponseEntity<?> removeItemFromCart(@RequestParam Long productId, Principal principal) {
-        User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        String productRef = product.getItemName();
-
-        orderItemRepository.findByUserIdAndProductRef(user.getId(), productRef)
-                .ifPresent(orderItemRepository::delete);
-
-        return ResponseEntity.ok("Item removed");
-    }
-
-    @PostMapping("/order/place")
-    public String placeOrder(
-            @RequestParam String shippingOption,
-            @RequestParam String paymentMethod,
-            @RequestParam String itemsJson,
-            Principal principal,
-            RedirectAttributes redirectAttributes) throws JsonProcessingException {
-
-        User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        ObjectMapper mapper = new ObjectMapper();
-        List<Map<String, Object>> items = mapper.readValue(itemsJson, new TypeReference<>() {
-        });
-        BigDecimal subtotal = BigDecimal.ZERO;
-
-        for (Map<String, Object> item : items) {
-            Long productId = Long.valueOf(item.get("productId").toString());
-            int quantity = Integer.parseInt(item.get("quantity").toString());
-
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
-
-            BigDecimal price = BigDecimal.valueOf(product.getPrice());
-            subtotal = subtotal.add(price.multiply(BigDecimal.valueOf(quantity)));
+        // ========== ORDER MANAGEMENT ==========
+        @GetMapping("/cart")
+        public String viewCart() {
+                return "cart"; // cart.html
         }
 
-        BigDecimal shippingFee = switch (shippingOption) {
-            case "express" -> BigDecimal.valueOf(75);
-            case "overnight" -> BigDecimal.valueOf(150);
-            default -> BigDecimal.valueOf(45);
-        };
-        BigDecimal tax = subtotal.multiply(BigDecimal.valueOf(0.12));
-        BigDecimal total = subtotal.add(shippingFee).add(tax);
+        @GetMapping("/api/cart/count")
+        @ResponseBody
+        public int getCartItemCount(Principal principal) {
+                if (principal == null) {
+                        return 0; // For non-logged-in users
+                }
 
-        String trackingNumber = UUID.randomUUID().toString().substring(0, 12).toUpperCase();
+                User user = userRepository.findByUsername(principal.getName())
+                                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Save ORDER record
-        Order order = new Order();
-        order.setUserId(user.getId());
-        order.setTotalAmount(total);
-        order.setPaymentMethod(paymentMethod);
-        order.setShippingOption(shippingOption);
-        order.setShippingAddress(user.getAddress());
-        order.setStatus("PENDING");
-        order.setTrackingNumber(trackingNumber);
-        orderRepository.save(order);
-
-        // Save PAYMENT records (one per product)
-        for (Map<String, Object> item : items) {
-            Long productId = Long.valueOf(item.get("productId").toString());
-            int quantity = Integer.parseInt(item.get("quantity").toString());
-
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
-
-            BigDecimal price = BigDecimal.valueOf(product.getPrice());
-
-            Payment payment = new Payment();
-            payment.setUser(user);
-            payment.setOrder(order);
-            payment.setProductId(productId.toString());
-            payment.setItemName(product.getItemName());
-            payment.setAmount(price.multiply(BigDecimal.valueOf(quantity)));
-            payment.setTransactionId(trackingNumber);
-            payment.setStatus("PENDING");
-            payment.setShippingOption(shippingOption);
-            payment.setPaymentMethodDetails(paymentMethod);
-            payment.setDaysLeft(5);
-            payment.setQuantity(quantity);
-
-            paymentRepository.save(payment);
-
+                return orderItemRepository.sumQuantityByUserId(user.getId());
         }
 
-        // Remove from cart if needed
-        // orderItemRepository.deleteByUserId(user.getId());
+        @GetMapping("/api/cart")
+        @ResponseBody
+        public List<CartItemDTO> getCartItems(Principal principal) {
+                User user = userRepository.findByUsername(principal.getName())
+                                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        redirectAttributes.addFlashAttribute("trackingNumber", trackingNumber);
-        return "redirect:/order/success";
-    }
+                return orderItemRepository.findByUserId(user.getId())
+                                .stream()
+                                .map(orderItem -> {
+                                        CartItemDTO dto = new CartItemDTO();
+                                        dto.setQuantity(orderItem.getQuantity());
+                                        dto.setUnitPrice(orderItem.getUnitPrice().doubleValue());
 
-    @PostMapping("/api/orders/cancel/{id}")
-    @ResponseBody
-    public ResponseEntity<?> cancelOrder(@PathVariable Long id, Principal principal) {
-        User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                                        if (Boolean.TRUE.equals(orderItem.isCustom())) {
+                                                dto.setCustom(true);
+                                                dto.setItemName("Custom Tarpaulin (" + orderItem.getCustomSize() + ")");
+                                                dto.setImageLoc("https://placehold.co/150x100/b944fd/ffffff?font=poppins&text=Tarpulin");
 
-        Payment payment = paymentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                                                dto.setCustomSize(orderItem.getCustomSize());
+                                                dto.setEventType(orderItem.getEventType());
+                                                dto.setPersonalizedMessage(orderItem.getPersonalizedMessage());
+                                                dto.setTarpaulinThickness(orderItem.getTarpaulinThickness());
+                                                dto.setTarpaulinFinish(orderItem.getTarpaulinFinish());
+                                                dto.setProductId(-1L);
+                                        } else {
+                                                Product product = productRepository
+                                                                .findByItemName(orderItem.getProductRef())
+                                                                .orElseThrow(() -> new RuntimeException(
+                                                                                "Product not found: " + orderItem
+                                                                                                .getProductRef()));
 
-        if (!payment.getUser().getId().equals(user.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized");
+                                                dto.setCustom(false);
+                                                dto.setProductId(product.getId());
+                                                dto.setItemName(product.getItemName());
+                                                dto.setImageLoc(product.getImageLoc());
+                                        }
+
+                                        return dto;
+                                })
+                                .toList();
         }
 
-        if (!payment.getStatus().equals("PENDING")) {
-            return ResponseEntity.badRequest().body("Only pending orders can be cancelled.");
+        @Transactional
+        @PostMapping("/api/cart/add")
+        @ResponseBody
+        public ResponseEntity<?> addItemToCart(
+                        @RequestParam Long productId,
+                        @RequestParam(required = false, defaultValue = "1") int quantity,
+                        Principal principal) {
+
+                User user = userRepository.findByUsername(principal.getName())
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+
+                Product product = productRepository.findById(productId)
+                                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+                // Stock validation
+                if (product.getStock() <= 0) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("This product is out of stock");
+                }
+
+                if (quantity > product.getStock()) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("Only " + product.getStock() + " items available");
+                }
+
+                String productRef = product.getItemName();
+
+                // Changed to handle multiple results
+                List<OrderItem> existingItems = orderItemRepository.findByUserIdAndProductRef(user.getId(), productRef);
+                if (!existingItems.isEmpty()) {
+                        // Sum all existing quantities
+                        int totalQuantity = existingItems.stream()
+                                        .mapToInt(OrderItem::getQuantity)
+                                        .sum() + quantity;
+
+                        if (totalQuantity > product.getStock()) {
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                .body("Cannot add more than available stock (Max: " + product.getStock()
+                                                                + ")");
+                        }
+
+                        // Update first item and delete duplicates
+                        OrderItem itemToUpdate = existingItems.get(0);
+                        itemToUpdate.setQuantity(totalQuantity);
+                        orderItemRepository.save(itemToUpdate);
+
+                        // Delete duplicates if any
+                        if (existingItems.size() > 1) {
+                                orderItemRepository.deleteAll(existingItems.subList(1, existingItems.size()));
+                        }
+                } else {
+                        OrderItem newItem = new OrderItem();
+                        newItem.setUserId(user.getId());
+                        newItem.setProductRef(productRef);
+                        newItem.setQuantity(quantity);
+                        newItem.setUnitPrice(BigDecimal.valueOf(product.getPrice()));
+                        newItem.setCustom(false);
+                        orderItemRepository.save(newItem);
+                }
+
+                return ResponseEntity.ok("Item added to cart");
         }
 
-        // Update status and ETA
-        payment.setStatus("CANCELLED");
-        payment.setDaysLeft(0); // You can change this to -1 or null if needed
-        paymentRepository.save(payment);
+        @PostMapping("/api/cart/validate-checkout")
+        @ResponseBody
+        public ResponseEntity<?> validateCheckout(
+                        @RequestBody Map<String, Object> payload,
+                        Principal principal) {
 
-        return ResponseEntity.ok("Order cancelled.");
-    }
+                try {
+                        User user = userRepository.findByUsername(principal.getName())
+                                        .orElseThrow(() -> new RuntimeException("User not found"));
 
-    @GetMapping("/api/orders")
-    @ResponseBody
-    public List<OrderStatusDTO> getOrdersByStatus(
-            @RequestParam String status,
-            Principal principal) {
-        User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                        List<Map<String, Object>> items = (List<Map<String, Object>>) payload.get("items");
 
-        return paymentRepository.findByUserIdAndStatus(user.getId(), status).stream()
-                .map(payment -> {
-                    Product product = productRepository.findByItemName(payment.getItemName()).orElseThrow();
-                    return new OrderStatusDTO(
-                            payment.getId(),
-                            payment.getItemName(),
-                            payment.getAmount(),
-                            product.getImageLoc(),
-                            payment.getDaysLeft(),
-                            payment.getShippingOption(),
-                            payment.getStatus(),
-                            payment.getTransactionId(),
-                            payment.getOrder().getId(),
-                            payment.getQuantity());
-                })
-                .toList();
-    }
+                        if (items == null || items.isEmpty()) {
+                                return ResponseEntity.badRequest()
+                                                .body(Map.of("error", "No items selected for checkout"));
+                        }
+
+                        // Validate stock for each item
+                        for (Map<String, Object> item : items) {
+                                Long productId = Long.valueOf(item.get("productId").toString());
+                                int quantity = Integer.parseInt(item.get("quantity").toString());
+
+                                if (productId != -1) { // Skip custom products
+                                        Product product = productRepository.findById(productId)
+                                                        .orElseThrow(() -> new RuntimeException("Product not found"));
+
+                                        if (product.getStock() < quantity) {
+                                                return ResponseEntity.badRequest()
+                                                                .body(Map.of(
+                                                                                "error",
+                                                                                "Insufficient stock for "
+                                                                                                + product.getItemName(),
+                                                                                "product", product.getItemName(),
+                                                                                "available", product.getStock()));
+                                        }
+                                }
+                        }
+
+                        return ResponseEntity.ok(Map.of("success", true));
+                } catch (Exception e) {
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                        .body(Map.of("error", "Validation error: " + e.getMessage()));
+                }
+        }
+
+        @PostMapping("/api/cart/update")
+        @ResponseBody
+        public ResponseEntity<?> updateCartQuantity(
+                        @RequestParam Long productId,
+                        @RequestParam int quantity,
+                        Principal principal) {
+
+                User user = userRepository.findByUsername(principal.getName())
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+
+                Product product = productRepository.findById(productId)
+                                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+                String productRef = product.getItemName();
+
+                List<OrderItem> items = orderItemRepository.findByUserIdAndProductRef(user.getId(), productRef);
+                if (items.isEmpty()) {
+                        throw new RuntimeException("Cart item not found");
+                }
+                OrderItem item = items.get(0);
+
+                item.setQuantity(quantity);
+                orderItemRepository.save(item);
+
+                return ResponseEntity.ok("Quantity updated");
+        }
+
+        @PostMapping("/api/cart/remove")
+        @ResponseBody
+        public ResponseEntity<?> removeItemFromCart(
+                        @RequestParam(required = false) Long productId,
+                        @RequestParam(required = false) String customSize,
+                        @RequestParam(required = false) String eventType,
+                        @RequestParam(required = false) String message,
+                        @RequestParam(required = false) String thickness,
+                        @RequestParam(required = false) String finish,
+                        Principal principal) {
+
+                User user = userRepository.findByUsername(principal.getName())
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+
+                if (productId != null && productId != -1L) {
+                        // Regular product
+                        Product product = productRepository.findById(productId)
+                                        .orElseThrow(() -> new RuntimeException("Product not found"));
+                        String productRef = product.getItemName();
+
+                        List<OrderItem> items = orderItemRepository.findByUserIdAndProductRef(user.getId(), productRef);
+                        if (!items.isEmpty()) {
+                                orderItemRepository.deleteAll(items);
+                        }
+
+                } else {
+                        // Custom tarpaulin
+                        orderItemRepository.findByUserIdAndCustomFields(
+                                        user.getId(), customSize, eventType, message, thickness, finish)
+                                        .ifPresent(orderItemRepository::delete);
+                }
+
+                return ResponseEntity.ok("Item removed");
+        }
+
+        @PostMapping("/api/cart/custom-tarpaulin")
+        @ResponseBody
+        public ResponseEntity<?> addCustomTarpaulinToCart(@RequestBody Map<String, Object> payload,
+                        Principal principal) {
+                User user = userRepository.findByUsername(principal.getName())
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+
+                String size = payload.get("size").toString();
+                String itemName = "Custom Tarpaulin (" + size + ")";
+                BigDecimal price = BigDecimal.valueOf(Double.parseDouble(payload.get("price").toString()));
+
+                OrderItem customItem = new OrderItem();
+                customItem.setUserId(user.getId());
+                customItem.setProductRef(itemName);
+                customItem.setQuantity(1);
+                customItem.setUnitPrice(price);
+                customItem.setCustom(true);
+
+                // ✅ Set all the custom fields correctly
+                customItem.setCustomSize(size);
+                customItem.setEventType(payload.get("eventType").toString());
+                customItem.setPersonalizedMessage(payload.get("message").toString());
+                customItem.setTarpaulinThickness(payload.get("thickness").toString());
+                customItem.setTarpaulinFinish(payload.get("finish").toString());
+
+                orderItemRepository.save(customItem);
+
+                // Return updated cart (optional; you can also return just a message)
+                return ResponseEntity.ok("Custom tarpaulin added to cart");
+        }
 }
-/*  */

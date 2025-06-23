@@ -14,5 +14,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // Optionally: custom finder
     Order findByTrackingNumber(String trackingNumber);
+    
 }
 

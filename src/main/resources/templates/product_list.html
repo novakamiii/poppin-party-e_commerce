@@ -15,29 +15,32 @@
 </head>
 
 <body>
-  <header class="sticky-header">
-    <div class="header-inner">
-      <div class="logo">
-        <a th:href="@{/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
-      </div>
-      <div class="search">
-        <input type="text" class="search-input" placeholder="Search">
-        <button class="search-button">
-          <img th:src="@{/img/search.png}" alt="search">
-        </button>
-      </div>
-      <div class="header-actions">
-        <div class="account-button">
-          <a th:href="@{/account}">
-            <img th:src="@{/img/account.png}" alt="user" id="user">
-          </a>
+    <header class="sticky-header">
+        <div class="header-inner">
+            <div class="logo">
+                <a th:href="@{/admin/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
+            </div>
+            <div class="search">
+                <input type="text" class="search-input" placeholder="Search">
+                <button class="search-button">
+                    <img th:src="@{/img/search.png}" alt="search">
+                </button>
+            </div>
         </div>
-      </div>
-    </div>
-  </header>
+    </header>
 
 
   <main>
+    <div class="addproduct-container">
+      <a th:href="@{/products/add}">
+        <button class="addproduct-button"> Add New Product</button>
+      </a>
+    </div>
+    <div class="addproduct-container">
+      <a th:href="@{/products/archived}">
+        <button class="addproduct-button"> Restore a Product</button>
+      </a>
+    </div>
     <table class="table-section">
       <tr>
         <th>ID</th>
@@ -58,19 +61,24 @@
         <td id="table-description" style="position: relative;">
 
           <img th:src="${product.imageLoc}" alt="Product Image" class="hover-image" />
-        </td>        
+        </td>
         <td th:text="${product.description}" id="table-description"></td> <!-- Ensure description is displayed -->
         <td>
-          <a th:href="@{'/products/edit/' + ${product.id}}">Edit</a> |
-          <a th:href="@{'/products/delete/' + ${product.id}}" onclick="return confirm('Delete this item?');">Delete</a>
+          <!-- ✏️ Edit -->
+          <a th:href="@{'/products/edit/' + ${product.id}}" title="Edit" alt="Edit Product">
+            ✏️
+          </a>
+
+          <!-- 🗑️ Archive (with confirmation) -->
+          <a th:href="@{'/products/delete/' + ${product.id}}"
+            onclick="return confirm('Are you sure you want to archive this product?');" title="Archive/Delete"
+            alt="Archive Product">
+            🗑️
+          </a>
         </td>
       </tr>
     </table>
-    <div class="addproduct-container">
-      <a th:href="@{/products/add}">
-        <button class="addproduct-button"> Add New Product</button>
-      </a>
-    </div>
+
   </main>
   <footer>
     <div class="footer-container">
@@ -91,5 +99,38 @@
       </div>
   </footer>
 </body>
+<script type="module">
+    import { updateCartCounter } from '/js/ajax.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log("DOM fully loaded");
+        updateCartCounter();
+    });
+</script>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.querySelector('.search-input');
+    const searchButton = document.querySelector('.search-button');
+    const productRows = document.querySelectorAll('.table-section tr:not(:first-child)');
+
+    function performSearch() {
+      const searchTerm = searchInput.value.toLowerCase().trim();
+
+      productRows.forEach(row => {
+        const productName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        const productDesc = row.querySelector('td:nth-child(7)').textContent.toLowerCase();
+        const shouldShow = productName.includes(searchTerm) ||
+          productDesc.includes(searchTerm);
+
+        row.style.display = shouldShow ? '' : 'none';
+      });
+    }
+
+    searchButton.addEventListener('click', performSearch);
+    searchInput.addEventListener('input', performSearch);
+  });
+</script>
 
 </html>

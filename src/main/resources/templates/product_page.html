@@ -27,8 +27,29 @@
                 </button>
             </div>
             <div class="header-actions">
-                <div class="cart-image">
-                    <a th:href="@{/cart}"><img th:src="@{/img/cart.png}" alt="cart" id="cart"></a>
+                <div class="notif-button" data-protected data-protected-name="notifications">
+                    <img th:src="@{/img/notif.png}" alt="notification" id="notif">
+                    <span id="notification-counter" class="notification-counter">0</span>
+                    <div class="notif-dropdown">
+                        <div class="notif-header">
+                            <h3>Notifications</h3>
+                            <button id="mark-all-read">Mark all as read</button>
+                        </div>
+                        <div class="notif-content" id="notif-content">
+                            <!-- Notifications will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="account-button" data-protected data-protected-name="your account">
+                    <a th:href="@{/account}">
+                        <img th:src="@{/img/account.png}" alt="user" id="user">
+                    </a>
+                </div>
+                <div class="cart-image" data-protected data-protected-name="your cart">
+                    <a th:href="@{/cart}">
+                        <img th:src="@{/img/cart.png}" alt="cart" id="cart">
+                        <span id="cart-counter" class="cart-counter">0</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -62,8 +83,11 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button class="add-to-cart-btn">ADD TO CART</button>
-                    <button class="buy-now-btn">BUY NOW</button>
+                    <button class="add-to-cart-btn" id="addToCartBtn">ADD TO CART</button>
+                    <button class="buy-now-btn" id="buyNowBtn">BUY NOW</button>
+                    <div class="out-of-stock-message" id="outOfStockMessage" style="display: none;">
+                        This product is currently out of stock
+                    </div>
                 </div>
 
                 <div class="product-description">
@@ -85,8 +109,6 @@
             </div> <!-- ✅ add this -->
         </div>
     </main>
-
-
 
     <footer>
         <div class="footer-container">
@@ -150,77 +172,25 @@
             © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
         </div>
     </footer>
+</body>
 
-    <script th:src="@{/js/script.js}"></script>
+<!-- Buy Now and Add to Cart -->
+<script type="module">
+    import { handleBuyNow, updateCartCounter } from '/js/ajax.js';
+    import { authWrapper } from '/js/auth-utils.js';
 
-    <!--Add to Cart-->
-    <script type="module">
-        document.addEventListener("DOMContentLoaded", () => {
-            const addToCartBtn = document.querySelector(".add-to-cart-btn");
-            const qtyInput = document.getElementById("product-qty");
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log("DOM fully loaded");
+        updateCartCounter();
 
-            if (addToCartBtn && qtyInput) {
-                addToCartBtn.addEventListener("click", () => {
-                    const qty = parseInt(qtyInput.value);
-                    const productId = window.location.pathname.split("/").pop();
-
-                    fetch("/api/cart", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        },
-                        body: `productId=${productId}&quantity=${qty}`
-                    })
-                        .then(res => {
-                            if (!res.ok) throw new Error("Failed to add to cart");
-                            return res.text();
-                        })
-                        .then(msg => alert(msg))
-                        .catch(err => alert("Error: " + err.message));
-                });
-            }
-        });
-
-    </script>
-
-
-
-    <!--Related Products-->
-    <script type="module">
-        import { createProductCardHTML } from '/js/ajax.js';
-
-        const productList = document.querySelector('#related-products');
-
-        fetch('/api/products')
-            .then(res => res.json())
-            .then(products => {
-                const currentProductId = window.location.pathname.split('/').pop();
-
-                // Shuffle helper
-                function shuffle(array) {
-                    return array.sort(() => 0.5 - Math.random());
-                }
-
-                // Filter out current product, then shuffle, then take 4
-                const randomRelated = shuffle(
-                    products.filter(product => product.id != currentProductId)
-                ).slice(0, 4);
-
-                randomRelated.forEach(product => {
-                    productList.insertAdjacentHTML('beforeend', createProductCardHTML(product));
-                });
-            })
-            .catch(err => {
-                console.error("Error fetching products:", err);
-            });
-    </script>
-
-    <script>
-        // Product Quantity Selector Logic
-        const qtyInput = document.getElementById('product-qty');
+        // Initialize elements
+        const addToCartBtn = document.getElementById("addToCartBtn");
+        const buyNowBtn = document.getElementById("buyNowBtn");
+        const qtyInput = document.getElementById("product-qty");
         const minusBtn = document.querySelector('.qty-btn.minus');
         const plusBtn = document.querySelector('.qty-btn.plus');
 
+        // Quantity controls
         if (qtyInput && minusBtn && plusBtn) {
             minusBtn.addEventListener('click', () => {
                 let currentQty = parseInt(qtyInput.value);
@@ -237,53 +207,203 @@
             });
         }
 
-        // Product Image Gallery Logic
-        const mainProductImage = document.getElementById('mainProductImage');
-        const thumbnails = document.querySelectorAll('.thumbnail');
+        // Add to Cart
+        if (addToCartBtn && qtyInput) {
+            addToCartBtn.addEventListener("click", () => {
+                authWrapper("add items to cart", async () => {
+                    const quantity = parseInt(qtyInput.value);
+                    const productId = window.location.pathname.split("/").pop();
 
-        thumbnails.forEach(thumbnail => {
-            thumbnail.addEventListener('click', () => {
-                // Remove active class from all thumbnails
-                thumbnails.forEach(t => t.classList.remove('active'));
-                // Add active class to the clicked thumbnail
-                thumbnail.classList.add('active');
-                // Change the main image source
-                mainProductImage.src = thumbnail.getAttribute('data-full-src');
-            });
-        });
+                    try {
+                        const response = await fetch("/api/cart/add", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body: `productId=${productId}&quantity=${quantity}`
+                        });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const productId = window.location.pathname.split('/').pop();
+                        if (response.redirected) {
+                            alert('You must be logged in to access this feature!');
+                            window.location.href = response.url;
+                            return;
+                        }
 
-            fetch(`/api/products/${productId}`)
-                .then(res => res.json())
-                .then(product => {
-                    document.getElementById('mainProductImage').src = product.imageLoc;
-                    document.getElementById('productTitle').textContent = product.itemName;
-                    document.getElementById('productPrice').textContent = `₱ ${product.price}`;
-                    document.getElementById('stockInfo').textContent = `${product.stock} pieces available`;
-                    document.getElementById('productDescription').textContent = product.description || 'No description available.';
+                        if (!response.ok) {
+                            throw new Error("Failed to add to cart");
+                        }
 
-                    // Generate thumbnails (optional, if you store multiple images per product)
-                    const thumbnailContainer = document.getElementById('thumbnailContainer');
-                    thumbnailContainer.innerHTML = `<img src="${product.imageLoc}" class="thumbnail active" data-full-src="${product.imageLoc}">`;
-
-                    // Sample static specs (you can load dynamic fields instead if you store them)
-                    document.getElementById('productSpecs').innerHTML = `
-          <li><span class="spec-label">Brand:</span> Poppin' Party</li>
-          <li><span class="spec-label">Material:</span> Lightweight Resin, Premium Cotton Lace</li>
-          <li><span class="spec-label">Dimensions:</span> 17cm x 11cm</li>
-        `;
-                })
-                .catch(err => {
-                    console.error('Failed to fetch product:', err);
-                    alert("Product not found.");
+                        const message = await response.text();
+                        alert(message);
+                        updateCartCounter();
+                    } catch (err) {
+                        alert(err.message);
+                    }
                 });
+            });
+        }
+
+        // Buy Now
+        if (buyNowBtn && qtyInput) {
+            buyNowBtn.addEventListener("click", () => {
+                authWrapper("complete your purchase", async () => {
+                    const quantity = parseInt(qtyInput.value);
+                    const productId = window.location.pathname.split("/").pop();
+
+                    try {
+                        await handleBuyNow(productId, quantity);
+                    } catch (err) {
+                        alert("Failed to proceed to checkout: " + err.message);
+                    }
+                });
+            });
+        }
+    });
+</script>
+
+<!-- Checking Auth -->
+<script type="module">
+  import { setupAuthProtectedElements } from '/js/auth-utils.js';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    setupAuthProtectedElements();
+  });
+</script>
+
+<!-- notification script -->
+<script th:src="@{/js/notif.js}"></script>
+
+
+<!--Related Products-->
+<script type="module">
+    import { createProductCardHTML } from '/js/ajax.js';
+
+    const productList = document.querySelector('#related-products');
+
+    fetch('/api/products')
+        .then(res => res.json())
+        .then(products => {
+            const currentProductId = window.location.pathname.split('/').pop();
+
+            // Shuffle helper
+            function shuffle(array) {
+                return array.sort(() => 0.5 - Math.random());
+            }
+
+            // Filter out current product, then shuffle, then take 4
+            const randomRelated = shuffle(
+                products.filter(product => product.id != currentProductId)
+            ).slice(0, 4);
+
+            randomRelated.forEach(product => {
+                productList.insertAdjacentHTML('beforeend', createProductCardHTML(product));
+            });
+        })
+        .catch(err => {
+            console.error("Error fetching products:", err);
         });
-    </script>
+</script>
+
+<script>
+    // Product Quantity Selector Logic
+    const qtyInput = document.getElementById('product-qty');
+    const minusBtn = document.querySelector('.qty-btn.minus');
+    const plusBtn = document.querySelector('.qty-btn.plus');
+
+    if (qtyInput && minusBtn && plusBtn) {
+        minusBtn.addEventListener('click', () => {
+            let currentQty = parseInt(qtyInput.value);
+            if (currentQty > parseInt(qtyInput.min)) {
+                qtyInput.value = currentQty - 1;
+            }
+        });
+
+        plusBtn.addEventListener('click', () => {
+            let currentQty = parseInt(qtyInput.value);
+            if (currentQty < parseInt(qtyInput.max)) {
+                qtyInput.value = currentQty + 1;
+            }
+        });
+    }
+
+    // Product Image Gallery Logic
+    const mainProductImage = document.getElementById('mainProductImage');
+    const thumbnails = document.querySelectorAll('.thumbnail');
+
+    thumbnails.forEach(thumbnail => {
+        thumbnail.addEventListener('click', () => {
+            // Remove active class from all thumbnails
+            thumbnails.forEach(t => t.classList.remove('active'));
+            // Add active class to the clicked thumbnail
+            thumbnail.classList.add('active');
+            // Change the main image source
+            mainProductImage.src = thumbnail.getAttribute('data-full-src');
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const productId = window.location.pathname.split('/').pop();
+
+        fetch(`/api/products/${productId}`)
+            .then(res => res.json())
+            .then(product => {
+                document.getElementById('mainProductImage').src = product.imageLoc;
+                document.getElementById('productTitle').textContent = product.itemName;
+                document.getElementById('productPrice').textContent = `₱ ${product.price}`;
+                document.getElementById('stockInfo').textContent = `${product.stock} pieces available`;
+                document.getElementById('productDescription').textContent = product.description || 'No description available.';
+
+                // Generate thumbnails (optional, if you store multiple images per product)
+                const thumbnailContainer = document.getElementById('thumbnailContainer');
+                thumbnailContainer.innerHTML = `<img src="${product.imageLoc}" class="thumbnail active" data-full-src="${product.imageLoc}">`;
+
+                // Sample static specs (you can load dynamic fields instead if you store them)
+                document.getElementById('productSpecs').innerHTML = `
+          <li><span class="spec-label">Brand:</span> Poppin' Party</li>
+          <li><span class="spec-label">Material:</span> Premium Material.</li>
+          <li><span class="spec-label">Dimensions:</span> May Vary.</li>
+        `;
+            })
+            .catch(err => {
+                console.error('Failed to fetch product:', err);
+                alert("Product not found.");
+            });
+    });
+</script>
+<script type="module">
+    import { setupAuthProtectedElements } from '/js/auth-utils.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupAuthProtectedElements();
+    });
+</script>
 
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.querySelector('.search-input');
+        const searchButton = document.querySelector('.search-button');
 
-</body>
+        function handleSearch() {
+            const searchTerm = searchInput.value.trim();
+
+            if (searchTerm) {
+                // Redirect to see-more page with search query
+                window.location.href = `/products/see-more?search=${encodeURIComponent(searchTerm)}`;
+            } else {
+                // Optional: Show error message or just redirect without search
+                window.location.href = '/products/see-more';
+            }
+        }
+
+        // Event listeners
+        searchButton.addEventListener('click', handleSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleSearch();
+            }
+        });
+    });
+</script>
 
 </html>

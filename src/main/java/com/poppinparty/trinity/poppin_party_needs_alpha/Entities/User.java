@@ -2,9 +2,12 @@ package com.poppinparty.trinity.poppin_party_needs_alpha.Entities;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,6 +15,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -21,17 +25,30 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    private String name;
+    private String phone;
     private String username;
     private String password;
     private String address;
     private String email;
     private String role;
     @Column(name = "prof_img_loc")
-    private String imagePath; 
+    private String imagePath;
+    // Account Dashboard
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+    @Column(name = "birth_date")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate birthDate;
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
 
-    //Fix this shit
-    //done na lods
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications = new ArrayList<>();
+
     public String getImagePath() {
         return imagePath;
     }
@@ -39,13 +56,6 @@ public class User {
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
     }
-
-    // Account Dashboard
-    private String name;
-    private String phone;
-
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
 
     public Gender getGender() {
         return gender;
@@ -60,10 +70,6 @@ public class User {
         MALE, FEMALE, OTHER // Must match Thymeleaf values EXACTLY
     }
 
-    @Column(name = "birth_date")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate birthDate;
-
     public LocalDate getBirthDate() {
         return birthDate;
     }
@@ -71,9 +77,6 @@ public class User {
     public void setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
     }
-
-    @Column(name = "last_login")
-    private LocalDateTime lastLogin;
 
     public LocalDateTime getLastLogin() {
         return lastLogin;

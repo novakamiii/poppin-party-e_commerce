@@ -10,7 +10,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
-  <script th:src="@{/js/ajax.js}"></script>
 </head>
 
 <body>
@@ -26,12 +25,28 @@
         </button>
       </div>
       <div class="header-actions">
-        <div class="cart-image">
-          <a th:href="@{/cart}"><img th:src="@{/img/cart.png}" alt="cart" id="cart"></a>
+          <div class="notif-button" data-protected data-protected-name="notifications">
+          <img th:src="@{/img/notif.png}" alt="notification" id="notif">
+          <span id="notification-counter" class="notification-counter">0</span>
+          <div class="notif-dropdown">
+            <div class="notif-header">
+              <h3>Notifications</h3>
+              <button id="mark-all-read">Mark all as read</button>
+            </div>
+            <div class="notif-content" id="notif-content">
+              <!-- Notifications will be loaded here -->
+            </div>
+          </div>
         </div>
-        <div class="account-button">
+          <div class="account-button" data-protected data-protected-name="your account">
           <a th:href="@{/account}">
             <img th:src="@{/img/account.png}" alt="user" id="user">
+          </a>
+        </div>
+          <div class="cart-image" data-protected data-protected-name="your cart">
+          <a th:href="@{/cart}">
+            <img th:src="@{/img/cart.png}" alt="cart" id="cart">
+            <span id="cart-counter" class="cart-counter">0</span>
           </a>
         </div>
       </div>
@@ -113,7 +128,7 @@
         <p class="categtext">string lights</p>
       </div>
       <div class="categcontainer">
-        <button class="categbutton" id="customtarp" th:onclick="'location.href=\'' + @{/products/customtarp} + '\';'">
+        <button class="categbutton" id="customtarp" th:onclick="'location.href=\'' + @{/products/customtarp} + '\';'" data-protected data-protected-name="this feature!">
           <img th:src="@{/img/imgcustarp.png}" alt="customtarp" class="categicon">
         </button>
         <p class="categtext">custom tarpaulin</p>
@@ -136,7 +151,8 @@
 
     <br />
     <div class="tarpaulinbanner">
-      <img th:src="@{/img/tarpaulinbanner.png}" alt="tarpaulinbanner" class="tarpban" th:onclick="'location.href=\'' + @{/products/customtarp} + '\';'"/>
+      <img th:src="@{/img/tarpaulinbanner.png}" alt="tarpaulinbanner" class="tarpban"
+        th:onclick="'location.href=\'' + @{/products/customtarp} + '\';'" data-protected data-protected-name="to this feature!"/>
     </div>
     <br />
 
@@ -218,14 +234,10 @@
           <li>POPPIN' GUARANTEE</li>
           <li>FREE SHIPPING</li>
           <li>PAYMENT METHODS</li>
-          <!--USER Role-->
-          <li th:if="${#authorization.expression('hasAuthority(''ROLE_USER'')')}">
-            <a th:href="@{'/logout'}">LOG-OUT</a>
-
-            <!--Admin Role-->
+          <!--Admin Role-->
           <li th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}">
             <a th:href="@{/admin/home}">
-              PRODUCT INVENTORY
+              ADMIN DASHBOARD
             </a>
           </li>
         </ul>
@@ -276,4 +288,55 @@
   </footer>
 </body>
 
+
+<!-- Checking Auth -->
+<script type="module">
+  import { setupAuthProtectedElements } from '/js/auth-utils.js';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    setupAuthProtectedElements();
+  });
+</script>
+
+
+<!-- Cart Counter Script -->
+<script type="module">
+  import { updateCartCounter } from '/js/ajax.js';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM fully loaded");
+    updateCartCounter();
+  });
+</script>
+
+<!-- notification script -->
+<script th:src="@{/js/notif.js}"></script>
+
+<!-- Search Functionality -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.querySelector('.search-input');
+    const searchButton = document.querySelector('.search-button');
+
+    function handleSearch() {
+      const searchTerm = searchInput.value.trim();
+
+      if (searchTerm) {
+        // Redirect to see-more page with search query
+        window.location.href = `/products/see-more?search=${encodeURIComponent(searchTerm)}`;
+      } else {
+        // Optional: Show error message or just redirect without search
+        window.location.href = '/products/see-more';
+      }
+    }
+
+    // Event listeners
+    searchButton.addEventListener('click', handleSearch);
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        handleSearch();
+      }
+    });
+  });
+</script>
 </html>
