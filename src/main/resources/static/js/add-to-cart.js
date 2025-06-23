@@ -1,14 +1,14 @@
-  /**
-   * Displays the empty cart UI in the cart container.
-   * Updates the cart container with a message and image indicating the cart is empty,
-   * resets the cart total to "0.00", and hides the checkout button.
-   *
-   * Assumes the existence of the following global variables:
-   * - cartContainer: The DOM element where the cart contents are displayed.
-   * - cartTotal: The DOM element displaying the cart's total price.
-   * - checkoutButton: The DOM element for the checkout button.
-   */
-  document.addEventListener("DOMContentLoaded", () => {
+/**
+ * Displays the empty cart UI in the cart container.
+ * Updates the cart container with a message and image indicating the cart is empty,
+ * resets the cart total to "0.00", and hides the checkout button.
+ *
+ * Assumes the existence of the following global variables:
+ * - cartContainer: The DOM element where the cart contents are displayed.
+ * - cartTotal: The DOM element displaying the cart's total price.
+ * - checkoutButton: The DOM element for the checkout button.
+ */
+document.addEventListener("DOMContentLoaded", () => {
   const cartContainer = document.getElementById("cartContainer");
   const cartTotal = document.getElementById("cartTotal");
   const checkoutButton = document.querySelector(".checkout-button");
@@ -29,7 +29,7 @@
 
   function renderCartItem(item) {
     return `
-      <div class="cart-item" data-product-id="${item.productId}">
+<div class="cart-item" data-cart-id="${item.id}">
         <img src="${item.imageLoc}" alt="${item.itemName}" class="cartpage-image" />
         <div class="product-details">
           <p class="cartpage-title">${item.itemName}</p>
@@ -77,17 +77,26 @@
     });
   }
 
-  function removeItem(productId, cartItemElement) {
+  function normalizeField(val) {
+    if (Array.isArray(val)) return val.join(" ").trim();
+    if (val === null || val === undefined) return "";
+    if (typeof val === "string") return val.trim();
+    return String(val).trim(); // fallback for numbers, booleans, etc.
+  }
+
+  function removeItem(cartItemId, cartItemElement) {
+    const params = new URLSearchParams();
+    params.append("id", cartItemId);
+
     fetch("/api/cart/remove", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `productId=${productId}`
+      body: params.toString()
     }).then(res => {
       if (!res.ok) throw new Error("Failed to remove item");
       cartItemElement.remove();
       updateTotal();
 
-      // Check if cart is now empty
       if (document.querySelectorAll(".cart-item").length === 0) {
         showEmptyCart();
       }
@@ -96,6 +105,8 @@
       console.error(err);
     });
   }
+
+
 
   fetch("/api/cart")
     .then(res => {
@@ -135,9 +146,12 @@
 
         if (e.target.closest(".remove-btn")) {
           if (confirm("Remove this item from your cart?")) {
-            removeItem(productId, cartItem);
+            const cartItemId = cartItem.getAttribute("data-cart-id");
+            removeItem(cartItemId, cartItem);
           }
         }
+
+
       });
 
       cartContainer.addEventListener("input", e => {
