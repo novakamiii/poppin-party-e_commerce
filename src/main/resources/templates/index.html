@@ -25,15 +25,25 @@
         </button>
       </div>
       <div class="header-actions">
-        <div class="notif-button">
+          <div class="notif-button" data-protected data-protected-name="notifications">
           <img th:src="@{/img/notif.png}" alt="notification" id="notif">
+          <span id="notification-counter" class="notification-counter">0</span>
+          <div class="notif-dropdown">
+            <div class="notif-header">
+              <h3>Notifications</h3>
+              <button id="mark-all-read">Mark all as read</button>
+            </div>
+            <div class="notif-content" id="notif-content">
+              <!-- Notifications will be loaded here -->
+            </div>
+          </div>
         </div>
-        <div class="account-button">
+          <div class="account-button" data-protected data-protected-name="your account">
           <a th:href="@{/account}">
             <img th:src="@{/img/account.png}" alt="user" id="user">
           </a>
         </div>
-        <div class="cart-image">
+          <div class="cart-image" data-protected data-protected-name="your cart">
           <a th:href="@{/cart}">
             <img th:src="@{/img/cart.png}" alt="cart" id="cart">
             <span id="cart-counter" class="cart-counter">0</span>
@@ -118,7 +128,7 @@
         <p class="categtext">string lights</p>
       </div>
       <div class="categcontainer">
-        <button class="categbutton" id="customtarp" th:onclick="'location.href=\'' + @{/products/customtarp} + '\';'">
+        <button class="categbutton" id="customtarp" th:onclick="'location.href=\'' + @{/products/customtarp} + '\';'" data-protected data-protected-name="this feature!">
           <img th:src="@{/img/imgcustarp.png}" alt="customtarp" class="categicon">
         </button>
         <p class="categtext">custom tarpaulin</p>
@@ -142,7 +152,7 @@
     <br />
     <div class="tarpaulinbanner">
       <img th:src="@{/img/tarpaulinbanner.png}" alt="tarpaulinbanner" class="tarpban"
-        th:onclick="'location.href=\'' + @{/products/customtarp} + '\';'" />
+        th:onclick="'location.href=\'' + @{/products/customtarp} + '\';'" data-protected data-protected-name="to this feature!"/>
     </div>
     <br />
 
@@ -278,7 +288,18 @@
   </footer>
 </body>
 
-<!-- Move this script right before closing </body> tag -->
+
+<!-- Checking Auth -->
+<script type="module">
+  import { setupAuthProtectedElements } from '/js/auth-utils.js';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    setupAuthProtectedElements();
+  });
+</script>
+
+
+<!-- Cart Counter Script -->
 <script type="module">
   import { updateCartCounter } from '/js/ajax.js';
 
@@ -288,7 +309,10 @@
   });
 </script>
 
-<!-- Add this script right before the closing </body> tag -->
+<!-- notification script -->
+<script th:src="@{/js/notif.js}"></script>
+
+<!-- Search Functionality -->
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.querySelector('.search-input');
@@ -315,7 +339,4 @@
     });
   });
 </script>
-
-
-
 </html>

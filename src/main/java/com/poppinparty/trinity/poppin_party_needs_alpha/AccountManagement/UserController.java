@@ -1,8 +1,11 @@
 package com.poppinparty.trinity.poppin_party_needs_alpha.AccountManagement;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -57,6 +60,14 @@ public class UserController {
         } else {
             return "Not authenticated";
         }
+    }
+
+    @GetMapping("/api/auth/check")
+    public ResponseEntity<?> checkAuth(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/redirect")

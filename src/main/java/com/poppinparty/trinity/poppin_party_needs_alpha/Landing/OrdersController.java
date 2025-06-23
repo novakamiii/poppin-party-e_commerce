@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
+
 import jakarta.transaction.Transactional;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -37,9 +39,14 @@ import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderReposi
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.PaymentRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ProductRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.UserRepository;
+import com.poppinparty.trinity.poppin_party_needs_alpha.Services.NotificationService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 public class OrdersController {
+        private static final Logger log = LoggerFactory.getLogger(OrdersController.class);
         // === ORDER MANAGEMENT ===
         @Autowired
         private OrderItemRepository orderItemRepository;
@@ -51,6 +58,9 @@ public class OrdersController {
         private OrderRepository orderRepository;
         @Autowired
         private PaymentRepository paymentRepository;
+
+        @Autowired
+        private NotificationService notificationService;
 
         @GetMapping("/order/status")
         public String viewOrderStatus() {
@@ -129,28 +139,25 @@ public class OrdersController {
                         Principal principal,
                         RedirectAttributes redirectAttributes) {
 
+                User user = null;
                 try {
-                        User user = userRepository.findByUsername(principal.getName())
+                        // 1. Get user
+                        user = userRepository.findByUsername(principal.getName())
                                         .orElseThrow(() -> new RuntimeException("User not found"));
 
+                        // 2. Parse items
                         ObjectMapper mapper = new ObjectMapper();
                         List<Map<String, Object>> items = mapper.readValue(itemsJson, new TypeReference<>() {
                         });
 
-                        // Final validation
+                        // 3. Validate items
                         if (items.isEmpty()) {
                                 redirectAttributes.addFlashAttribute("error", "No items selected for checkout");
                                 return "redirect:/cart";
                         }
 
-                        // Calculate subtotal
-                        BigDecimal subtotal = items.stream()
-                                        .map(item -> new BigDecimal(item.get("unitPrice").toString())
-                                                        .multiply(BigDecimal.valueOf(Integer
-                                                                        .parseInt(item.get("quantity").toString()))))
-                                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                        // STOCK VALIDATION PHASE
+                        // 4. Validate stock and calculate subtotal
+                        BigDecimal subtotal = BigDecimal.ZERO;
                         for (Map<String, Object> item : items) {
                                 Long productId = Long.valueOf(safeGet(item, "productId"));
                                 int quantity = Integer.parseInt(safeGet(item, "quantity"));
@@ -167,22 +174,12 @@ public class OrdersController {
                                                 return "redirect:/cart";
                                         }
                                 }
+                                subtotal = subtotal.add(
+                                                new BigDecimal(safeGet(item, "unitPrice"))
+                                                                .multiply(BigDecimal.valueOf(quantity)));
                         }
 
-                        // STOCK DEDUCTION PHASE
-                        for (Map<String, Object> item : items) {
-                                Long productId = Long.valueOf(safeGet(item, "productId"));
-                                int quantity = Integer.parseInt(safeGet(item, "quantity"));
-
-                                if (!isCustomProduct(productId)) {
-                                        Product product = productRepository.findById(productId)
-                                                        .orElseThrow(() -> new RuntimeException("Product not found"));
-
-                                        product.setStock(product.getStock() - quantity);
-                                        productRepository.save(product);
-                                }
-                        }
-
+                        // 5. Calculate totals
                         BigDecimal shippingFee = switch (shippingOption) {
                                 case "express" -> BigDecimal.valueOf(75);
                                 case "overnight" -> BigDecimal.valueOf(150);
@@ -191,70 +188,82 @@ public class OrdersController {
                         BigDecimal tax = subtotal.multiply(BigDecimal.valueOf(0.12));
                         BigDecimal total = subtotal.add(shippingFee).add(tax);
 
-                        String trackingNumber = UUID.randomUUID().toString().substring(0, 12).toUpperCase();
-
-                        // Save ORDER record
+                        // 6. Create and save order
                         Order order = new Order();
-                        order.setUserId(user.getId());
+                        order.setUser(user); // Set the user relationship properly
                         order.setTotalAmount(total);
                         order.setPaymentMethod(paymentMethod);
                         order.setShippingOption(shippingOption);
                         order.setShippingAddress(user.getAddress());
                         order.setStatus("PENDING");
-                        order.setTrackingNumber(trackingNumber);
-                        orderRepository.save(order);
+                        order.setTrackingNumber(UUID.randomUUID().toString().substring(0, 12).toUpperCase());
+                        order = orderRepository.save(order); // Save and get managed entity
 
-                        // Save PAYMENT records (one per product)
+                        // 7. Process payments and update stock
                         for (Map<String, Object> item : items) {
                                 Long productId = Long.valueOf(safeGet(item, "productId"));
                                 int quantity = Integer.parseInt(safeGet(item, "quantity"));
                                 BigDecimal price = new BigDecimal(safeGet(item, "unitPrice"));
                                 String itemName = safeGet(item, "itemName");
 
-                                // String imageLoc; Irrelevant
+                                // Update stock for non-custom products
+                                if (!isCustomProduct(productId)) {
+                                        Product product = productRepository.findById(productId)
+                                                        .orElseThrow(() -> new RuntimeException("Product not found"));
+                                        product.setStock(product.getStock() - quantity);
+                                        productRepository.save(product);
+                                }
 
-                                // 📝 Create Payment record
+                                // Create payment record
                                 Payment payment = new Payment();
                                 payment.setUser(user);
                                 payment.setOrder(order);
                                 payment.setItemName(itemName);
                                 payment.setAmount(price.multiply(BigDecimal.valueOf(quantity)));
-                                payment.setTransactionId(trackingNumber);
+                                payment.setTransactionId(order.getTrackingNumber());
                                 payment.setStatus("PENDING");
                                 payment.setShippingOption(shippingOption);
                                 payment.setPaymentMethodDetails(paymentMethod);
                                 payment.setDaysLeft(5);
                                 payment.setQuantity(quantity);
 
-                                if (productId == -1L) {
-                                        // Custom product
-                                        payment.setProductId(1L); // You can use a dummy product like ID 1 =
-                                                                  // "Placeholder" OR
-                                                                  // skip setting productId at all if not @NotNull
+                                if (isCustomProduct(productId)) {
+                                        payment.setProductId(1L); // Default product ID for custom items
                                         payment.setIsCustom(true);
-                                        payment.setCustomProductRef(itemName); // descriptive like "Custom Tarpaulin
-                                                                               // (2x3 ft)"
+                                        payment.setCustomProductRef(itemName);
                                 } else {
-                                        // Regular product
-                                        Product product = productRepository.findById(productId)
-                                                        .orElseThrow(() -> new RuntimeException("Product not found"));
-                                        payment.setProductId(product.getId());
+                                        payment.setProductId(productId);
                                         payment.setIsCustom(false);
-                                        payment.setCustomProductRef(null);
                                 }
 
                                 paymentRepository.save(payment);
                         }
 
+                        // 8. Clear cart and send notification
                         orderItemRepository.deleteByUserId(user.getId());
 
-                        redirectAttributes.addFlashAttribute("trackingNumber", trackingNumber);
+                        notificationService.createNotification(
+                                        user,
+                                        "Your order #" + order.getId() + " has been placed",
+                                        order.getTrackingNumber(),
+                                        "PENDING",
+                                        order.getId());
+
+                        redirectAttributes.addFlashAttribute("trackingNumber", order.getTrackingNumber());
                         return "redirect:/order/success";
 
+                } catch (JsonProcessingException e) {
+                        log.error("JSON parsing error", e);
+                        redirectAttributes.addFlashAttribute("error", "Invalid cart data format");
+                } catch (RuntimeException e) {
+                        log.error("Order processing error", e);
+                        redirectAttributes.addFlashAttribute("error", "Order failed: " + e.getMessage());
                 } catch (Exception e) {
-                        redirectAttributes.addFlashAttribute("error", "Order processing failed: " + e.getMessage());
-                        return "redirect:/cart";
+                        log.error("Unexpected error during order placement", e);
+                        redirectAttributes.addFlashAttribute("error", "An unexpected error occurred");
                 }
+
+                return "redirect:/cart";
         }
 
         private boolean isCustomProduct(Long productId) {
@@ -364,6 +373,41 @@ public class OrdersController {
                 paymentRepository.save(payment);
 
                 return ResponseEntity.ok("Order item restored");
+        }
+
+        @Transactional
+        @PostMapping("/orders/{orderId}/mark-received")
+        public ResponseEntity<?> markOrderAsReceived(@PathVariable Long orderId, Principal principal) {
+                try {
+                        Optional<Order> maybeOrder = orderRepository.findById(orderId);
+                        if (maybeOrder.isEmpty()) {
+                                System.out.println("No order found with id: " + orderId);
+                        }
+
+                        Order order = maybeOrder.orElseThrow(() -> new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND, "Order not found with id: " + orderId));
+
+                        if (!order.getUser().getUsername().equals(principal.getName())) {
+                                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                                .body("You can only mark your own orders as received");
+                        }
+
+                        // ✅ Update order status
+                        order.setStatus("COMPLETED");
+                        orderRepository.save(order);
+
+                        // ✅ Update all associated payments' status to COMPLETED
+                        List<Payment> payments = paymentRepository.findByOrderId(orderId);
+                        for (Payment payment : payments) {
+                                payment.setStatus("COMPLETED");
+                                paymentRepository.save(payment);
+                        }
+
+                        return ResponseEntity.ok("Order marked as received");
+                } catch (Exception e) {
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                        .body("Error updating order: " + e.getMessage());
+                }
         }
 
 }

@@ -29,6 +29,16 @@
             <div class="header-actions">
                 <div class="notif-button">
                     <img th:src="@{/img/notif.png}" alt="notification" id="notif">
+                    <span id="notification-counter" class="notification-counter">0</span>
+                    <div class="notif-dropdown">
+                        <div class="notif-header">
+                            <h3>Notifications</h3>
+                            <button id="mark-all-read">Mark all as read</button>
+                        </div>
+                        <div class="notif-content" id="notif-content">
+                            <!-- Notifications will be loaded here -->
+                        </div>
+                    </div>
                 </div>
                 <div class="account-button">
                     <a th:href="@{/account}">
@@ -220,6 +230,9 @@
         });
     });
 </script>
+
+<!-- notification script -->
+<script th:src="@{/js/notif.js}"></script>
 
 <script type="module">
     import { updateCartCounter } from '/js/ajax.js';

@@ -109,7 +109,7 @@ public class AdminAccountManagementController {
         for (Order order : orders) {
             ArchivedOrders archivedOrder = new ArchivedOrders();
             archivedOrder.setOriginalOrderId(order.getId());
-            archivedOrder.setUserId(order.getUserId());
+            archivedOrder.setUserId(order.getId());
             archivedOrder.setOrderDate(order.getOrderDate());
             archivedOrder.setTotalAmount(order.getTotalAmount());
             archivedOrder.setStatus(order.getStatus());
@@ -209,7 +209,7 @@ public class AdminAccountManagementController {
 
         for (ArchivedOrders archivedOrder : archivedOrders) {
             Order order = new Order();
-            order.setUserId(savedUser.getId());
+            order.setId(savedUser.getId());
             order.setOrderDate(archivedOrder.getOrderDate());
             order.setTotalAmount(archivedOrder.getTotalAmount());
             order.setStatus(archivedOrder.getStatus() != null ? archivedOrder.getStatus() : "PENDING");

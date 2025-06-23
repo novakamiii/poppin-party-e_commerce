@@ -16,15 +16,33 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
             }
 
             if (data.length === 0) {
-                container.innerHTML = "<p>No orders found for this status.</p>";
+                container.innerHTML =
+                    `<div class="no-orders-found">
+                        <img src="/img/no-results.png" alt="No orders" class="no-orders-image">
+                        <p class="no-orders-message">No orders found for this status</p>
+                    </div>
+                `;
+
                 return;
             }
+
 
             data.forEach(order => {
                 const etaDays = order.status === "CANCELLED" ? "Cancelled" : (order.daysLeft ?? "N/A");
 
+                let actionButton = '';
+                if (status === "PENDING") {
+                    actionButton = `<span><a href="#" class="cancel-order" data-id="${order.id}">Cancel</a></span>`;
+                } else if (status === "CANCELLED") {
+                    actionButton = `<span><a href="#" class="restore-order" data-id="${order.id}">Undo</a></span>`;
+                } else if (status === "TO_RECEIVE") {
+                    actionButton = `<span><button class="mark-received" data-id="${order.orderId}">Mark as Received</button></span>`;
+                    // ✅ this line now uses the actual Order ID
+                }
+
+
                 container.insertAdjacentHTML("beforeend", `
-                    <div class="order-item">
+                    <div class="order-item" data-order-id="${order.id}">
                         <div class="item-image">
                             <img src="${order.imageLoc}" alt="${order.itemName}" />
                         </div>
@@ -37,13 +55,7 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
                         <div class="item-total">
                             <span class="total-label">TOTAL:</span>
                             <span class="total-price">₱${order.amount.toFixed(2)}</span>
-                            ${status === "PENDING" ?
-                        `<span><a href="#" class="cancel-order" data-id="${order.id}">Cancel</a></span>` :
-                        order.status === "CANCELLED" ?
-                            `<span><a href="#" class="restore-order" data-id="${order.id}">Undo</a></span>` :
-                            ""
-                    }
-
+                            ${actionButton}
                         </div>
                     </div>
                 `);
@@ -55,6 +67,7 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
             console.error("Order fetch error:", err);
         });
 }
+
 export function initStatusTabs(tabSelector, containerId, defaultStatus = "PENDING") {
     const tabs = document.querySelectorAll(tabSelector);
 
@@ -92,8 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         alert("Error cancelling: " + err.message);
                         console.error("Cancel error:", err);
                     });
-
-
             }
         }
 
@@ -113,8 +124,33 @@ document.addEventListener("DOMContentLoaded", () => {
                     alert("Error restoring: " + err.message);
                     console.error("Restore error:", err);
                 });
+        }
 
+        // Add this new handler for "Mark as Received"
+        if (e.target.classList.contains("mark-received")) {
+            e.preventDefault();
+            const orderId = e.target.dataset.id;
+            if (confirm("Have you received this order?")) {
+                fetch(`/orders/${orderId}/mark-received`, { method: "POST" })
+                    .then(async res => {
+                        if (!res.ok) {
+                            const errorMessage = await res.text();
+                            throw new Error(errorMessage || "Update failed");
+                        }
+                        alert("Order marked as received!");
+                        refreshActiveOrders();
 
+                        // Optional: Switch to COMPLETED tab
+                        const completedTab = document.querySelector('.status-tab[data-tab="COMPLETED"]');
+                        if (completedTab) {
+                            completedTab.click();
+                        }
+                    })
+                    .catch(err => {
+                        alert("Error updating order: " + err.message);
+                        console.error("Update error:", err);
+                    });
+            }
         }
     });
 
@@ -141,3 +177,36 @@ export function initializeOrderTabs() {
     // Initial load
     loadOrdersByStatus("PENDING");
 }
+
+export function handleUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('order');
+    const status = urlParams.get('status');
+
+    if (orderId && status) {
+        // Find and activate the correct tab
+        const tab = document.querySelector(`.status-tab[data-tab="${status}"]`);
+        if (tab) {
+            document.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            loadOrdersByStatus(status);
+
+            // Optional: Scroll to or highlight the specific order
+            setTimeout(() => {
+                const orderElement = document.querySelector(`[data-order-id="${orderId}"]`);
+                if (orderElement) {
+                    orderElement.scrollIntoView({ behavior: 'smooth' });
+                    orderElement.classList.add('highlighted');
+                    setTimeout(() => orderElement.classList.remove('highlighted'), 2000);
+                }
+            }, 500);
+        }
+    }
+}
+
+// Add this to your DOMContentLoaded event:
+document.addEventListener("DOMContentLoaded", () => {
+    initStatusTabs(".status-tab", "orderStatusContent", "PENDING");
+    handleUrlParams();  // Add this line
+});
+

@@ -1,28 +1,42 @@
 document.addEventListener("DOMContentLoaded", () => {
   const cartContainer = document.getElementById("cartContainer");
   const cartTotal = document.getElementById("cartTotal");
+  const checkoutButton = document.querySelector(".checkout-button");
+
+  function showEmptyCart() {
+    cartContainer.innerHTML = `
+      <div class="empty-cart">
+        <img src="/img/empty-cart.png" alt="Empty cart" class="empty-cart-image">
+        <h3 class="empty-cart-title">Your cart is empty</h3>
+        <p class="empty-cart-message">Looks like you haven't added any items yet</p>
+        <a href="/products/see-more" class="empty-cart-button">Browse Products</a>
+      </div>
+    `;
+    cartTotal.textContent = "0.00";
+    checkoutButton.style.display = "none";
+  }
 
   function renderCartItem(item) {
     return `
-        <div class="cart-item" data-product-id="${item.productId}">
-          <img src="${item.imageLoc}" alt="${item.itemName}" class="cartpage-image" />
-          <div class="product-details">
-            <p class="cartpage-title">${item.itemName}</p>
-            <div class="price-quantity">
-              <span class="price">₱${item.unitPrice.toFixed(2)}</span>
-              <div class="quantity-controls">
-                <button class="quantity-btn minus">-</button>
-                <input type="number" value="${item.quantity}" min="1" class="quantity-input"/>
-                <button class="quantity-btn plus">+</button>
-              </div>
+      <div class="cart-item" data-product-id="${item.productId}">
+        <img src="${item.imageLoc}" alt="${item.itemName}" class="cartpage-image" />
+        <div class="product-details">
+          <p class="cartpage-title">${item.itemName}</p>
+          <div class="price-quantity">
+            <span class="price">₱${item.unitPrice.toFixed(2)}</span>
+            <div class="quantity-controls">
+              <button class="quantity-btn minus">-</button>
+              <input type="number" value="${item.quantity}" min="1" class="quantity-input"/>
+              <button class="quantity-btn plus">+</button>
             </div>
           </div>
-          <div class="actions">
-            <input class="action-btn item-check" type="checkbox" checked />
-            <button class="action-btn remove-btn"><img src="/img/x.png" alt="remove"></button>
-          </div>
-        </div>  
-      `;
+        </div>
+        <div class="actions">
+          <input class="action-btn item-check" type="checkbox" checked />
+          <button class="action-btn remove-btn"><img src="/img/x.png" alt="remove"></button>
+        </div>
+      </div>
+    `;
   }
 
   function updateTotal() {
@@ -61,6 +75,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!res.ok) throw new Error("Failed to remove item");
       cartItemElement.remove();
       updateTotal();
+
+      // Check if cart is now empty
+      if (document.querySelectorAll(".cart-item").length === 0) {
+        showEmptyCart();
+      }
     }).catch(err => {
       alert("Error removing item.");
       console.error(err);
@@ -73,6 +92,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return res.json();
     })
     .then(items => {
+      if (items.length === 0) {
+        showEmptyCart();
+        return;
+      }
+
       items.forEach(item => {
         cartContainer.insertAdjacentHTML("beforeend", renderCartItem(item));
       });
@@ -123,10 +147,10 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     .catch(err => {
       console.error("Error loading cart:", err);
-      cartContainer.innerHTML = "<p>Failed to load cart.</p>";
+      showEmptyCart();
     });
 
-  document.querySelector(".checkout-button").addEventListener("click", () => {
+  checkoutButton.addEventListener("click", () => {
     const selectedItems = [];
     document.querySelectorAll(".cart-item").forEach(item => {
       if (item.querySelector(".item-check").checked) {
@@ -142,14 +166,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (selectedItems.length === 0) {
       alert("Please select at least one item to proceed to checkout.");
-      window.location.href = "/cart";
       return;
     }
 
     localStorage.setItem("checkoutItems", JSON.stringify(selectedItems));
     window.location.href = "/order/checkout";
   });
-
-  
-
 });

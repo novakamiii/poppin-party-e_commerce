@@ -85,7 +85,8 @@ export function handleAddToCartSuccess() {
     setTimeout(() => counter.classList.remove('pulse'), 500);
   }
 }
-// In /js/ajax.js - make sure this is at the bottom
+
+
 export async function handleBuyNow(productId, quantity) {
   try {
     const response = await fetch(`/order/buy-now?productId=${productId}&quantity=${quantity}`, {
@@ -97,7 +98,21 @@ export async function handleBuyNow(productId, quantity) {
       credentials: 'include'
     });
 
+    // Handle authentication redirects
+    if (response.redirected && response.url.includes('/login')) {
+      alert('You must be logged in to access this feature!');
+      window.location.href = response.url;
+      return;
+    }
+
+    // Check for HTML response (login page)
     const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('text/html')) {
+      window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+      return;
+    }
+
+    // Handle JSON responses
     if (!contentType || !contentType.includes('application/json')) {
       const text = await response.text();
       throw new Error(text || 'Invalid response from server');
@@ -106,17 +121,28 @@ export async function handleBuyNow(productId, quantity) {
     const data = await response.json();
 
     if (!response.ok) {
+      // Handle specific authentication errors
+      if (response.status === 401 || response.status === 403) {
+        window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+        return;
+      }
       throw new Error(data.error || 'Purchase failed');
     }
 
+    // Success case
     updateCartCounter(1);
     localStorage.setItem("checkoutItems", JSON.stringify([data]));
     window.location.href = "/order/checkout";
+
   } catch (error) {
     console.error('Buy Now error:', error);
-    alert(error.message);
+    if (!error.message.includes('JSON')) { // Don't show parse errors to user
+      alert('Please log in to complete your purchase');
+    }
+    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
   }
 }
+
 
 
 

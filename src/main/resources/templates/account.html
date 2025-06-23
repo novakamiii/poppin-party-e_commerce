@@ -32,6 +32,16 @@
             <div class="header-actions">
                 <div class="notif-button">
                     <img th:src="@{/img/notif.png}" alt="notification" id="notif">
+                    <span id="notification-counter" class="notification-counter">0</span>
+                    <div class="notif-dropdown">
+                        <div class="notif-header">
+                            <h3>Notifications</h3>
+                            <button id="mark-all-read">Mark all as read</button>
+                        </div>
+                        <div class="notif-content" id="notif-content">
+                            <!-- Notifications will be loaded here -->
+                        </div>
+                    </div>
                 </div>
                 <div class="cart-image">
                     <a th:href="@{/cart}">
@@ -48,36 +58,31 @@
             <div class="sidebar">
                 <div class="profile-header">
                     <!-- PROFILE IMAGE -->
+                    <p>User Information</p>
+                    <p class="username" th:text="${user?.username ?: 'No user detected'}">
+                        placeholder
+                    </p>
                     <div class="profile-image">
                         <img id="profilePic"
                             th:src="${user.imagePath} != null ? @{${user.imagePath}} : @{/img/default-profile.png}"
                             alt="Profile Picture" />
                     </div>
-                    <form id="uploadProfileImageForm" enctype="multipart/form-data">
-                        <input type="file" name="imageFile" accept="image/*" />
-                        <button type="submit" class="save-button">Upload Image</button>
-                    </form>
-
-                    <!-- Safe Navigation + Security -->
-                    <p class="username" th:text="${user?.username ?: 'No user detected'}">
-                        placeholder
-                    </p>
-
-                    <!-- Secured edit link
-                    <a th:href="@{/account}" th:if="${user != null}" class="edit-profile-link">
-                        Edit Profile
-                    </a> -->
-                    <p class="edit-profile-link">
-                        User Information
-                    </p>
-                    <a th:href="@{'/logout'}">LOG-OUT</a>
-                    <br>
-                    <a th:href="@{'/order/status'}">Order Status</a>
+                    <div class="file-upload-container">
+                        <form id="uploadProfileImageForm" enctype="multipart/form-data">
+                            <div class="file-upload-wrapper">
+                                <label class="file-upload-button" for="imageFile">Choose Photo</label>
+                                <input type="file" id="imageFile" name="imageFile" accept="image/*" />
+                                <div id="file-name">No file selected</div>
+                            </div>
+                            <button type="submit" class="save-button small">Upload</button>
+                        </form>
+                    </div>
+                    <a th:href="@{'/logout'}" class="sidebar-button logout">LOG OUT</a>
+                    <a th:href="@{'/order/status'}" class="sidebar-button order-status">ORDER STATUS</a>
                 </div>
 
                 <ul class="dashboard-menu">
                     <li><a href="#profile" class="active">My Account</a></li>
-                    <!-- <li><a href="#order-status">Order Status</a></li>-->
                 </ul>
             </div>
 
@@ -146,11 +151,6 @@
                     </div>
                 </section>
             </div>
-
-            <!--<section id="order-status" class="dashboard-section">
-            </section>-->
-
-
         </div>
         </div>
     </main>
@@ -211,12 +211,35 @@
     <script th:src="@{/js/account.js}"></script>
 
     <script>
+        // Update the file name display when a file is selected
+        document.getElementById('imageFile').addEventListener('change', function (e) {
+            const fileNameDisplay = document.getElementById('file-name');
+            if (this.files && this.files.length > 0) {
+                fileNameDisplay.textContent = this.files[0].name;
+                fileNameDisplay.style.color = '#333'; // Make text visible
+            } else {
+                fileNameDisplay.textContent = 'No file selected';
+                fileNameDisplay.style.color = '#666'; // Gray out when no file
+            }
+        });
+
+        // Form submission handler
         document.getElementById("uploadProfileImageForm").addEventListener("submit", function (e) {
             e.preventDefault();
 
+            const fileInput = document.getElementById('imageFile');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("Please select an image file first");
+                return;
+            }
+
             const formData = new FormData(this);
-            const file = formData.get("imageFile");
-            console.log("Uploading image:", file);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.textContent;
+
+            // Show loading state
+            submitBtn.textContent = "Uploading...";
+            submitBtn.disabled = true;
 
             fetch("/account/upload-image", {
                 method: "POST",
@@ -224,21 +247,35 @@
                 credentials: "same-origin"
             })
                 .then(res => {
-                    if (!res.ok) return res.text().then(text => { throw new Error(text); });
+                    if (!res.ok) throw new Error(res.statusText);
                     return res.json();
                 })
                 .then(data => {
-                    console.log("Upload response:", data);
-                    document.getElementById("profilePic").src = data.imageUrl;
-                    alert("Profile image uploaded!");
+                    // Update profile picture with cache-busting parameter
+                    const profilePic = document.getElementById("profilePic");
+                    profilePic.src = data.imageUrl + '?' + new Date().getTime();
+
+                    // Reset file input and display
+                    fileInput.value = '';
+                    document.getElementById('file-name').textContent = 'No file selected';
+                    document.getElementById('file-name').style.color = '#666';
+
+                    submitBtn.textContent = "Uploaded!";
+                    setTimeout(() => {
+                        submitBtn.textContent = originalBtnText;
+                    }, 2000);
                 })
                 .catch(err => {
-                    console.error("Upload failed:", err.message);
-                    alert("Upload failed: " + "You haven't selected an image file or the upload failed. Please try again.");
+                    console.error("Upload failed:", err);
+                    alert("Upload failed. Please try again.");
+                    submitBtn.textContent = originalBtnText;
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
                 });
         });
-
     </script>
+
 
 
     <script>
@@ -314,6 +351,9 @@
             }
         })();
     </script>
+
+    <!-- notification script -->
+    <script th:src="@{/js/notif.js}"></script>
 
     <script type="module">
         import { updateCartCounter } from '/js/ajax.js';
