@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Poppin Party</title>
+
+  <link rel="icon" th:href="@{/img/logowhite.png}" type="image/png" />
+
+  <link rel="stylesheet" th:href="@{/css/styles.css}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <header class="sticky-header">
+    <div class="header-inner">
+      <div class="logo">
+        <a th:href="@{/admin/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
+      </div>
+      <div class="search">
+        <input type="text" class="search-input" placeholder="Search">
+        <button class="search-button">
+          <img th:src="@{/img/search.png}" alt="search">
+        </button>
+      </div>
+    </div>
+  </header>
+
+
+  <main>
+    <div class="addproduct-container">
+      <a th:href="@{/products}">
+        <button class="addproduct-button"> Return Back</button>
+      </a>
+    </div>
+    <table class="table-section">
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Category</th>
+        <th>Image</th>
+        <th>Description</th> <!-- Add header for description -->
+        <th>Actions</th>
+      </tr>
+      <tr th:each="product : ${archivedProducts}">
+        <td th:text="${product.id}"></td>
+        <td th:text="${product.itemName}"></td>
+        <td th:text="${product.price}"></td>
+        <td th:text="${product.stock}"></td>
+        <td th:text="${product.category}"></td>
+        <td id="table-description" style="position: relative;">
+
+          <img th:src="${product.imageLoc}" alt="Product Image" class="hover-image" />
+        </td>
+        <td th:text="${product.description}"></td>
+        <td>
+          <!-- ♻️ Restore (with confirmation) -->
+          <a th:href="@{'/products/restore/' + ${product.id}}"
+            onclick="return confirm('Restore this archived product?');" title="Restore">
+            ♻️
+          </a>
+        </td>
+      </tr>
+
+    </table>
+  </main>
+  <footer>
+    <div class="footer-container">
+      <div class="footer-logo">
+        <img th:src="@{/img/logowhite.png}" alt="Poppin Party Logo">
+        <p>POPPIN PARTY</p>
+        <p>CELEBRATION NEEDS</p>
+      </div>
+      <div class="footer-section">
+        <h3>CUSTOMER SERVICE</h3>
+        <ul>
+          <li><a th:href="@{/home}">MAIN PAGE</a></li>
+          <li><a th:href="@{/logout}">LOG-OUT</a></li>
+        </ul>
+      </div>
+      <div class="copyright">
+        © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
+      </div>
+  </footer>
+</body>
+<script type="module">
+    import { updateCartCounter } from '/js/ajax.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log("DOM fully loaded");
+        updateCartCounter();
+    });
+</script>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.querySelector('.search-input');
+    const searchButton = document.querySelector('.search-button');
+    const productRows = document.querySelectorAll('.table-section tr:not(:first-child)');
+
+    function performSearch() {
+      const searchTerm = searchInput.value.toLowerCase().trim();
+
+      productRows.forEach(row => {
+        const productName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        const productDesc = row.querySelector('td:nth-child(7)').textContent.toLowerCase();
+        const shouldShow = productName.includes(searchTerm) ||
+          productDesc.includes(searchTerm);
+
+        row.style.display = shouldShow ? '' : 'none';
+      });
+    }
+
+    searchButton.addEventListener('click', performSearch);
+    searchInput.addEventListener('input', performSearch);
+  });
+</script>
+
+
+</html>
