@@ -407,3 +407,12 @@
     width: auto;
     margin: 10px auto 0;
 }
+.password-match {
+    color: green;
+    font-weight: bold;
+}
+
+.password-mismatch {
+    color: red;
+    font-weight: bold;
+}

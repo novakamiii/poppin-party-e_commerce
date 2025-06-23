@@ -23,13 +23,14 @@ export const shippingFees = {
 export function updateSummary() {
   const items = JSON.parse(localStorage.getItem("checkoutItems") || "[]");
   const shipping = localStorage.getItem("shippingOption") || "standard";
-  const payment = localStorage.getItem("paymentMethod") || "paypal";
+  const payment = localStorage.getItem("paymentMethod") || "cod";
+
 
   const shippingCost = shippingFees[shipping] || 0;
   let subtotal = items.reduce((sum, item) => {
-    const priceText = document.querySelector(`.cart-item[data-product-id="${item.productId}"] .price`)?.textContent.replace("₱", "") || "0";
+    const priceText = document.querySelector(`.checkout-cart-item[data-product-id="${item.productId}"] .price`)?.textContent.replace("₱", "") || "0";
     const price = parseFloat(priceText);
-    const qty = parseInt(document.querySelector(`.cart-item[data-product-id="${item.productId}"] .quantity-input`)?.value || item.quantity);
+    const qty = parseInt(document.querySelector(`.checkout-cart-item[data-product-id="${item.productId}"] .quantity-input`)?.value || item.quantity);
     return sum + (price * qty);
   }, 0);
 
@@ -56,7 +57,8 @@ export function updateSummary() {
 function bindQuantityListeners() {
   document.querySelectorAll(".quantity-input").forEach(input => {
     input.addEventListener("input", () => {
-      const itemDiv = input.closest(".cart-item");
+      const itemDiv = input.closest(".checkout-cart-item");
+
       const productId = itemDiv.getAttribute("data-product-id");
       const quantity = parseInt(input.value);
 
@@ -83,32 +85,11 @@ export function renderCheckoutItems(containerSelector, afterRenderCallback = () 
     renderItems(container, localItems);
     afterRenderCallback();
   }
-
-  // // Then verify with server
-  // fetch("/api/cart")
-  //   .then(res => res.json())
-  //   .then(serverItems => {
-  //     // Map server items to match local format
-  //     const formattedItems = serverItems.map(item => ({
-  //       productId: item.productId,
-  //       quantity: item.quantity,
-  //       unitPrice: item.unitPrice,
-  //       itemName: item.itemName,
-  //       imageLoc: item.imageLoc
-  //     }));
-
-  //     if (JSON.stringify(formattedItems) !== JSON.stringify(localItems)) {
-  //       localStorage.setItem("checkoutItems", JSON.stringify(formattedItems));
-  //       renderItems(container, formattedItems);
-  //       afterRenderCallback();
-  //     }
-  //   })
-  //   .catch(console.error);
 }
 
 function renderItems(container, items) {
   container.innerHTML = items.map(item => `
-    <div class="cart-item" data-product-id="${item.productId}">
+    <div class="checkout-cart-item" data-product-id="${item.productId}">
       <img src="${item.imageLoc}" alt="${item.itemName}" class="cartpage-image" />
       <div class="product-details">
         <p class="cartpage-title">${item.itemName}</p>
@@ -123,5 +104,9 @@ function renderItems(container, items) {
   `).join('');
 
   updateSummary();
+  bindQuantityListeners(); // ✅ Needed to make quantity changes work
 }
+
+
+
 

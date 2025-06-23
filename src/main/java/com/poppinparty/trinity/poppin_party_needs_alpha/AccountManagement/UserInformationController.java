@@ -33,6 +33,8 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -54,7 +56,6 @@ public class UserInformationController {
     @Autowired
     private UserRepository userRepository;
 
-
     // ========== USER MANAGEMENT ==========
 
     @GetMapping("/account")
@@ -72,6 +73,36 @@ public class UserInformationController {
         model.addAttribute("user", user);
 
         return "account";
+    }
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @PostMapping("/account/change-password")
+    public String changePassword(@RequestParam("newPassword") String newPassword,
+            @RequestParam("confirmPassword") String confirmPassword,
+            Principal principal,
+            RedirectAttributes redirectAttributes) {
+
+        if (!newPassword.equals(confirmPassword)) {
+            redirectAttributes.addAttribute("passwordError", "Passwords do not match.");
+            return "redirect:/account";
+        }
+
+        if (newPassword.length() < 6) {
+            redirectAttributes.addAttribute("passwordError", "Password must be at least 6 characters.");
+            return "redirect:/account";
+        }
+
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // invalidate session and redirect to login
+        SecurityContextHolder.clearContext(); // logout current session
+        return "redirect:/login?passwordChanged=true";
     }
 
     @PostMapping("/account/update")

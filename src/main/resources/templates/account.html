@@ -148,6 +148,42 @@
 
                             <button type="submit" class="save-button">Save</button>
                         </form>
+                        <!-- End of profile update form -->
+                        </form>
+
+                        <!-- 🔧 Wrap the password form in its own div outside .form-grid -->
+                        <div class="password-form-wrapper">
+                            <form th:action="@{/account/change-password}" method="post">
+                                <h3>Change Password</h3>
+
+                                <div class="form-group">
+                                    <label for="newPassword" class="form-label">New Password</label>
+                                    <input type="password" id="newPassword" name="newPassword" class="form-input"
+                                        required />
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                    <input type="password" id="confirmPassword" name="confirmPassword"
+                                        class="form-input" required />
+                                    <div id="passwordError" class="form-text"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <button type="submit" class="save-button small">Change Password</button>
+                                </div>
+
+
+
+
+                                <div th:if="${param.passwordSuccess}" class="alert alert-success">
+                                    Password changed successfully!
+                                </div>
+                            </form>
+
+                        </div>
+
+
                     </div>
                 </section>
             </div>
@@ -209,6 +245,51 @@
 
     <script th:src="@{/js/script.js}"></script>
     <script th:src="@{/js/account.js}"></script>
+
+
+    <script>
+        function validatePassword() {
+            const password = document.getElementById('newPassword').value;
+            const confPassword = document.getElementById('confirmPassword').value;
+            const errorElement = document.getElementById('passwordError');
+
+            if (confPassword.length === 0) {
+                errorElement.textContent = "";
+                errorElement.className = "form-text";
+            } else if (password !== confPassword) {
+                errorElement.textContent = "Passwords do not match!";
+                errorElement.className = "form-text password-mismatch";
+                return false;
+            } else {
+                errorElement.textContent = "Passwords match!";
+                errorElement.className = "form-text password-match";
+                return true;
+            }
+        }
+
+        // Prevent future birthdates
+        document.querySelector('input[type="date"]').addEventListener('change', function () {
+            const selectedDate = new Date(this.value);
+            if (selectedDate > new Date()) {
+                alert("Birthdate cannot be in the future!");
+                this.value = '';
+            }
+        });
+
+        // Live validation as user types
+        document.getElementById('confirmPassword').addEventListener('input', validatePassword);
+        document.getElementById('newPassword').addEventListener('input', validatePassword);
+
+        // Prevent form submit if password doesn't match
+        document.querySelector('form[th\\:action="@{/account/change-password}"]').addEventListener('submit', function (e) {
+            if (!validatePassword()) {
+                e.preventDefault();
+                alert("Please make sure passwords match!");
+            }
+        });
+    </script>
+
+
 
     <script>
         // Update the file name display when a file is selected
