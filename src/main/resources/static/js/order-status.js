@@ -51,7 +51,6 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
                 return;
             }
 
-
             data.forEach(order => {
                 const etaDays = order.status === "CANCELLED" ? "Cancelled" : (order.daysLeft ?? "N/A");
 
@@ -62,9 +61,13 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
                     actionButton = `<span><a href="#" class="restore-order" data-id="${order.id}">Undo</a></span>`;
                 } else if (status === "TO_RECEIVE") {
                     actionButton = `<span><button class="mark-received" data-id="${order.orderId}">Mark as Received</button></span>`;
-                    // ✅ this line now uses the actual Order ID
                 }
 
+                // Only show ETA if not COMPLETED
+                let etaHtml = "";
+                if ((order.status || "").trim().toUpperCase() !== "COMPLETED") {
+                    etaHtml = `<p class="item-eta">ETA: ${etaDays} ${etaDays === "Cancelled" ? "" : "day(s) left"}</p>`;
+                }
 
                 container.insertAdjacentHTML("beforeend", `
                     <div class="order-item" data-order-id="${order.id}">
@@ -75,7 +78,7 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
                             <h3 class="item-name">${order.itemName}</h3>
                             <h3 class="tracking-number">${order.transactionId}</h3>
                             <p class="item-qty">QTY: ${order.quantity}</p>
-                            <p class="item-eta">ETA: ${etaDays} ${etaDays === "Cancelled" ? "" : "day(s) left"}</p>
+                            ${etaHtml}
                         </div>
                         <div class="item-total">
                             <span class="total-label">TOTAL:</span>
