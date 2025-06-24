@@ -35,7 +35,6 @@ public class UserInformationController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-
     // ========== USER MANAGEMENT ==========
 
     @GetMapping("/account")
