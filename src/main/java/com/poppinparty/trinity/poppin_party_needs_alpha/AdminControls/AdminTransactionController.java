@@ -1,27 +1,3 @@
-/**
- * Controller for admin transaction management, including viewing and updating order/payment statuses.
- * <p>
- * Endpoints:
- * <ul>
- *   <li><b>GET /admin/transaction-approval</b>: Displays a list of payments filtered by status for admin approval.</li>
- *   <li><b>POST /admin/transaction/{orderId}/status</b>: Updates the status of a specific order and sends notifications to the user.</li>
- * </ul>
- * 
- * Dependencies:
- * <ul>
- *   <li>{@link PaymentRepository} for accessing payment data.</li>
- *   <li>{@link OrderRepository} for accessing order data.</li>
- *   <li>{@link OrderStatusService} for updating order statuses.</li>
- *   <li>{@link NotificationService} for sending notifications to users.</li>
- * </ul>
- * 
- * Inner Classes:
- * <ul>
- *   <li><b>StatusUpdateRequest</b>: DTO for receiving new status updates in requests.</li>
- * </ul>
- * 
- * Handles validation of status updates and ensures notifications are sent for relevant status changes.
- */
 package com.poppinparty.trinity.poppin_party_needs_alpha.AdminControls;
 
 import java.util.Arrays;

@@ -108,48 +108,45 @@ body {
   background-color: #8e31c9;
 }
 
-/*Sign in Container*/
+/* Compact Sign up Container */
 .signup-container {
-  width: 300px;
-  /* Adjust as needed */
+  width: 320px;
   background-color: #d9d9d9;
   border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  /* Adds spacing between elements */
-  margin-left: auto;
-  margin-right: auto;
-  padding: 50px;
-  margin-top: 10px;
-  padding-bottom: 100px;
+  gap: 8px;
+  margin: 30px auto 0 auto;
+  padding: 24px 18px 32px 18px;
   font-family: "Bebas Neue", sans-serif;
 }
 
 .signup-container p {
   text-align: center;
-  font-size: 3em;
-  margin-bottom: 15px;
+  font-size: 2em;
+  margin-bottom: 10px;
 }
 
 .signup-container input[type="text"],
 .signup-container input[type="tel"],
-.signup-container input[type="password"] {
+.signup-container input[type="password"],
+.signup-container input[type="date"],
+.signup-container select {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
+  padding: 7px 10px;
+  margin-bottom: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
-  /* Ensures padding is included in the element's total width */
   font-family: sans-serif;
-  font-size: 1.5em;
+  font-size: 1em;
 }
 
 .signup-container a {
   text-decoration: none;
   color: #b944fd;
+  font-size: 1em;
 }
 
 .signup-container a:hover {
@@ -159,32 +156,55 @@ body {
 .signup-container button[type="submit"] {
   background-color: #b944fd;
   color: white;
-  width: 300px;
-  height: 50px;
+  width: 100%;
+  height: 38px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-family: "Bebas Neue", sans-serif;
-  font-size: 1.5em;
-  margin-top: 30px;
-  margin-left: auto;
-  margin-right: auto;
+  font-size: 1.1em;
+  margin-top: 18px;
 }
 
-.signup-container input[type="date"] {
+.signup-container button[type="submit"]:hover {
+  background-color: #8e31c9;
+}
+
+.signup-container .form-group {
+  margin-bottom: 8px;
+}
+
+.signup-container h2 {
+  font-size: 1em;
+  margin-top: 12px;
+  text-align: center;
+}
+/* Add or update these styles */
+.signup-container .form-select {
   width: 100%;
-  /* Make the date input fill the container width */
-  padding: 10px;
-  /* Same padding as other inputs */
-  margin-bottom: 10px;
-  /* Same margin */
+  padding: 7px 10px;
+  margin-bottom: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  box-sizing: border-box;
-  /* Include padding in width */
+  background: #fff url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 10px center/16px 16px;
+  font-size: 1em;
   font-family: sans-serif;
-  font-size: 1.5em;
-  /* Same font size */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #f7f7f7;
+  transition: border-color 0.2s;
+}
+
+.signup-container .form-select:focus {
+  border-color: #b944fd;
+  outline: none;
+  background-color: #fff;
+}
+
+.signup-container .form-group {
+  margin-bottom: 8px;
+  position: relative;
 }
 
 /* CART PAGE */
@@ -740,9 +760,9 @@ body {
 
 .no-notifications-image {
   width: 100px;
-  height: auto;    
-  display: block;   
-  margin: 0 auto;   
+  height: auto;
+  display: block;
+  margin: 0 auto;
   opacity: 0.7;
 }
 

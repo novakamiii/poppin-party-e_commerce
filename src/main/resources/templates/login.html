@@ -47,6 +47,27 @@
     <br>
     <br>
 
+    <script th:inline="javascript">
+      /*<![CDATA[*/
+      window.onload = function () {
+        if ([[${ param.logout }]] != null) {
+          alert("You have been logged out.");
+        }
+        if ([[${ param.error }]] != null) {
+          alert("Invalid username or password.");
+        }
+        if ([[${ success }]] != null) {
+          alert("Your account has been successfully created!");
+        }
+        if ([[${ param.relogin }]] != null) {
+          alert("Your session has expired. Please log in again.");
+        }
+        if ([[${ param.passwordChanged }]] != null) {
+          alert("Your password has been changed. Please log in again.");
+        }
+      };
+      /*]]>*/
+    </script>
 
   </main>
 
@@ -115,26 +136,5 @@
 
   <script th:src="@{/script.js}"></script>
 </body>
-<script th:inline="javascript">
-  /*<![CDATA[*/
-  window.onload = function () {
-    if ([[${param.logout}]] != null) {
-      alert("You have been logged out.");
-    }
-    if ([[${param.error}]] != null) {
-      alert("Invalid username or password.");
-    }
-    if ([[${success}]] != null) {
-      alert("Your account has been successfully created!");
-    }
-    if ([[${param.relogin}]] != null) {
-      alert("Your session has expired. Please log in again.");
-    }
-    if ([[${param.passwordChanged}]] != null) {
-      alert("Your password has been changed. Please log in again.");
-    }
-  };
-  /*]]>*/
-</script>
 
 </html>

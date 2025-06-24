@@ -5,13 +5,48 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Poppin Party</title>
-
     <link rel="icon" th:href="@{/img/logowhite.png}" type="image/png" />
-
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
+
+    <style>
+        .filter-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75em;
+            margin: 2em 0 1.5em 0;
+            padding: 0.75em 1.5em;
+            background: #f8f8fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            font-family: 'Bebas Neue', Arial, sans-serif;
+            font-size: 1.1em;
+        }
+
+        .filter-section label {
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #333;
+        }
+
+        .filter-section select {
+            padding: 0.4em 1.2em 0.4em 0.7em;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            background: #fff;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border 0.2s;
+        }
+
+        .filter-section select:focus {
+            outline: none;
+            border-color: #ff6f61;
+            box-shadow: 0 0 0 2px #ffe3e0;
+        }
+    </style>
 </head>
 
 <body>
@@ -50,7 +85,6 @@
             </option>
         </select>
     </div>
-
     <table class="table-section">
         <tr>
             <th>ID</th>
@@ -80,14 +114,15 @@
             <td th:text="${#dates.format(payment.order.orderDate, 'yyyy-MM-dd HH:mm')}"></td>
             <td>
                 <div class="buttonst">
-                    <a href="#" th:onclick="|updateStatus(${payment.order.id}, 'TO_SHIP')|"
-                        title="Mark as To Ship">📝</a>
+                    <a href="#" th:onclick="|updateStatus(${payment.order.id}, 'TO_SHIP')|" title="Mark as To Ship"
+                        style="background: none; border: none; cursor: pointer; text-decoration: none;">🚚</a>
                     <a href="#" th:onclick="|updateStatus(${payment.order.id}, 'TO_RECEIVE')|"
-                        title="Mark as To Receive">📦</a>
-                    <a href="#" th:onclick="|updateStatus(${payment.order.id}, 'COMPLETED')|"
-                        title="Mark as Completed">✅</a>
-                    <a href="#" th:onclick="|updateStatus(${payment.order.id}, 'CANCELLED')|"
-                        title="Mark as Cancelled">❌</a>
+                        title="Mark as To Receive"
+                        style="background: none; border: none; cursor: pointer; text-decoration: none;">📦</a>
+                    <a href="#" th:onclick="|updateStatus(${payment.order.id}, 'COMPLETED')|" title="Mark as Completed"
+                        style="background: none; border: none; cursor: pointer; text-decoration: none;">✅</a>
+                    <a href="#" th:onclick="|updateStatus(${payment.order.id}, 'CANCELLED')|" title="Mark as Cancelled"
+                        style="background: none; border: none; cursor: pointer; text-decoration: none;">❌</a>
                 </div>
             </td>
         </tr>
@@ -147,44 +182,44 @@
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.querySelector('.search-input');
-    const searchButton = document.querySelector('.search-button');
-    const transactionRows = document.querySelectorAll('.table-section tr:not(:first-child)');
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.querySelector('.search-input');
+        const searchButton = document.querySelector('.search-button');
+        const transactionRows = document.querySelectorAll('.table-section tr:not(:first-child)');
 
-    function performSearch() {
-        const searchTerm = searchInput.value.toLowerCase().trim();
+        function performSearch() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
 
-        transactionRows.forEach(row => {
-            const orderId = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-            const username = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
-            const itemName = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
-            const trackingNumber = row.querySelector('td:nth-child(8)').textContent.toLowerCase();
+            transactionRows.forEach(row => {
+                const orderId = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+                const username = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                const itemName = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+                const trackingNumber = row.querySelector('td:nth-child(8)').textContent.toLowerCase();
 
-            const shouldShow = orderId.includes(searchTerm) ||
-                             username.includes(searchTerm) ||
-                             itemName.includes(searchTerm) ||
-                             trackingNumber.includes(searchTerm);
+                const shouldShow = orderId.includes(searchTerm) ||
+                    username.includes(searchTerm) ||
+                    itemName.includes(searchTerm) ||
+                    trackingNumber.includes(searchTerm);
 
-            row.style.display = shouldShow ? '' : 'none';
+                row.style.display = shouldShow ? '' : 'none';
+            });
+        }
+
+        // Add debounce to prevent rapid firing
+        let debounceTimer;
+        function debounceSearch() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+        }
+
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('input', debounceSearch);
+
+        // Also search when filter changes
+        document.querySelector('.filter-section select').addEventListener('change', () => {
+            setTimeout(performSearch, 500); // Wait for page to load new data
         });
-    }
-
-    // Add debounce to prevent rapid firing
-    let debounceTimer;
-    function debounceSearch() {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(performSearch, 300);
-    }
-
-    searchButton.addEventListener('click', performSearch);
-    searchInput.addEventListener('input', debounceSearch);
-
-    // Also search when filter changes
-    document.querySelector('.filter-section select').addEventListener('change', () => {
-        setTimeout(performSearch, 500); // Wait for page to load new data
     });
-});
 </script>
 
 </html>

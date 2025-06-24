@@ -71,7 +71,7 @@
           <!-- 🗑️ Archive (with confirmation) -->
           <a th:href="@{'/admin/user/delete/' + ${user.id}}"
             onclick="return confirm('Are you sure you want to archive this user?');" title="Archive/Delete"
-            alt="Archive User">
+            style="background: none; border: none; cursor: pointer; text-decoration: none;" alt="Archive User">
             🗑️
           </a>
         </td>

@@ -43,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.CartItemDTO;
@@ -141,13 +142,17 @@ public class CartController {
 
                 // Stock validation
                 if (product.getStock() <= 0) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                        .body("This product is out of stock");
+                        return ResponseEntity
+                                                        .status(HttpStatus.BAD_REQUEST)
+                                                        .contentType(MediaType.TEXT_PLAIN)
+                                                        .body("This product is out of stock!");
+
                 }
 
                 if (quantity > product.getStock()) {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                        .body("Only " + product.getStock() + " items available");
+                                        .contentType(MediaType.TEXT_PLAIN)
+                                        .body("Only " + product.getStock() + " items available!");
                 }
 
                 String productRef = product.getItemName();
@@ -161,9 +166,12 @@ public class CartController {
                                         .sum() + quantity;
 
                         if (totalQuantity > product.getStock()) {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                return ResponseEntity
+                                                .status(HttpStatus.BAD_REQUEST)
+                                                .contentType(MediaType.TEXT_PLAIN)
                                                 .body("Cannot add more than available stock (Max: " + product.getStock()
                                                                 + ")");
+
                         }
 
                         // Update first item and delete duplicates
@@ -185,7 +193,8 @@ public class CartController {
                         orderItemRepository.save(newItem);
                 }
 
-                return ResponseEntity.ok("Item added to cart");
+                return ResponseEntity.ok("Item added to cart!");
+
         }
 
         @PostMapping("/api/cart/validate-checkout")

@@ -1,27 +1,3 @@
-/**
- * Controller for managing user account information and profile images.
- * <p>
- * Handles displaying the user dashboard, updating user profile details,
- * and uploading/deleting user profile images.
- * </p>
- *
- * <ul>
- *   <li>
- *     <b>GET /account</b>: Displays the account dashboard for the authenticated user.
- *   </li>
- *   <li>
- *     <b>POST /account/update</b>: Updates editable user profile fields (name, email, phone, gender, address).
- *   </li>
- *   <li>
- *     <b>POST /account/upload-image</b>: Handles profile image upload, deletes old image if not default,
- *     and updates the user's image path.
- *   </li>
- * </ul>
- *
- * <p>
- * Requires authentication for all endpoints. Uses {@link UserRepository} for persistence.
- * </p>
- */
 package com.poppinparty.trinity.poppin_party_needs_alpha.AccountManagement;
 
 import java.io.IOException;
@@ -56,6 +32,10 @@ public class UserInformationController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+
     // ========== USER MANAGEMENT ==========
 
     @GetMapping("/account")
@@ -74,9 +54,6 @@ public class UserInformationController {
 
         return "account";
     }
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/account/change-password")
     public String changePassword(@RequestParam("newPassword") String newPassword,

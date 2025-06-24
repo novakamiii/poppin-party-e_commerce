@@ -1,13 +1,3 @@
-/**
- * Displays the empty cart UI in the cart container.
- * Updates the cart container with a message and image indicating the cart is empty,
- * resets the cart total to "0.00", and hides the checkout button.
- *
- * Assumes the existence of the following global variables:
- * - cartContainer: The DOM element where the cart contents are displayed.
- * - cartTotal: The DOM element displaying the cart's total price.
- * - checkoutButton: The DOM element for the checkout button.
- */
 document.addEventListener("DOMContentLoaded", () => {
   const cartContainer = document.getElementById("cartContainer");
   const cartTotal = document.getElementById("cartTotal");
@@ -27,27 +17,49 @@ document.addEventListener("DOMContentLoaded", () => {
     checkoutButton.style.display = "none";
   }
 
+  
+
   function renderCartItem(item) {
-    return `
-<div class="cart-item" data-cart-id="${item.id}">
-        <img src="${item.imageLoc}" alt="${item.itemName}" class="cartpage-image" />
+    // If product does not exist (e.g., missing imageLoc or productId is -1/null/undefined)
+    if (!item.imageLoc || item.productId === "-1" || item.productId === null || item.productId === undefined) {
+      return `
+      <div class="cart-item sold-out">
+        <img src="/img/sold-out.png" alt="Sold Out" class="cartpage-image" />
         <div class="product-details">
-          <p class="cartpage-title">${item.itemName}</p>
+          <p class="cartpage-title">${item.itemName || "Product Unavailable"}</p>
           <div class="price-quantity">
-            <span class="price">₱${item.unitPrice.toFixed(2)}</span>
-            <div class="quantity-controls">
-              <button class="quantity-btn minus">-</button>
-              <input type="number" value="${item.quantity}" min="1" class="quantity-input"/>
-              <button class="quantity-btn plus">+</button>
-            </div>
+            <span class="price">₱0.00</span>
+            <span class="sold-out-label">Restock / Sold Out</span>
           </div>
         </div>
         <div class="actions">
-          <input class="action-btn item-check" type="checkbox" checked />
           <button class="action-btn remove-btn"><img src="/img/x.png" alt="remove"></button>
         </div>
       </div>
     `;
+    }
+
+    // Normal product
+    return `
+    <div class="cart-item" data-product-id="${item.productId}">
+      <img src="${item.imageLoc}" alt="${item.itemName}" class="cartpage-image" />
+      <div class="product-details">
+        <p class="cartpage-title">${item.itemName}</p>
+        <div class="price-quantity">
+          <span class="price">₱${item.unitPrice.toFixed(2)}</span>
+          <div class="quantity-controls">
+            <button class="quantity-btn minus">-</button>
+            <input type="number" value="${item.quantity}" min="1" class="quantity-input"/>
+            <button class="quantity-btn plus">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <input class="action-btn item-check" type="checkbox" checked />
+        <button class="action-btn remove-btn"><img src="/img/x.png" alt="remove"></button>
+      </div>
+    </div>
+  `;
   }
 
   function updateTotal() {
@@ -77,26 +89,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function normalizeField(val) {
-    if (Array.isArray(val)) return val.join(" ").trim();
-    if (val === null || val === undefined) return "";
-    if (typeof val === "string") return val.trim();
-    return String(val).trim(); // fallback for numbers, booleans, etc.
-  }
-
-  function removeItem(cartItemId, cartItemElement) {
-    const params = new URLSearchParams();
-    params.append("id", cartItemId);
-
+  function removeItem(productId, cartItemElement) {
     fetch("/api/cart/remove", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: params.toString()
+      body: `productId=${productId}`
     }).then(res => {
       if (!res.ok) throw new Error("Failed to remove item");
       cartItemElement.remove();
       updateTotal();
 
+      // Check if cart is now empty
       if (document.querySelectorAll(".cart-item").length === 0) {
         showEmptyCart();
       }
@@ -105,8 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error(err);
     });
   }
-
-
 
   fetch("/api/cart")
     .then(res => {
@@ -146,12 +147,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (e.target.closest(".remove-btn")) {
           if (confirm("Remove this item from your cart?")) {
-            const cartItemId = cartItem.getAttribute("data-cart-id");
-            removeItem(cartItemId, cartItem);
+            removeItem(productId, cartItem);
           }
         }
-
-
       });
 
       cartContainer.addEventListener("input", e => {

@@ -40,144 +40,50 @@
     </header>
     <!--End of Header-->
     <main>
-        <br>
-        <br>
         <div class="signup-container">
             <p>SIGN UP</p>
+            <!-- Only the form part, for clarity -->
             <form th:object="${user}" th:action="@{/register}" method="post">
-                <input type="text" th:field="*{email}" placeholder="E-Mail" required> <br>
-                <input type="text" th:field="*{name}" placeholder="First Name" required> <br>
+                <input type="text" th:field="*{email}" placeholder="E-Mail" required>
+                <input type="text" th:field="*{name}" placeholder="First Name" required>
                 <div class="form-group">
-                    <label for="gender"><span class="required"></span></label>
-                    <select th:field="*{gender}" class="form-select" style="
-                                background: white;
-                                border-radius: 5px;
-                                padding: 12px;
-                                width: 100%;
-                                font-family: sans-serif;
-                                font-size: 1.1rem;
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                                transition: all 0.3s ease;
-                            " required>
-                        <option value="" disabled selected style="color: #999; font-style: italic;">
-                            Select your gender
-                        </option>
-                
-                        <option
-                            th:each="genderOpt : ${genders}"
-                            th:value="${genderOpt}" th:text="${genderOpt}" style="
-                                padding: 8px;
-                                background: white;
-                                transition: background 0.2s;
-                            " th:attr="data-gender=${genderOpt}">
+                    <select th:field="*{gender}" class="form-select" required>
+                        <option value="" disabled selected>Select your gender</option>
+                        <option th:each="genderOpt : ${genders}" th:value="${genderOpt}" th:text="${genderOpt}">
                         </option>
                     </select>
                 </div>
-                
-                <br>
                 <div class="form-group">
-                    <label for="birthDate" style="display: block; text-align: center; margin-bottom: 8px;">
-                        Birthdate (YYYY-MM-DD)
-                      </label>
-                    <input 
-                        type="date" 
-                        th:field="*{birthDate}" 
-                        class="form-control" 
-                        pattern="\d{4}-\d{2}-\d{2}"
-                        required
-                        style="
-                            background: white;
-                            border-radius: 5px;
-                            padding: 12px;
-                            width: 100%;
-                            font-family: sans-serif;
-                            font-size: 1.1rem;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                            border: 1px solid #ccc;
-                            transition: all 0.3s ease;
-                            cursor: pointer;
-                        "
-                        onfocus="this.style.boxShadow='0 0 6px #6ca0dc'; this.style.borderColor='#6ca0dc';" 
-                        onblur="this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'; this.style.borderColor='#ccc';"
-                    >
+                    <input type="date" th:field="*{birthDate}" class="form-control" pattern="\d{4}-\d{2}-\d{2}"
+                        required>
                 </div>
-                <br>
-
                 <input type="text" th:field="*{username}" placeholder="Username" required>
-                <br>
                 <input type="tel" th:field="*{phone}" placeholder="Phone Number" required>
-                <br>
                 <input type="text" th:field="*{address}" placeholder="Permanent Address" required>
-                <br>
-                <!--PAssword Section-->
-                <style>
-                    .password-match {
-                        color: green;
-                    }
-
-                    .password-mismatch {
-                        color: red;
-                    }
-                </style>
-
-                <input type="password" th:field="*{password}" placeholder="Password" required>
-
-                <br>
-                <input type="password" id="confpassword" name="confpassword" placeholder="Confirm Password" required
+                <input type="password" th:field="*{password}" id="newPassword" placeholder="Password" required>
+                <input type="password" id="confirmPassword" name="confpassword" placeholder="Confirm Password" required
                     oninput="validatePassword()">
-                <br>
                 <span id="passwordError"></span>
-
-                <script>
-                    function validatePassword() {
-                        const password = document.getElementById('password').value;
-                        const confPassword = document.getElementById('confpassword').value;
-                        const errorElement = document.getElementById('passwordError');
-
-                        if (confPassword.length === 0) {
-                            errorElement.textContent = "";
-                            errorElement.className = "";
-                        }
-                        else if (password !== confPassword) {
-                            errorElement.textContent = "Passwords do not match!";
-                            errorElement.className = "password-mismatch";
-                            return false;
-                        } else {
-                            errorElement.textContent = "Passwords match!";
-                            errorElement.className = "password-match";
-                            return true;
-                        }
-                    }
-
-                    // Validate birthdate is not future
-                    document.querySelector('input[type="date"]').addEventListener('change', function () {
-                        const selectedDate = new Date(this.value);
-                        if (selectedDate > new Date()) {
-                            alert("Birthdate cannot be in the future!");
-                            this.value = '';
-                        }
-                    });
-
-
-                    document.querySelector('form').addEventListener('submit', function (e) {
-                        if (!validatePassword()) {
-                            e.preventDefault();
-                            alert("Please make sure passwords match!");
-                        }
-                    });
-                </script>
-                <!--PAssword Section End-->
                 <button type="submit">SIGN UP</button>
                 <h2>
                     Already have an Account? <a th:href="@{/login}">Log In</a>
                 </h2>
             </form>
         </div>
-        <br>
-        <br>
-
-        <img th:src="@{${user.imagePath}}" onerror="this.src='/img/default-profile.png'" />
     </main>
+
+
+    <img th:src="@{${user.imagePath}}" onerror="this.src='/img/default-profile.png'" hidden/> <!--PAssword Section-->
+    <style>
+        .password-match {
+            color: green;
+        }
+
+        .password-mismatch {
+            color: red;
+        }
+    </style>
+
 
     <footer>
         <div class="footer-container">
@@ -242,7 +148,139 @@
         </div>
     </footer>
 
-    <script th:src="@{/js/script.js}"></script>
+
 </body>
+<script th:src="@{/js/script.js}"></script>
+
+
+<!-- get back at this later -->
+<!-- <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const usernameInput = document.querySelector('input[name="username"]');
+        const emailInput = document.querySelector('input[name="email"]');
+
+        // Add spans for feedback if not present
+        if (!document.getElementById('username-check')) {
+            usernameInput.insertAdjacentHTML('afterend', '<span id="username-check" style="font-size:0.9em;margin-left:8px;"></span>');
+        }
+        if (!document.getElementById('email-check')) {
+            emailInput.insertAdjacentHTML('afterend', '<span id="email-check" style="font-size:0.9em;margin-left:8px;"></span>');
+        }
+        const usernameCheck = document.getElementById('username-check');
+        const emailCheck = document.getElementById('email-check');
+
+        usernameInput.addEventListener('input', function () {
+            const username = usernameInput.value.trim();
+            if (username.length < 3) {
+                usernameCheck.textContent = '';
+                return;
+            }
+            fetch(`/api/check/username?username=${encodeURIComponent(username)}`)
+                .then(res => {
+                    console.log(res);
+                    return res.json();
+                })
+                .then(exists => {
+                    console.log("Username exists?", exists);
+                })
+                .catch(err => console.error("Error:", err));
+
+            fetch(`/api/check/username?username=${encodeURIComponent(username)}`)
+                .then(res => res.json())
+                .then(exists => {
+                    if (exists) {
+                        usernameCheck.textContent = "Username is already taken";
+                        usernameCheck.style.color = "red";
+                    } else {
+                        usernameCheck.textContent = "Username is available";
+                        usernameCheck.style.color = "green";
+                    }
+                });
+        });
+
+        emailInput.addEventListener('input', function () {
+            const email = emailInput.value.trim();
+            if (!email.includes('@')) {
+                emailCheck.textContent = '';
+                return;
+            }
+            fetch(`/api/check/email?email=${encodeURIComponent(email)}`)
+                .then(res => res.json())
+                .then(exists => {
+                    if (exists) {
+                        emailCheck.textContent = "Email is already in use";
+                        emailCheck.style.color = "red";
+                    } else {
+                        emailCheck.textContent = "Email is available";
+                        emailCheck.style.color = "green";
+                    }
+                });
+        });
+    });
+</script> -->
+
+<script>
+    function validatePassword() {
+        const password = document.getElementById('newPassword').value;
+        const confPassword = document.getElementById('confirmPassword').value;
+        const errorElement = document.getElementById('passwordError');
+
+        if (confPassword.length === 0) {
+            errorElement.textContent = "";
+            errorElement.className = "form-text";
+        } else if (password.length < 5) {
+            errorElement.textContent = "";
+            errorElement.className = "form-text";
+            errorElement.textContent = "Password must be at least 5 characters!";
+            errorElement.style.color = "red";
+            errorElement.className = "form-text password must be atleast 5 characters!";
+            return false;
+        } else if (password !== confPassword) {
+            errorElement.textContent = "Passwords do not match!";
+            errorElement.className = "form-text password-mismatch";
+            return false;
+        } else {
+            errorElement.textContent = "Passwords match!";
+            errorElement.style.color = "green";
+            errorElement.className = "form-text password-match";
+            return true;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Prevent future birthdates
+        var dateInput = document.querySelector('input[type="date"]');
+        if (dateInput) {
+            dateInput.addEventListener('change', function () {
+                const selectedDate = new Date(this.value);
+                if (selectedDate > new Date()) {
+                    alert("Birthdate cannot be in the future!");
+                    this.value = '';
+                }
+            });
+        }
+
+        // Live validation as user types
+        var confirmPasswordInput = document.getElementById('confirmPassword');
+        if (confirmPasswordInput) {
+            confirmPasswordInput.addEventListener('input', validatePassword);
+        }
+        var newPasswordInput = document.getElementById('newPassword');
+        if (newPasswordInput) {
+            newPasswordInput.addEventListener('input', validatePassword);
+        }
+
+        // Prevent form submit if password doesn't match or is too short
+        var registerForm = document.querySelector('form[th\\:action="@{/register}"]');
+        if (registerForm) {
+            registerForm.addEventListener('submit', function (e) {
+                if (!validatePassword()) {
+                    e.preventDefault();
+                    alert("Please make sure passwords match and are at least 5 characters!");
+                }
+            });
+        }
+    });
+</script>
 
 </html>

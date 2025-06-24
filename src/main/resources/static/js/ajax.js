@@ -1,21 +1,3 @@
-
-
-
-/**
- * Sends form data (including image) to backend to add a product,
- * then calls a callback with the new product data to update UI.
- *
- * @param {HTMLFormElement} formElement - The form containing product data.
- * @param {function} onSuccess - Callback function(product) called after successful addition.
- * @param {function} onError - Callback function() called on failure.
- */
-/**
- * Sends an AJAX POST request to add a new product using the provided form element.
- *
- * @param {HTMLFormElement} formElement - The form element containing product data to submit.
- * @param {function(Object): void} onSuccess - Callback function invoked with the created product object on success.
- * @param {function(): void} [onError] - Optional callback function invoked if the request fails.
- */
 export function addProductAjax(formElement, onSuccess, onError) {
   const formData = new FormData(formElement);
 
@@ -41,22 +23,28 @@ export function addProductAjax(formElement, onSuccess, onError) {
  * @param {object} product - The product object with id, title, price, imagePath.
  * @returns {string} HTML string of product card.
  */
+
+
+//Old version with button inside image link
+/*
+<a href="/product-page/${product.id}">
+            <img src="${product.imageLoc}" alt="${product.itemName}" />
+          </a> */
+
 export function createProductCardHTML(product) {
   return `
+    <a href="/product-page/${product.id}" class="product-card-link" style="text-decoration:none;color:inherit;">
       <div class="product-card">
         <div class="product-image">
-          <a href="/product-page/${product.id}">
-            <img src="${product.imageLoc}" alt="${product.itemName}" />
-          </a>
+          <img src="${product.imageLoc}" alt="${product.itemName}" />
         </div>
         <div class="product-details">
-          <a href="/product-page/${product.id}">
-            <p class="product-title">${product.itemName}</p>
-          </a>
+          <p class="product-title">${product.itemName}</p>
           <p class="product-price">₱${product.price}</p>
         </div>
       </div>
-    `;
+    </a>
+  `;
 }
 
 // Initialize cart counter on page load
@@ -97,60 +85,80 @@ export function handleAddToCartSuccess() {
 
 
 export async function handleBuyNow(productId, quantity) {
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    alert('Add to cart failed: Please enter a valid quantity!');
+    return;
+  }
+
   try {
-    const response = await fetch(`/order/buy-now?productId=${productId}&quantity=${quantity}`, {
+    const response = await fetch(`/order/buy-now`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json'
       },
+      body: `productId=${productId}&quantity=${quantity}`,
       credentials: 'include'
     });
 
-    // Handle authentication redirects
-    if (response.redirected && response.url.includes('/login')) {
-      alert('You must be logged in to access this feature!');
-      window.location.href = response.url;
-      return;
-    }
-
-    // Check for HTML response (login page)
     const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('text/html')) {
+
+    // Check for authentication errors or unexpected HTML response
+    if (
+      response.status === 401 ||
+      response.status === 403 ||
+      (contentType && contentType.includes('text/html'))
+    ) {
+      alert('You must be logged in to purchase items!');
       window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
       return;
     }
 
-    // Handle JSON responses
-    if (!contentType || !contentType.includes('application/json')) {
-      const text = await response.text();
-      throw new Error(text || 'Invalid response from server');
+    let data = {};
+    let fallbackText = null;
+    try {
+      // Try to parse JSON if possible
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        // If not JSON, treat as text (could be an error message)
+        fallbackText = await response.text();
+        throw new Error(fallbackText || 'Unknown error occurred');
+      }
+    } catch (jsonErr) {
+      // If JSON parsing fails, use the fallbackText if available
+      if (fallbackText !== null) {
+        console.warn('Non-JSON response received:', fallbackText);
+        throw new Error(fallbackText || 'Unknown error occurred');
+      } else {
+        console.warn('Non-JSON response received and no fallbackText available');
+        throw new Error('Unknown error occurred');
+      }
     }
-
-    const data = await response.json();
 
     if (!response.ok) {
-      // Handle specific authentication errors
-      if (response.status === 401 || response.status === 403) {
-        window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
-        return;
-      }
-      throw new Error(data.error || 'Purchase failed');
+      throw new Error(data.error || data.message || 'Purchase failed');
     }
 
-    // Success case
     updateCartCounter(1);
     localStorage.setItem("checkoutItems", JSON.stringify([data]));
     window.location.href = "/order/checkout";
 
   } catch (error) {
     console.error('Buy Now error:', error);
-    if (!error.message.includes('JSON')) { // Don't show parse errors to user
-      alert('Please log in to complete your purchase');
+
+    if (
+      error.message.toLowerCase().includes('stock') ||
+      error.message.toLowerCase().includes('quantity')
+    ) {
+      alert(error.message);
+    } else {
+      alert(error.message || 'Something went wrong. Please try again.');
     }
-    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
   }
 }
+
+
 
 
 
