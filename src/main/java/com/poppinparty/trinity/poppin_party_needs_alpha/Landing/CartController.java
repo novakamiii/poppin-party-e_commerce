@@ -32,6 +32,7 @@ import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -50,8 +51,6 @@ import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.OrderItem;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Product;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.User;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderItemRepository;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderRepository;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.PaymentRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ProductRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.UserRepository;
 
@@ -98,6 +97,7 @@ public class CartController {
                                         dto.setUnitPrice(orderItem.getUnitPrice().doubleValue());
 
                                         if (Boolean.TRUE.equals(orderItem.isCustom())) {
+                                                dto.setId(orderItem.getId());
                                                 dto.setCustom(true);
                                                 dto.setItemName("Custom Tarpaulin (" + orderItem.getCustomSize() + ")");
                                                 dto.setImageLoc("https://placehold.co/150x100/b944fd/ffffff?font=poppins&text=Tarpulin");
@@ -271,36 +271,17 @@ public class CartController {
 
         @PostMapping("/api/cart/remove")
         @ResponseBody
-        public ResponseEntity<?> removeItemFromCart(
-                        @RequestParam(required = false) Long productId,
-                        @RequestParam(required = false) String customSize,
-                        @RequestParam(required = false) String eventType,
-                        @RequestParam(required = false) String message,
-                        @RequestParam(required = false) String thickness,
-                        @RequestParam(required = false) String finish,
-                        Principal principal) {
-
+        public ResponseEntity<?> removeItemById(@RequestParam Long id, Principal principal) {
                 User user = userRepository.findByUsername(principal.getName())
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-                if (productId != null && productId != -1L) {
-                        // Regular product
-                        Product product = productRepository.findById(productId)
-                                        .orElseThrow(() -> new RuntimeException("Product not found"));
-                        String productRef = product.getItemName();
+                Optional<OrderItem> itemOpt = orderItemRepository.findById(id);
 
-                        List<OrderItem> items = orderItemRepository.findByUserIdAndProductRef(user.getId(), productRef);
-                        if (!items.isEmpty()) {
-                                orderItemRepository.deleteAll(items);
-                        }
-
-                } else {
-                        // Custom tarpaulin
-                        orderItemRepository.findByUserIdAndCustomFields(
-                                        user.getId(), customSize, eventType, message, thickness, finish)
-                                        .ifPresent(orderItemRepository::delete);
+                if (itemOpt.isEmpty() || !itemOpt.get().getUserId().equals(user.getId())) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not authorized to remove this item.");
                 }
 
+                orderItemRepository.deleteById(id);
                 return ResponseEntity.ok("Item removed");
         }
 

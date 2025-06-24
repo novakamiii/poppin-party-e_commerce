@@ -1,6 +1,7 @@
 package com.poppinparty.trinity.poppin_party_needs_alpha.Entities;
 
 public class CartItemDTO {
+    private Long id;
     private Long productId;
     private String itemName;
     private String imageLoc;
@@ -14,6 +15,8 @@ public class CartItemDTO {
     private String personalizedMessage;
     private String tarpaulinThickness;
     private String tarpaulinFinish;
+
+    
 
     public Double getUnitPrice() {
         return unitPrice;
@@ -110,6 +113,14 @@ public class CartItemDTO {
 
     public void setTarpaulinFinish(String tarpaulinFinish) {
         this.tarpaulinFinish = tarpaulinFinish;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
 }

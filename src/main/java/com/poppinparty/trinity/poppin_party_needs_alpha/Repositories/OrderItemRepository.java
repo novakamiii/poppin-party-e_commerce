@@ -24,7 +24,15 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     @Transactional
     void deleteByUserId(Long userId);
 
-    @Query("SELECT o FROM OrderItem o WHERE o.userId = :userId AND o.customSize = :customSize AND o.eventType = :eventType AND o.personalizedMessage = :message AND o.tarpaulinThickness = :thickness AND o.tarpaulinFinish = :finish")
+    @Query("""
+                SELECT o FROM OrderItem o
+                WHERE o.userId = :userId
+                  AND (o.customSize = :customSize OR (o.customSize IS NULL AND :customSize = ''))
+                  AND (o.eventType = :eventType OR (o.eventType IS NULL AND :eventType = ''))
+                  AND (o.personalizedMessage = :message OR (o.personalizedMessage IS NULL AND :message = ''))
+                  AND (o.tarpaulinThickness = :thickness OR (o.tarpaulinThickness IS NULL AND :thickness = ''))
+                  AND (o.tarpaulinFinish = :finish OR (o.tarpaulinFinish IS NULL AND :finish = ''))
+            """)
     Optional<OrderItem> findByUserIdAndCustomFields(
             @Param("userId") Long userId,
             @Param("customSize") String customSize,
@@ -42,7 +50,5 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     @Modifying
     @Query("DELETE FROM OrderItem oi WHERE oi.userId = :userId")
     void deleteAllByUserId(@Param("userId") Long userId);
-
-    
 
 }
