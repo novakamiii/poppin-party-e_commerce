@@ -32,6 +32,7 @@ export function addProductAjax(formElement, onSuccess, onError) {
           </a> */
 
 export function createProductCardHTML(product) {
+  const outOfStock = product.stock === 0;
   return `
     <a href="/product-page/${product.id}" class="product-card-link" style="text-decoration:none;color:inherit;">
       <div class="product-card">
@@ -39,7 +40,10 @@ export function createProductCardHTML(product) {
           <img src="${product.imageLoc}" alt="${product.itemName}" />
         </div>
         <div class="product-details">
-          <p class="product-title">${product.itemName}</p>
+          <p class="product-title">
+            ${product.itemName}
+            ${outOfStock ? '<span class="out-of-stock-label" style="color:grey;font-weight:bold;margin-left:8px;">(Out of Stock)</span>' : ''}
+          </p>
           <p class="product-price">₱${product.price}</p>
         </div>
       </div>

@@ -46,7 +46,7 @@ public class SecurityConfig {
                     "/register", "/dummy", "/home", "/styles.css", "/img/**",
                     "/forgot-password", "/reset-password", "/login",
                     "/css/**", "/js/**", "/api/products/**", "/uploads/**", "/product-page/**",
-                    "/api/cart/**", "/products/see-more", "/products/category/**"
+                    "/api/cart/**", "/products/see-more", "/products/category/**", "/products/customtarp"
                 ).permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasRole("USER")
@@ -56,6 +56,7 @@ public class SecurityConfig {
                 .authenticationEntryPoint((request, response, authException) -> {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType("application/json");
+                    response.getWriter().write("{\"error\": \"Unauthorized\"}");
                     response.sendRedirect("/login");
                 })
             )
