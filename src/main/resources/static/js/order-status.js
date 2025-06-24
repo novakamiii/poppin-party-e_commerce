@@ -51,41 +51,43 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
                 return;
             }
 
-
             data.forEach(order => {
                 const etaDays = order.status === "CANCELLED" ? "Cancelled" : (order.daysLeft ?? "N/A");
 
                 let actionButton = '';
                 if (status === "PENDING") {
-                    actionButton = `<button class="order-action cancel-order" data-id="${order.id}">Cancel</button>`;
+                    actionButton = `<span><a href="#" class="cancel-order" data-id="${order.id}">Cancel</a></span>`;
                 } else if (status === "CANCELLED") {
-                    actionButton = `<button class="order-action restore-order" data-id="${order.id}">Undo</button>`;
+                    actionButton = `<span><a href="#" class="restore-order" data-id="${order.id}">Undo</a></span>`;
                 } else if (status === "TO_RECEIVE") {
-                    actionButton = `<button class="order-action mark-received" data-id="${order.orderId}">Mark as Received</button>`;
+                    actionButton = `<span><button class="mark-received" data-id="${order.orderId}">Mark as Received</button></span>`;
+                }
+
+                // Only show ETA if not COMPLETED
+                let etaHtml = "";
+                if ((order.status || "").trim().toUpperCase() !== "COMPLETED") {
+                    etaHtml = `<p class="item-eta">ETA: ${etaDays} ${etaDays === "Cancelled" ? "" : "day(s) left"}</p>`;
                 }
 
                 container.insertAdjacentHTML("beforeend", `
-        <div class="order-item" data-order-id="${order.id}">
-            <div class="item-image">
-                <img src="${order.imageLoc}" alt="${order.itemName}" />
-            </div>
-            <div class="item-details">
-                <h3 class="item-name">${order.itemName}</h3>
-                <h3 class="tracking-number">${order.transactionId}</h3>
-                <p class="item-qty">QTY: ${order.quantity}</p>
-                <p class="item-eta">ETA: ${etaDays} ${etaDays === "Cancelled" ? "" : "day(s) left"}</p>
-            </div>
-            <div class="item-total">
-                <span class="total-label">TOTAL:</span>
-                <span class="total-price">₱${order.amount.toFixed(2)}</span>
-                <div class="order-actions">
-                    ${actionButton}
-                </div>
-            </div>
-        </div>
-    `);
+                    <div class="order-item" data-order-id="${order.id}">
+                        <div class="item-image">
+                            <img src="${order.imageLoc}" alt="${order.itemName}" />
+                        </div>
+                        <div class="item-details">
+                            <h3 class="item-name">${order.itemName}</h3>
+                            <h3 class="tracking-number">${order.transactionId}</h3>
+                            <p class="item-qty">QTY: ${order.quantity}</p>
+                            ${etaHtml}
+                        </div>
+                        <div class="item-total">
+                            <span class="total-label">TOTAL:</span>
+                            <span class="total-price">₱${order.amount.toFixed(2)}</span>
+                            ${actionButton}
+                        </div>
+                    </div>
+                `);
             });
-
         })
         .catch(err => {
             const container = document.getElementById(containerId);
