@@ -65,14 +65,16 @@
         <td th:text="${product.description}" id="table-description"></td> <!-- Ensure description is displayed -->
         <td>
           <!-- ✏️ Edit -->
-          <a th:href="@{'/products/edit/' + ${product.id}}" title="Edit" alt="Edit Product">
+          <a th:href="@{'/products/edit/' + ${product.id}}" title="Edit" alt="Edit Product"
+             style="background: none; border: none; cursor: pointer; text-decoration: none;">
             ✏️
           </a>
 
           <!-- 🗑️ Archive (with confirmation) -->
           <a th:href="@{'/products/delete/' + ${product.id}}"
-            onclick="return confirm('Are you sure you want to archive this product?');" title="Archive/Delete"
-            alt="Archive Product">
+             onclick="return confirm('Are you sure you want to archive this product?');"
+             title="Archive/Delete" alt="Archive Product"
+             style="background: none; border: none; cursor: pointer; text-decoration: none;">
             🗑️
           </a>
         </td>

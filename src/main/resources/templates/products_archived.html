@@ -61,7 +61,8 @@
         <td>
           <!-- ♻️ Restore (with confirmation) -->
           <a th:href="@{'/products/restore/' + ${product.id}}"
-            onclick="return confirm('Restore this archived product?');" title="Restore">
+            onclick="return confirm('Restore this archived product?');" title="Restore"
+            style="background: none; border: none; cursor: pointer; text-decoration: none;">
             ♻️
           </a>
         </td>

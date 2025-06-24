@@ -18,7 +18,7 @@
     <header class="sticky-header">
         <div class="header-inner">
             <div class="logo">
-                <a th:href="@{/admin/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
+                <a th:href="@{/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
             </div>
             <div class="search">
                 <input type="text" class="search-input" placeholder="Search">
@@ -211,8 +211,19 @@
         if (addToCartBtn && qtyInput) {
             addToCartBtn.addEventListener("click", () => {
                 authWrapper("add items to cart", async () => {
+                    const rawProductId = window.location.pathname.split("/").pop();
+                    const productId = parseInt(rawProductId);
                     const quantity = parseInt(qtyInput.value);
-                    const productId = window.location.pathname.split("/").pop();
+
+                    if (isNaN(productId)) {
+                        alert("Invalid product ID");
+                        return;
+                    }
+
+                    if (isNaN(quantity) || quantity <= 0) {
+                        alert("Add to cart failed: Please enter a valid quantity!");
+                        return;
+                    }
 
                     try {
                         const response = await fetch("/api/cart/add", {
@@ -230,17 +241,19 @@
                         }
 
                         if (!response.ok) {
-                            throw new Error("Failed to add to cart");
+                            const errorMessage = await response.text();
+                            throw new Error(errorMessage);
                         }
 
                         const message = await response.text();
                         alert(message);
                         updateCartCounter();
                     } catch (err) {
-                        alert(err.message);
+                        alert("Add to cart failed: " + err.message);
                     }
                 });
             });
+
         }
 
         // Buy Now
@@ -263,11 +276,11 @@
 
 <!-- Checking Auth -->
 <script type="module">
-  import { setupAuthProtectedElements } from '/js/auth-utils.js';
+    import { setupAuthProtectedElements } from '/js/auth-utils.js';
 
-  document.addEventListener('DOMContentLoaded', () => {
-    setupAuthProtectedElements();
-  });
+    document.addEventListener('DOMContentLoaded', () => {
+        setupAuthProtectedElements();
+    });
 </script>
 
 <!-- notification script -->
@@ -305,27 +318,6 @@
 </script>
 
 <script>
-    // Product Quantity Selector Logic
-    const qtyInput = document.getElementById('product-qty');
-    const minusBtn = document.querySelector('.qty-btn.minus');
-    const plusBtn = document.querySelector('.qty-btn.plus');
-
-    if (qtyInput && minusBtn && plusBtn) {
-        minusBtn.addEventListener('click', () => {
-            let currentQty = parseInt(qtyInput.value);
-            if (currentQty > parseInt(qtyInput.min)) {
-                qtyInput.value = currentQty - 1;
-            }
-        });
-
-        plusBtn.addEventListener('click', () => {
-            let currentQty = parseInt(qtyInput.value);
-            if (currentQty < parseInt(qtyInput.max)) {
-                qtyInput.value = currentQty + 1;
-            }
-        });
-    }
-
     // Product Image Gallery Logic
     const mainProductImage = document.getElementById('mainProductImage');
     const thumbnails = document.querySelectorAll('.thumbnail');

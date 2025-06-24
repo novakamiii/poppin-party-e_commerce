@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
     <title>Add Product</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
 
         body {
-            font-family: 'Bebas Neue', sans-serif; /* Apply Bebas Neue */
+            font-family: 'Bebas Neue', sans-serif;
+            /* Apply Bebas Neue */
             background-color: #f4f4f4;
             display: flex;
             flex-direction: column;
@@ -19,7 +24,8 @@
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            width: 400px; /* Adjust as needed */
+            width: 400px;
+            /* Adjust as needed */
             margin-bottom: 20px;
         }
 
@@ -27,12 +33,13 @@
             text-align: center;
             color: #333;
             margin-bottom: 20px;
-            font-size: 2em; /* Make title larger with Bebas Neue */
+            font-size: 2em;
+            /* Make title larger with Bebas Neue */
         }
 
         .form-group {
             margin-bottom: 15px;
-            
+
         }
 
         .form-label {
@@ -40,7 +47,8 @@
             margin-bottom: 5px;
             color: #555;
             font-weight: bold;
-            font-size: 1.2em; /* Slightly larger labels */
+            font-size: 1.2em;
+            /* Slightly larger labels */
         }
 
         .form-input {
@@ -49,32 +57,40 @@
             border: 1px solid #ccc;
             border-radius: 8px;
             box-sizing: border-box;
-            font-size: 1.2em; /* Larger input text */
+            font-size: 1.2em;
+            /* Larger input text */
         }
 
         .form-input:focus {
             outline: none;
-            border-color: #b944fd; /* Purple focus color */
-            box-shadow: 0 0 5px rgba(185, 68, 253, 0.5); /* Purple focus shadow */
+            border-color: #b944fd;
+            /* Purple focus color */
+            box-shadow: 0 0 5px rgba(185, 68, 253, 0.5);
+            /* Purple focus shadow */
         }
 
         .form-button {
-            background-color: #b944fd; /* Purple button */
+            background-color: #b944fd;
+            /* Purple button */
             color: white;
             padding: 12px 15px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 1.4em; /* Larger button text */
+            font-size: 1.4em;
+            /* Larger button text */
             transition: background-color 0.3s ease;
             width: 100%;
             box-sizing: border-box;
-            letter-spacing: 0.05em; /* Slight letter spacing for Bebas Neue */
-            font-family: 'Bebas Neue', sans-serif; /* Apply Bebas Neue */
+            letter-spacing: 0.05em;
+            /* Slight letter spacing for Bebas Neue */
+            font-family: 'Bebas Neue', sans-serif;
+            /* Apply Bebas Neue */
         }
 
         .form-button:hover {
-            background-color: #8e31c9; /* Darker purple on hover */
+            background-color: #8e31c9;
+            /* Darker purple on hover */
         }
 
         .upload-container {
@@ -105,6 +121,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="add-product-container">
         <h2 class="add-product-title">ADD PRODUCT</h2>
@@ -116,7 +133,7 @@
             <div class="form-group">
                 <label for="description" class="form-label">DESCRIPTION:</label>
                 <textarea id="description" name="description" class="form-input" rows="4" required></textarea>
-            </div>            
+            </div>
             <div class="form-group">
                 <label for="price" class="form-label">PRICE:</label>
                 <input type="number" id="price" name="price" step="0.01" class="form-input" required>
@@ -137,16 +154,7 @@
                 </select>
             </div>
 
-            <script>
-                document.getElementById("category").addEventListener("change", function () {
-                    const newCatInput = document.getElementById("new-category-group");
-                    if (this.value === "other") {
-                        newCatInput.style.display = "block";
-                    } else {
-                        newCatInput.style.display = "none";
-                    }
-                });
-            </script>
+            <!-- Category change script moved below for correct DOM access -->
 
             <div class="form-group" id="new-category-group" style="display: none;">
                 <label for="newCategory" class="form-label">New Category</label>
@@ -155,14 +163,34 @@
 
             </div>
 
-            <div class="upload-container">
-                <h3>UPLOAD IMAGE</h3>
-                <div class="form-group">
-                    <label for="imageUpload" class="upload-label">CHOOSE AN IMAGE:</label>
-                    <input type="file" id="imageUpload" name="image" accept="image/*" class="form-input">
+            <!-- Image Upload -->
+            <div class="form-group upload-container">
+                <label for="imageUpload" class="upload-label">CHOOSE AN IMAGE:</label>
+                <input type="file" id="imageUpload" name="image" accept="image/*" class="form-input" required>
+            </div>
+
+            <!-- Cropping Modal -->
+            <div id="cropperModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background-color: rgba(0, 0, 0, 0.6); z-index: 9999; justify-content: center; align-items: center;">
+                <div
+                    style="background: white; padding: 20px; border-radius: 10px; max-width: 90%; max-height: 90%; overflow: auto;">
+                    <h3 style="margin-top: 0;">Crop Image</h3>
+                    <img id="modalImage" style="max-width: 100%; max-height: 60vh;" />
+                    <div style="margin-top: 1em; text-align: right;">
+                        <button type="button" id="cropConfirmBtn"
+                            style="padding: 10px 20px; background-color: #b944fd; color: white; border: none; border-radius: 5px;">
+                            Crop & Use Image
+                            </button>
+
+                            <button type="button" id="cropCancelBtn"
+                                style="padding: 10px 20px; margin-left: 10px; border-radius: 5px;">
+                                Cancel
+                            </button>
+
+                    </div>
                 </div>
             </div>
-        
+
             <button type="submit" class="form-button">ADD PRODUCT</button>
         </form>
 
@@ -170,4 +198,100 @@
 
     <a th:href="@{/products}" class="back-link">BACK TO INVENTORY</a>
 </body>
-</html>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        // Category select event handler
+        const categorySelect = document.getElementById("category");
+        if (categorySelect) {
+            categorySelect.addEventListener("change", function () {
+                const newCatInput = document.getElementById("new-category-group");
+                if (this.value === "other") {
+                    newCatInput.style.display = "block";
+                } else {
+                    newCatInput.style.display = "none";
+                }
+            });
+        }
+
+        // CropperJS logic
+        let cropper;
+        const imageInput = document.getElementById('imageUpload');
+        const modal = document.getElementById('cropperModal');
+        const modalImage = document.getElementById('modalImage');
+        const confirmBtn = document.getElementById('cropConfirmBtn');
+        const cancelBtn = document.getElementById('cropCancelBtn');
+
+        // Max file size in bytes (e.g., 2MB)
+        const MAX_FILE_SIZE = 2 * 1024 * 1024;
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > MAX_FILE_SIZE) {
+                alert("Image is too large! Please select an image smaller than 2MB.");
+                imageInput.value = "";
+                return;
+            }
+
+            const url = URL.createObjectURL(file);
+            modalImage.src = url;
+            modal.style.display = 'flex'; // Show modal popup
+
+            modalImage.onload = () => {
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(modalImage, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 1,
+                });
+            };
+        });
+
+        confirmBtn.addEventListener('click', () => {
+            if (!cropper) return;
+
+            // Use the original file name if available, otherwise fallback to 'cropped.jpg'
+            const originalFile = imageInput.files[0];
+            const originalName = originalFile ? originalFile.name : 'cropped.jpg';
+
+            // Try to compress by lowering quality if needed
+            function handleBlob(blob) {
+                if (blob.size > MAX_FILE_SIZE) {
+                    // Try compressing more
+                    cropper.getCroppedCanvas({ width: 250, height: 250 }).toBlob((compressedBlob) => {
+                        if (compressedBlob.size > MAX_FILE_SIZE) {
+                            alert("Cropped image is still too large. Please choose a smaller image or crop a smaller area.");
+                            return;
+                        }
+                        setFileAndClose(compressedBlob);
+                    }, 'image/jpeg', 0.7); // Lower quality
+                } else {
+                    setFileAndClose(blob);
+                }
+            }
+
+            function setFileAndClose(blob) {
+                const croppedFile = new File([blob], originalName, { type: 'image/jpeg' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(croppedFile);
+                imageInput.files = dataTransfer.files;
+
+                cropper.destroy();
+                cropper = null;
+                modal.style.display = 'none';
+                alert("Image cropped! You can now submit the form.");
+            }
+
+            cropper.getCroppedCanvas({ width: 250, height: 250 }).toBlob(handleBlob, 'image/jpeg', 0.9);
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+            cropper?.destroy();
+            cropper = null;
+            imageInput.value = ""; // clear file input
+        });
+    });
+</script>

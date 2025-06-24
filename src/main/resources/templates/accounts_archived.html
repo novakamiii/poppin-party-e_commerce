@@ -62,13 +62,12 @@
                     <img th:src="@{${user.imagePath}}" alt="User Image" class="hover-image">
                 </td>
                 <td>
-                    <!-- Replace the <a> tag with a form -->
-                    <form th:action="@{'/admin/user/restore/' + ${user.id}}" method="POST" style="display: inline;">
-                        <button type="submit" onclick="return confirm('Restore this archived user?');"
-                            style="background: none; border: none; cursor: pointer;" title="Restore User">
-                            ♻️
-                        </button>
-                    </form>
+                    <a th:href="@{'/admin/user/restore/' + ${user.id}}"
+                        onclick="return confirm('Restore this archived user?');"
+                        style="background: none; border: none; cursor: pointer; text-decoration: none;"
+                        title="Restore User">
+                         ♻️
+                    </a>
                 </td>
             </tr>
         </table>
