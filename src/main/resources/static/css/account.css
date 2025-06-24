@@ -123,6 +123,17 @@
     background-color: #e3f2fd;
 }
 
+.sidebar-button.admin-dashboard {
+    background-color: #f0b3ed;
+    color: #861181;
+    border-color: #bbdefb;
+}
+
+.sidebar-button.admin-dashboard:hover {
+    background-color: #d19dce;
+}
+
+
 .profile-header {
     text-align: center;
     margin-bottom: 20px;

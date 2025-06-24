@@ -25,7 +25,7 @@
         </button>
       </div>
       <div class="header-actions">
-          <div class="notif-button" data-protected data-protected-name="notifications">
+        <div class="notif-button" th:if="${#authorization.expression('isAuthenticated()')}">
           <img th:src="@{/img/notif.png}" alt="notification" id="notif">
           <span id="notification-counter" class="notification-counter">0</span>
           <div class="notif-dropdown">
@@ -38,12 +38,12 @@
             </div>
           </div>
         </div>
-          <div class="account-button" data-protected data-protected-name="your account">
+        <div class="account-button" data-protected data-protected-name="your account">
           <a th:href="@{/account}">
             <img th:src="@{/img/account.png}" alt="user" id="user">
           </a>
         </div>
-          <div class="cart-image" data-protected data-protected-name="your cart">
+        <div class="cart-image" data-protected data-protected-name="your cart">
           <a th:href="@{/cart}">
             <img th:src="@{/img/cart.png}" alt="cart" id="cart">
             <span id="cart-counter" class="cart-counter">0</span>
@@ -128,7 +128,7 @@
         <p class="categtext">string lights</p>
       </div>
       <div class="categcontainer">
-        <button class="categbutton" id="customtarp" th:onclick="'location.href=\'' + @{/products/customtarp} + '\';'" data-protected data-protected-name="this feature!">
+        <button class="categbutton" id="customtarp" th:onclick="'location.href=\'' + @{/products/customtarp} + '\';'">
           <img th:src="@{/img/imgcustarp.png}" alt="customtarp" class="categicon">
         </button>
         <p class="categtext">custom tarpaulin</p>
@@ -152,7 +152,7 @@
     <br />
     <div class="tarpaulinbanner">
       <img th:src="@{/img/tarpaulinbanner.png}" alt="tarpaulinbanner" class="tarpban"
-        th:onclick="'location.href=\'' + @{/products/customtarp} + '\';'" data-protected data-protected-name="to this feature!"/>
+        th:onclick="'location.href=\'' + @{/products/customtarp} + '\';'" />
     </div>
     <br />
 
@@ -339,4 +339,5 @@
     });
   });
 </script>
+
 </html>

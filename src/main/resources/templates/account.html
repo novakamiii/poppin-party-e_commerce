@@ -101,13 +101,11 @@
                             </div>
                         </div>
                     </div>
-                    <a th:href="@{'/logout'}" class="sidebar-button logout">LOG OUT</a>
+                    <a th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}" th:href="@{'/admin/home'}"
+                        class="sidebar-button admin-dashboard">ADMIN DASHBOARD</a>
                     <a th:href="@{'/order/status'}" class="sidebar-button order-status">ORDER STATUS</a>
+                    <a th:href="@{'/logout'}" class="sidebar-button logout">LOG OUT</a>
                 </div>
-
-                <ul class="dashboard-menu">
-                    <li><a href="#profile" class="active">My Account</a></li>
-                </ul>
             </div>
 
             <div class="main-content">
@@ -175,9 +173,10 @@
 
                         <!-- 🔧 Wrap the password form in its own div outside .form-grid -->
                         <div class="password-form-wrapper">
-                            <form th:action="@{/account/change-password}" method="post">
-                                <h3>Change Password</h3>
 
+                            <h3 class="content-title">Change Password</h3>
+
+                            <form th:action="@{/account/change-password}" method="post">
                                 <div class="form-group">
                                     <label for="newPassword" class="form-label">New Password</label>
                                     <input type="password" id="newPassword" name="newPassword" class="form-input"
@@ -194,9 +193,6 @@
                                 <div class="form-group">
                                     <button type="submit" class="save-button small">Change Password</button>
                                 </div>
-
-
-
 
                                 <div th:if="${param.passwordSuccess}" class="alert alert-success">
                                     Password changed successfully!
@@ -269,22 +265,30 @@
 
 <script>
     function validatePassword() {
-        const password = document.getElementById('newPassword').value;
-        const confPassword = document.getElementById('confirmPassword').value;
+        const passwordInput = document.getElementById('newPassword');
+        const confPasswordInput = document.getElementById('confirmPassword');
+        const password = passwordInput.value;
+        const confPassword = confPasswordInput.value;
         const errorElement = document.getElementById('passwordError');
+
+        // Disable confirm password if password is too short
+        if (password.length < 6) {
+            confPasswordInput.value = '';
+            confPasswordInput.disabled = true;
+            errorElement.textContent = "Password must be at least 6 characters.";
+            errorElement.style.color = "grey";
+            errorElement.className = "form-text password-mismatch";
+            return false;
+        } else {
+            confPasswordInput.disabled = false;
+        }
 
         if (confPassword.length === 0) {
             errorElement.textContent = "";
             errorElement.className = "form-text";
-        } else if (password.length < 5) {
-            errorElement.textContent = "";
-            errorElement.className = "form-text";
-            errorElement.textContent = "Password must be at least 5 characters!";
-            errorElement.style.color = "red";
-            errorElement.className = "form-text password must be atleast 5 characters!";
-            return false;
         } else if (password !== confPassword) {
             errorElement.textContent = "Passwords do not match!";
+            errorElement.style.color = "red";
             errorElement.className = "form-text password-mismatch";
             return false;
         } else {
@@ -295,7 +299,7 @@
         }
     }
 
-    // Prevent future birthdates
+    //prevent future birthdates
     document.querySelector('input[type="date"]').addEventListener('change', function () {
         const selectedDate = new Date(this.value);
         if (selectedDate > new Date()) {
@@ -304,16 +308,19 @@
         }
     });
 
-    // Live validation as user types
-    document.getElementById('confirmPassword').addEventListener('input', validatePassword);
+    //live validation as user types
     document.getElementById('newPassword').addEventListener('input', validatePassword);
+    document.getElementById('confirmPassword').addEventListener('input', validatePassword);
 
-    // Prevent form submit if password doesn't match or is too short
-    document.querySelector('form[th\\:action="@{/account/change-password}"]').addEventListener('submit', function (e) {
-        if (!validatePassword()) {
-            e.preventDefault();
-            alert("Please make sure passwords match and are at least 5 characters!");
+    //password validation on page load
+    window.addEventListener('DOMContentLoaded', function () {
+        const passwordInput = document.getElementById('newPassword');
+        const confPasswordInput = document.getElementById('confirmPassword');
+        if (passwordInput.value.length < 5) {
+            confPasswordInput.value = '';
+            confPasswordInput.disabled = true;
         }
+        validatePassword();
     });
 </script>
 
