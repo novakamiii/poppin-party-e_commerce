@@ -1,23 +1,3 @@
-/**
- * Handles dashboard navigation and tab switching logic for the account page.
- *
- * - Adds click event listeners to sidebar menu links to show/hide dashboard sections.
- * - Updates the active state of sidebar links and dashboard sections.
- * - When the "Order Status" section is activated, initializes the "to-ship" tab as active and sets up tab switching logic.
- * - Ensures only one order status tab and its corresponding content are active at a time.
- * - On initial page load, shows the "profile" section by default.
- * - If the URL hash is "#order-status", initializes the "to-ship" tab as active.
- *
- * Elements involved:
- *   - `.dashboard-menu a`: Sidebar navigation links.
- *   - `.dashboard-section`: Main dashboard content sections.
- *   - `#order-status .status-tab`: Tabs within the order status section.
- *   - `#order-status .order-item-list`: Content lists for each order status tab.
- *
- * Assumes:
- *   - Each sidebar link's `href` attribute matches the `id` of its target section.
- *   - Order status tabs use a `data-tab` attribute matching the `id` of their content.
- */
 const dashboardMenuLinks = document.querySelectorAll('.dashboard-menu a');
         const dashboardSections = document.querySelectorAll('.dashboard-section');
         const orderStatusTabs = document.querySelectorAll('#order-status .status-tab');

@@ -1,39 +1,3 @@
-
-
-/**
- * Handles URL parameters to activate the correct order status tab and optionally highlight a specific order.
- * Looks for 'order' and 'status' parameters in the URL, activates the corresponding tab,
- * loads orders for that status, and highlights the specified order if present.
- */
-//export function handleUrlParams() {}
-
-/**
- * Loads orders by status and renders them into the specified container.
- * Fetches orders from the API, displays them, and adds appropriate action buttons based on status.
- *
- * @param {string} status - The status of orders to load (e.g., "PENDING", "CANCELLED", "TO_RECEIVE").
- * @param {string} [containerId="orderStatusContent"] - The ID of the container to render orders into.
- */
-//export function loadOrdersByStatus(status, containerId = "orderStatusContent") {}
-
-/**
- * Initializes status tabs for order filtering.
- * Adds click event listeners to tabs, loads orders for the selected status, and sets the default tab.
- *
- * @param {string} tabSelector - CSS selector for the status tabs.
- * @param {string} containerId - The ID of the container to render orders into.
- * @param {string} [defaultStatus="PENDING"] - The default status to load on initialization.
- */
-//export function initStatusTabs(tabSelector, containerId, defaultStatus = "PENDING") {}
-
-/**
- * Initializes order status tabs and sets up click handlers.
- * Loads orders for the selected tab and sets the default tab to "PENDING".
- * (Legacy function, use `initStatusTabs` for more flexibility.)
- */
-//export function initializeOrderTabs() {}
-
-
 export function handleUrlParams() {
     const urlParams = new URLSearchParams(window.location.search);
     const orderId = urlParams.get('order');
@@ -87,7 +51,6 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
                 return;
             }
 
-
             data.forEach(order => {
                 const etaDays = order.status === "CANCELLED" ? "Cancelled" : (order.daysLeft ?? "N/A");
 
@@ -98,9 +61,13 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
                     actionButton = `<span><a href="#" class="restore-order" data-id="${order.id}">Undo</a></span>`;
                 } else if (status === "TO_RECEIVE") {
                     actionButton = `<span><button class="mark-received" data-id="${order.orderId}">Mark as Received</button></span>`;
-                    // ✅ this line now uses the actual Order ID
                 }
 
+                // Only show ETA if not COMPLETED
+                let etaHtml = "";
+                if ((order.status || "").trim().toUpperCase() !== "COMPLETED") {
+                    etaHtml = `<p class="item-eta">ETA: ${etaDays} ${etaDays === "Cancelled" ? "" : "day(s) left"}</p>`;
+                }
 
                 container.insertAdjacentHTML("beforeend", `
                     <div class="order-item" data-order-id="${order.id}">
@@ -111,7 +78,7 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
                             <h3 class="item-name">${order.itemName}</h3>
                             <h3 class="tracking-number">${order.transactionId}</h3>
                             <p class="item-qty">QTY: ${order.quantity}</p>
-                            <p class="item-eta">ETA: ${etaDays} ${etaDays === "Cancelled" ? "" : "day(s) left"}</p>
+                            ${etaHtml}
                         </div>
                         <div class="item-total">
                             <span class="total-label">TOTAL:</span>

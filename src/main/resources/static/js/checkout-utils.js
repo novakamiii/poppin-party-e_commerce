@@ -1,19 +1,3 @@
-// checkout-utils.js
-
-/**
- * Renders selected checkout items dynamically from localStorage and cart data.
- * Requires the server to expose an /api/cart endpoint.
- *
- * @param {string} containerSelector - The CSS selector for the container element.
- * @param {function} [afterRenderCallback] - Optional function to call after items are rendered.
- * An object representing the shipping fees for different delivery options.
- * @typedef {Object} ShippingFees
- * @property {number} standard - The fee for standard shipping.
- * @property {number} express - The fee for express shipping.
- * @property {number} overnight - The fee for overnight shipping.
- *
- * @type {ShippingFees}
- */
 export const shippingFees = {
   standard: 45,
   express: 75,
