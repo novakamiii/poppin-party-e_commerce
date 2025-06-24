@@ -119,11 +119,16 @@ public class OrdersController {
                         Product product = productRepository.findById(productId)
                                         .orElseThrow(() -> new RuntimeException("Product not found"));
 
-                        if (product.getStock() < quantity) {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                                .contentType(MediaType.APPLICATION_JSON)
-                                                .body(Map.of("error",
-                                                                "Only " + product.getStock() + " items available"));
+                        if (product.getStock() == 0) {
+                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                                        .contentType(MediaType.APPLICATION_JSON)
+                                                                        .body(Map.of("error",
+                                                                                                        "Add to cart failed: This product is out of stock!"));
+                        } else if (product.getStock() < quantity) {
+                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                                        .contentType(MediaType.APPLICATION_JSON)
+                                                                        .body(Map.of("error",
+                                                                                                        "Add to cart failed: Only " + product.getStock() + " items available!"));
                         }
 
                         OrderItem newItem = new OrderItem();

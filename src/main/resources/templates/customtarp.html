@@ -27,7 +27,7 @@
                 </button>
             </div>
             <div class="header-actions">
-                <div class="notif-button">
+                <div class="notif-button" th:if="${#authorization.expression('isAuthenticated()')}">
                     <img th:src="@{/img/notif.png}" alt="notification" id="notif">
                     <span id="notification-counter" class="notification-counter">0</span>
                     <div class="notif-dropdown">
@@ -40,12 +40,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="account-button">
+                <div class="account-button" data-protected data-protected-name="your account">
                     <a th:href="@{/account}">
                         <img th:src="@{/img/account.png}" alt="user" id="user">
                     </a>
                 </div>
-                <div class="cart-image">
+                <div class="cart-image" data-protected data-protected-name="your cart">
                     <a th:href="@{/cart}">
                         <img th:src="@{/img/cart.png}" alt="cart" id="cart">
                         <span id="cart-counter" class="cart-counter">0</span>
@@ -117,8 +117,16 @@
             </div>
 
             <div class="add-to-cart-area">
-                <button class="add-to-cart-btn" id="addToCartBtn">ADD TO CART</button>
+                <button class="add-to-cart-btn" id="addToCartBtn"
+                    th:disabled="${not #authorization.expression('isAuthenticated()')}"
+                    th:classappend="${not #authorization.expression('isAuthenticated()')} ? ' disabled'">
+                    ADD TO CART
+                </button>
             </div>
+            <span th:if="${not #authorization.expression('isAuthenticated()')}" class="login-to-purchase-msg"
+                style="margin-left:10px; color:grey; font-size:1em">
+                Please login to purchase!
+            </span>
             <p class="estimated-price">Estimated Price: ₱<span id="estimatedPrice">400</span></p>
         </div>
     </main>
@@ -181,6 +189,15 @@
 <script src="script.js"></script>
 
 <script type="module" src="/js/add-custom-tarp-cart.js"></script>
+
+<!-- Checking Auth -->
+<script type="module">
+    import { setupAuthProtectedElements } from '/js/auth-utils.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupAuthProtectedElements();
+    });
+</script>
 
 
 

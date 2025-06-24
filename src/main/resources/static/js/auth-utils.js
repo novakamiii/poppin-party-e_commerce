@@ -15,7 +15,7 @@ export const checkAuth = async (actionName) => {
     }
     return true;
   } catch (error) {
-    alert(`You need to be logged in to ${actionName}`);
+    alert(`You need to be logged in to ${actionName}!`);
     window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
     return false;
   }

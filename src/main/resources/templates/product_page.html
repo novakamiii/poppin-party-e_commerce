@@ -27,7 +27,7 @@
                 </button>
             </div>
             <div class="header-actions">
-                <div class="notif-button" data-protected data-protected-name="notifications">
+                <div class="notif-button" th:if="${#authorization.expression('isAuthenticated()')}">
                     <img th:src="@{/img/notif.png}" alt="notification" id="notif">
                     <span id="notification-counter" class="notification-counter">0</span>
                     <div class="notif-dropdown">
