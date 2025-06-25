@@ -46,39 +46,32 @@
             <!-- Notice will be inserted here by JavaScript -->
         </div>
         <br>
-        <div class="checkout-items">
+        <div class="checkout-cart-container">
+            <div class="checkout-items">
+            </div>
         </div>
+
         <br>
         <div class="checkout-details">
+            <!-- SHIPPING -->
             <div class="detail-section shipping-section">
                 <div class="section-header">
                     <h3>SHIPPING OPTION:</h3>
-                    <button id="openShippingPopup">Choose Shipping Option</button>
-
-                    <div id="shippingPopup" class="popup">
-                        <div class="popup-content">
-                            <span id="closeShippingPopup" class="close-button">&times;</span>
-                            <h2>Select Shipping Option</h2>
-                            <ul class="shipping-options">
-                                <li>
-                                    <input type="radio" id="standard" name="shipping" value="standard" checked>
-                                    <label for="standard">Standard Shipping</label>
-                                </li>
-                                <li>
-                                    <input type="radio" id="express" name="shipping" value="express">
-                                    <label for="express">Express Shipping</label>
-                                </li>
-                                <li>
-                                    <input type="radio" id="overnight" name="shipping" value="overnight">
-                                    <label for="overnight">Overnight Delivery</label>
-                                </li>
-                            </ul>
-                            <button id="selectShippingButton">Select</button>
-                        </div>
-                    </div>
-
                 </div>
-                <p><span id="selectedShippingOption">Standard Shipping</span></p>
+                <ul class="shipping-options">
+                    <li>
+                        <input type="radio" id="standard" name="shipping" value="standard">
+                        <label for="standard">Standard Shipping</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="express" name="shipping" value="express">
+                        <label for="express">Express Shipping</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="overnight" name="shipping" value="overnight">
+                        <label for="overnight">Overnight Shipping</label>
+                    </li>
+                </ul>
             </div>
 
             <div class="detail-section address-section">
@@ -91,40 +84,28 @@
             <div class="detail-section payment-section">
                 <div class="section-header">
                     <h3>PAYMENT OPTION:</h3>
-                    <div class="payment-method">
-                        <span id="selectedPayment">PAYPAL</span>
-                    </div>
-                    <button id="openPaymentPopup">Choose Payment Method</button>
-
-                    <div id="paymentPopup" class="popup">
-                        <div class="popup-content">
-                            <span id="closePaymentPopup" class="close-button">&times;</span>
-                            <h2>Select Payment Method</h2>
-                            <ul class="payment-options">
-                                <li>
-                                    <input type="radio" id="paypal" name="payment" value="paypal">
-                                    <label for="paypal">PayPal</label>
-                                </li>
-                                <li>
-                                    <input type="radio" id="creditcard" name="payment" value="creditcard">
-                                    <label for="creditcard">Credit Card</label>
-                                </li>
-                                <li>
-                                    <input type="radio" id="gcash" name="payment" value="gcash">
-                                    <label for="gcash">GCash</label>
-                                </li>
-                                <li>
-                                    <input type="radio" id="banktransfer" name="payment" value="banktransfer">
-                                    <label for="banktransfer">Bank Transfer</label>
-                                </li>
-                            </ul>
-                            <button id="selectPaymentButton">Select</button>
-                        </div>
-                    </div>
-
-
                 </div>
+                <ul class="payment-options">
+                    <li>
+                        <input type="radio" id="cod" name="payment" value="cod">
+                        <label for="cod">Cash on Delivery</label>
+                    </li>
+
+                    <li>
+                        <input type="radio" id="creditcard" name="payment" value="creditcard">
+                        <label for="creditcard">Credit Card</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="gcash" name="payment" value="gcash">
+                        <label for="gcash">GCash</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="banktransfer" name="payment" value="banktransfer">
+                        <label for="banktransfer">Bank Transfer</label>
+                    </li>
+                </ul>
             </div>
+
 
             <div class="detail-section order-summary">
                 <h3>ORDER SUMMARY</h3>
@@ -234,10 +215,23 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         // Initialize form values
-        document.getElementById("shippingOptionInput").value =
-            localStorage.getItem("shippingOption") || "standard";
-        document.getElementById("paymentMethodInput").value =
-            localStorage.getItem("paymentMethod") || "paypal";
+        const shippingInput = document.getElementById("shippingOptionInput");
+        const paymentInput = document.getElementById("paymentMethodInput");
+
+        const savedShipping = localStorage.getItem("shippingOption") || "standard";
+        const savedPayment = localStorage.getItem("paymentMethod") || "cod";
+
+
+        shippingInput.value = savedShipping;
+        paymentInput.value = savedPayment;
+
+        // Pre-select visible shipping radio based on saved value
+        const shippingRadio = document.querySelector(`input[name="shipping"][value="${savedShipping}"]`);
+        if (shippingRadio) shippingRadio.checked = true;
+
+        // Pre-select popup-based payment radio if present
+        const paymentRadio = document.querySelector(`input[name="payment"][value="${savedPayment}"]`);
+        if (paymentRadio) paymentRadio.checked = true;
 
         // Load cart items
         const storedItems = JSON.parse(localStorage.getItem("checkoutItems") || "[]");
@@ -254,20 +248,28 @@
                 .catch(err => console.error("Cart load error:", err));
         }
 
-        // Setup popups
-        setupPopup('payment', (selectedValue, selectedLabel) => {
-            document.getElementById("selectedPayment").textContent = selectedLabel;
-            document.getElementById("paymentMethodInput").value = selectedValue;
-            localStorage.setItem("paymentMethod", selectedValue);
-            updateSummary();
+        // Listen to shipping option changes (now visible)
+        document.addEventListener("change", function (e) {
+            if (e.target.name === "shipping") {
+                const selected = e.target;
+                const label = document.querySelector(`label[for="${selected.id}"]`)?.textContent;
+                shippingInput.value = selected.value;
+                localStorage.setItem("shippingOption", selected.value);
+                updateSummary();
+            }
         });
 
-        setupPopup('shipping', (selectedValue, selectedLabel) => {
-            document.getElementById("selectedShippingOption").textContent = selectedLabel;
-            document.getElementById("shippingOptionInput").value = selectedValue;
-            localStorage.setItem("shippingOption", selectedValue);
-            updateSummary();
+        // Listen to visible payment radio changes
+        document.addEventListener("change", function (e) {
+            if (e.target.name === "payment") {
+                const selected = e.target;
+                const label = document.querySelector(`label[for="${selected.id}"]`)?.textContent;
+                paymentInput.value = selected.value;
+                localStorage.setItem("paymentMethod", selected.value);
+                updateSummary();
+            }
         });
+
 
         // Form submission
         document.getElementById("checkoutForm")?.addEventListener("submit", function (e) {
@@ -285,7 +287,6 @@
         const closeBtn = popup.querySelector('.close-button');
         const selectBtn = popup.querySelector('button');
 
-        // Event listeners
         openBtn.addEventListener('click', () => popup.style.display = 'flex');
         closeBtn?.addEventListener('click', () => popup.style.display = 'none');
         window.addEventListener('click', (e) => e.target === popup && (popup.style.display = 'none'));
@@ -311,5 +312,6 @@
         return true;
     }
 </script>
+
 
 </html>

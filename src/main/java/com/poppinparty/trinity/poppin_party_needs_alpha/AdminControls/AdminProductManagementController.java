@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import org.springframework.web.multipart.MultipartFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ui.Model;
 
 
@@ -35,7 +33,6 @@ import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ProductRepo
 
 @Controller
 public class AdminProductManagementController {
-    private static final Logger log = LoggerFactory.getLogger(AdminProductManagementController.class);
 
     @Autowired
     private ProductRepository productRepository;
