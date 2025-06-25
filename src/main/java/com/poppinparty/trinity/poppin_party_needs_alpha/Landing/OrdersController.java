@@ -50,7 +50,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.CartItemDTO;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Order;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.OrderItem;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.OrderStatusDTO;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Payment;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Product;
