@@ -247,11 +247,9 @@ INSERT INTO `categories` VALUES
 (5,'Wig',NULL),
 (6,'Confetti',NULL),
 (7,'Garland',NULL),
-(8,'fatass teto',NULL),
 (11,'Pinata',NULL),
 (12,'Party Hats',NULL),
 (13,'LED',NULL),
-(14,'Baloon',NULL),
 (15,'Balloon',NULL),
 (16,'Banner',NULL),
 (17,'Hanging',NULL),
@@ -582,4 +580,4 @@ commit;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2025-06-25 13:40:35
+-- Dump completed on 2025-06-25 23:01:04
