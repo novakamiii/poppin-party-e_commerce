@@ -214,6 +214,8 @@ public class OrdersController {
                         order.setStatus("PENDING");
                         order.setTrackingNumber(UUID.randomUUID().toString().substring(0, 12).toUpperCase());
                         order = orderRepository.save(order); // Save and get managed entity
+                        log.info("Received payment method: {}", paymentMethod);
+
 
                         // 7. Process payments and update stock
                         for (Map<String, Object> item : items) {
