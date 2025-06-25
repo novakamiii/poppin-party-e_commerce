@@ -17,13 +17,13 @@ document.addEventListener("DOMContentLoaded", () => {
     checkoutButton.style.display = "none";
   }
 
-  
+
 
   function renderCartItem(item) {
     // If product does not exist (e.g., missing imageLoc or productId is -1/null/undefined)
     if (!item.imageLoc || item.productId === "-1" || item.productId === null || item.productId === undefined) {
       return `
-      <div class="cart-item sold-out">
+      <div class="cart-item sold-out" data-order-item-id="${item.id}">
         <img src="/img/sold-out.png" alt="Sold Out" class="cartpage-image" />
         <div class="product-details">
           <p class="cartpage-title">${item.itemName || "Product Unavailable"}</p>
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Normal product
     return `
-    <div class="cart-item" data-product-id="${item.productId}">
+    <div class="cart-item" data-order-item-id="${item.id}">
       <img src="${item.imageLoc}" alt="${item.itemName}" class="cartpage-image" />
       <div class="product-details">
         <p class="cartpage-title">${item.itemName}</p>
@@ -90,24 +90,31 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function removeItem(productId, cartItemElement) {
+    const params = new URLSearchParams();
+    params.append("id", productId); // if productId is actually OrderItem.id
+    console.log("🟦 removeItem() called with:", productId);
+
     fetch("/api/cart/remove", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `productId=${productId}`
+      body: params.toString()
     }).then(res => {
       if (!res.ok) throw new Error("Failed to remove item");
-      cartItemElement.remove();
+      if (cartItemElement) cartItemElement.remove();
       updateTotal();
 
-      // Check if cart is now empty
       if (document.querySelectorAll(".cart-item").length === 0) {
         showEmptyCart();
       }
     }).catch(err => {
       alert("Error removing item.");
-      console.error(err);
+      console.error("Remove item error:", err);
+      if (err && err.stack) {
+        console.error(err.stack);
+      }
     });
   }
+
 
   fetch("/api/cart")
     .then(res => {
@@ -129,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cartContainer.addEventListener("click", e => {
         const cartItem = e.target.closest(".cart-item");
         if (!cartItem) return;
-        const productId = cartItem.getAttribute("data-product-id");
+        const productId = cartItem.getAttribute("data-order-item-id");
         const input = cartItem.querySelector(".quantity-input");
         let qty = parseInt(input.value);
 
@@ -147,15 +154,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (e.target.closest(".remove-btn")) {
           if (confirm("Remove this item from your cart?")) {
-            removeItem(productId, cartItem);
+            const orderItemId = cartItem.getAttribute("data-order-item-id");
+            removeItem(orderItemId, cartItem);
           }
         }
+
       });
 
       cartContainer.addEventListener("input", e => {
         const cartItem = e.target.closest(".cart-item");
         if (e.target.classList.contains("quantity-input")) {
-          const productId = cartItem.getAttribute("data-product-id");
+          const productId = cartItem.getAttribute("data-order-item-id");
           const newQty = parseInt(e.target.value);
           if (newQty > 0) updateQuantity(productId, newQty);
         }

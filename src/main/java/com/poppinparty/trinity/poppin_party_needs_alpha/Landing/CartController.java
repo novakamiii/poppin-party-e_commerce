@@ -32,26 +32,26 @@ import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.CartItemDTO;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.OrderItem;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Product;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.User;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderItemRepository;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderRepository;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.PaymentRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.ProductRepository;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.UserRepository;
 
@@ -66,6 +66,7 @@ public class CartController {
         private UserRepository userRepository;
 
         // ========== ORDER MANAGEMENT ==========
+
         @GetMapping("/cart")
         public String viewCart() {
                 return "cart"; // cart.html
@@ -94,6 +95,7 @@ public class CartController {
                                 .stream()
                                 .map(orderItem -> {
                                         CartItemDTO dto = new CartItemDTO();
+                                        dto.setId(orderItem.getId()); // ✅ FIX
                                         dto.setQuantity(orderItem.getQuantity());
                                         dto.setUnitPrice(orderItem.getUnitPrice().doubleValue());
 
@@ -143,9 +145,9 @@ public class CartController {
                 // Stock validation
                 if (product.getStock() <= 0) {
                         return ResponseEntity
-                                                        .status(HttpStatus.BAD_REQUEST)
-                                                        .contentType(MediaType.TEXT_PLAIN)
-                                                        .body("This product is out of stock!");
+                                        .status(HttpStatus.BAD_REQUEST)
+                                        .contentType(MediaType.TEXT_PLAIN)
+                                        .body("This product is out of stock!");
 
                 }
 
@@ -271,36 +273,24 @@ public class CartController {
 
         @PostMapping("/api/cart/remove")
         @ResponseBody
-        public ResponseEntity<?> removeItemFromCart(
-                        @RequestParam(required = false) Long productId,
-                        @RequestParam(required = false) String customSize,
-                        @RequestParam(required = false) String eventType,
-                        @RequestParam(required = false) String message,
-                        @RequestParam(required = false) String thickness,
-                        @RequestParam(required = false) String finish,
-                        Principal principal) {
-
+        public ResponseEntity<?> removeItemById(@RequestParam Long id, Principal principal) {
                 User user = userRepository.findByUsername(principal.getName())
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-                if (productId != null && productId != -1L) {
-                        // Regular product
-                        Product product = productRepository.findById(productId)
-                                        .orElseThrow(() -> new RuntimeException("Product not found"));
-                        String productRef = product.getItemName();
+                System.out.println("✅ /api/cart/remove hit with ID: " + id);
 
-                        List<OrderItem> items = orderItemRepository.findByUserIdAndProductRef(user.getId(), productRef);
-                        if (!items.isEmpty()) {
-                                orderItemRepository.deleteAll(items);
-                        }
+                Optional<OrderItem> itemOpt = orderItemRepository.findById(id);
 
-                } else {
-                        // Custom tarpaulin
-                        orderItemRepository.findByUserIdAndCustomFields(
-                                        user.getId(), customSize, eventType, message, thickness, finish)
-                                        .ifPresent(orderItemRepository::delete);
+                if (itemOpt.isEmpty()) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found");
                 }
 
+                if (!itemOpt.get().getUserId().equals(user.getId())) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                        .body("You do not own this item.");
+                }
+
+                orderItemRepository.deleteById(id);
                 return ResponseEntity.ok("Item removed");
         }
 
