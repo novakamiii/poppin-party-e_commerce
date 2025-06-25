@@ -26,16 +26,16 @@
           <img th:src="@{/img/search.png}" alt="search">
         </button>
       </div>
+      <div class="admin-header-actions">
+        <a th:href="@{/products}" title="Go Back" class="admin-header-action">
+          <img th:src="@{/img/back.png}" alt="Go Back" class="admin-header-action-img">
+        </a>
+      </div>
     </div>
   </header>
 
 
   <main>
-    <div class="addproduct-container">
-      <a th:href="@{/products}">
-        <button class="addproduct-button"> Return Back</button>
-      </a>
-    </div>
     <table class="table-section">
       <tr>
         <th>ID</th>
@@ -55,7 +55,7 @@
         <td th:text="${product.category}"></td>
         <td id="table-description" style="position: relative;">
 
-          <img th:src="${product.imageLoc}" alt="Product Image" class="hover-image" />
+          <img th:src="${product.imageLoc}" alt="Product Image" class="hover-image"/>
         </td>
         <td th:text="${product.description}"></td>
         <td>
@@ -90,12 +90,12 @@
   </footer>
 </body>
 <script type="module">
-    import { updateCartCounter } from '/js/ajax.js';
+  import { updateCartCounter } from '/js/ajax.js';
 
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log("DOM fully loaded");
-        updateCartCounter();
-    });
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM fully loaded");
+    updateCartCounter();
+  });
 </script>
 
 

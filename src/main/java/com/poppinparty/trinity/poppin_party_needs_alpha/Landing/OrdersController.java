@@ -364,6 +364,7 @@ public class OrdersController {
                 return ResponseEntity.ok("Order cancelled successfully");
         }
 
+        @Transactional
         @PostMapping("/api/orders/restore/{paymentId}")
         @ResponseBody
         public ResponseEntity<?> restoreOrder(@PathVariable Long paymentId, Principal principal) {
@@ -384,6 +385,20 @@ public class OrdersController {
 
                 if (!"CANCELLED".equals(payment.getStatus())) {
                         return ResponseEntity.badRequest().body("Only cancelled items can be restored.");
+                }
+
+                // Stock deduction for non-custom products
+                if (payment.getProductId() != null && !payment.getIsCustom()) {
+                        Product product = productRepository.findById(payment.getProductId())
+                                        .orElseThrow(() -> new RuntimeException("Product not found"));
+
+                        if (product.getStock() < payment.getQuantity()) {
+                                return ResponseEntity.badRequest()
+                                        .body("Cannot restore: Not enough stock available. Only " + product.getStock() + " left.");
+                        }
+
+                        product.setStock(product.getStock() - payment.getQuantity());
+                        productRepository.save(product);
                 }
 
                 payment.setStatus("PENDING"); // or restore previous status if tracked
