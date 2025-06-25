@@ -87,6 +87,16 @@ public class UserInformationController {
             Principal principal,
             RedirectAttributes redirectAttributes) {
 
+        String currentEmail = userRepository.findByUsername(principal.getName())
+                .map(User::getEmail)
+                .orElse("");
+        String newEmail = formUser.getEmail();
+
+        if (!currentEmail.equals(newEmail) && userRepository.existsByEmail(newEmail)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Email already in use.");
+            return "redirect:/account";
+        }
+
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Validation errors occurred.");
             return "redirect:/account";

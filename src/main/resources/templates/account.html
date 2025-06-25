@@ -123,6 +123,7 @@
                                 <input type="text" id="username" name="username" th:value="${user.username}"
                                     class="form-input" readonly />
                                 <small class="form-text">Username can only be changed once.</small>
+                                <span id="usernameError" class="error-text"></span>
                             </div>
 
                             <div class="form-group">
@@ -135,16 +136,48 @@
                                 <input type="email" id="email" name="email" th:value="${user.email}"
                                     class="form-input" />
                             </div>
-
+                            <span id="emailError" class="error-text"></span>
                             <div class="form-group">
-                                <label for="address" class="form-label">Address</label>
-                                <input type="address" id="address" name="address" th:value="${user.address}"
-                                    class="form-input" />
+                                <label for="addressDisplay" class="form-label">Address</label>
+                                <input type="text" id="addressDisplay" class="form-input" th:value="${user.address}"
+                                    readonly th:attr="title=${user.address}" />
+                                    <small class="form-text">Click to edit</small>
+                                <input type="hidden" name="address" id="fullAddress" />
+                            </div>
+
+                            <!-- Address Picker Modal -->
+                            <div id="addressModal" class="modal">
+                                <div class="modal-content">
+                                    <h3>Select Full Address</h3>
+                                    <input type="text" id="lotNumber" placeholder="Lot / House Number"
+                                        class="form-input" required />
+                                    <input type="text" id="street" placeholder="Street Name" class="form-input"
+                                        required />
+
+                                    <select id="region" class="form-input">
+                                        <option>Select Region</option>
+                                    </select>
+                                    <select id="province" class="form-input" disabled>
+                                        <option>Select Province</option>
+                                    </select>
+                                    <select id="city" class="form-input" disabled>
+                                        <option>Select City/Municipality</option>
+                                    </select>
+                                    <select id="barangay" class="form-input" disabled>
+                                        <option>Select Barangay</option>
+                                    </select>
+
+                                    <div class="modal-actions">
+                                        <button id="saveAddressBtn" class="save-button small">Save</button>
+                                        <button id="cancelAddressBtn" class="save-button small">Cancel</button>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="form-group">
                                 <label for="phone" class="form-label">Phone Number</label>
                                 <input type="tel" id="phone" name="phone" th:value="${user.phone}" class="form-input" />
+                                <span class="error-text" id="phoneError"></span>
                             </div>
 
                             <div class="form-group">
@@ -262,6 +295,148 @@
 
 
 </body>
+<style>
+    .valid-input {
+        border: 2px solid #28a745 !important;
+        /* green */
+        background-color: #eaffea;
+    }
+
+    .invalid-input {
+        border: 2px solid #dc3545 !important;
+        /* red */
+        background-color: #ffeaea;
+    }
+
+    .feedback-msg {
+        font-size: 0.9em;
+        color: #dc3545;
+        margin-top: 4px;
+        display: block;
+    }
+
+    .feedback-msg.valid {
+        color: #28a745;
+    }
+</style>
+
+<script th:src="@{/js/psgcAPIaccount.js}"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector('form[action="/account/update"]');
+        const emailField = document.getElementById("email");
+        const usernameField = document.getElementById("username");
+        const phoneField = document.getElementById("phone");
+
+        const originalEmail = emailField.value.trim();
+        const originalUsername = usernameField.value.trim();
+
+        let emailTimer, usernameTimer;
+
+        // Helper to toggle validity classes and messages
+        function updateFieldState(field, message, isValid) {
+            const existing = field.parentElement.querySelector(".feedback-msg");
+            if (existing) existing.remove();
+
+            field.classList.remove("valid-input", "invalid-input");
+            if (message) {
+                const msg = document.createElement("span");
+                msg.className = "feedback-msg";
+                msg.textContent = message;
+
+                if (isValid) {
+                    field.classList.add("valid-input");
+                    msg.classList.add("valid");
+                } else {
+                    field.classList.add("invalid-input");
+                    field.setCustomValidity(message);
+                }
+
+                field.parentElement.appendChild(msg);
+            } else {
+                field.classList.add("valid-input");
+                field.setCustomValidity("");
+            }
+
+            field.reportValidity();
+        }
+
+        emailField.addEventListener("input", () => {
+            clearTimeout(emailTimer);
+            emailTimer = setTimeout(async () => {
+                const email = emailField.value.trim();
+                if (!email || email === originalEmail) {
+                    updateFieldState(emailField, "", true);
+                    return;
+                }
+
+                const res = await fetch(`/api/check/email?email=${encodeURIComponent(email)}`);
+                const data = await res.json();
+
+                if (data.exists) {
+                    updateFieldState(emailField, "Email is already in use.", false);
+                } else {
+                    updateFieldState(emailField, "Email is available ✅", true);
+                }
+            }, 300);
+        });
+
+        usernameField.addEventListener("input", () => {
+            clearTimeout(usernameTimer);
+            usernameTimer = setTimeout(async () => {
+                const username = usernameField.value.trim();
+                if (!username || username === originalUsername) {
+                    updateFieldState(usernameField, "", true);
+                    return;
+                }
+
+                const res = await fetch(`/api/check/username?username=${encodeURIComponent(username)}`);
+                const data = await res.json();
+
+                if (data.exists) {
+                    updateFieldState(usernameField, "Username is already taken.", false);
+                } else {
+                    updateFieldState(usernameField, "Username is available ✅", true);
+                }
+            }, 300);
+        });
+
+        phoneField.addEventListener("input", () => {
+            const phone = phoneField.value.trim();
+            const regex = /^(09\d{9}|\+639\d{9})$/;
+
+            if (!regex.test(phone)) {
+                updateFieldState(phoneField, "Use 09XXXXXXXXX or +639XXXXXXXXX format.", false);
+            } else {
+                updateFieldState(phoneField, "Valid phone number ✅", true);
+            }
+        });
+
+        form.addEventListener("submit", function (e) {
+            if (
+                emailField.validationMessage ||
+                usernameField.validationMessage ||
+                phoneField.validationMessage
+            ) {
+                e.preventDefault();
+                emailField.reportValidity();
+                usernameField.reportValidity();
+                phoneField.reportValidity();
+            }
+
+            // Address was never filled/saved
+            if (!addressSaved) {
+                e.preventDefault();
+                alert("Please fill in and save your address.");
+                addressDisplay.focus();
+            }
+        });
+    });
+</script>
+
+
+
 
 <script>
     function validatePassword() {

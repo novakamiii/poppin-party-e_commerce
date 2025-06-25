@@ -35,16 +35,17 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.CartItemDTO;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.OrderItem;
@@ -65,6 +66,7 @@ public class CartController {
         private UserRepository userRepository;
 
         // ========== ORDER MANAGEMENT ==========
+
         @GetMapping("/cart")
         public String viewCart() {
                 return "cart"; // cart.html
@@ -93,11 +95,11 @@ public class CartController {
                                 .stream()
                                 .map(orderItem -> {
                                         CartItemDTO dto = new CartItemDTO();
+                                        dto.setId(orderItem.getId()); // ✅ FIX
                                         dto.setQuantity(orderItem.getQuantity());
                                         dto.setUnitPrice(orderItem.getUnitPrice().doubleValue());
 
                                         if (Boolean.TRUE.equals(orderItem.isCustom())) {
-                                                dto.setId(orderItem.getId());
                                                 dto.setCustom(true);
                                                 dto.setItemName("Custom Tarpaulin (" + orderItem.getCustomSize() + ")");
                                                 dto.setImageLoc("https://placehold.co/150x100/b944fd/ffffff?font=poppins&text=Tarpulin");
@@ -143,9 +145,9 @@ public class CartController {
                 // Stock validation
                 if (product.getStock() <= 0) {
                         return ResponseEntity
-                                                        .status(HttpStatus.BAD_REQUEST)
-                                                        .contentType(MediaType.TEXT_PLAIN)
-                                                        .body("This product is out of stock!");
+                                        .status(HttpStatus.BAD_REQUEST)
+                                        .contentType(MediaType.TEXT_PLAIN)
+                                        .body("This product is out of stock!");
 
                 }
 
@@ -275,10 +277,17 @@ public class CartController {
                 User user = userRepository.findByUsername(principal.getName())
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+                System.out.println("✅ /api/cart/remove hit with ID: " + id);
+
                 Optional<OrderItem> itemOpt = orderItemRepository.findById(id);
 
-                if (itemOpt.isEmpty() || !itemOpt.get().getUserId().equals(user.getId())) {
-                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not authorized to remove this item.");
+                if (itemOpt.isEmpty()) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found");
+                }
+
+                if (!itemOpt.get().getUserId().equals(user.getId())) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                        .body("You do not own this item.");
                 }
 
                 orderItemRepository.deleteById(id);
