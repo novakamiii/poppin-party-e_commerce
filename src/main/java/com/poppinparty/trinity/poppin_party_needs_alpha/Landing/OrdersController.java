@@ -101,7 +101,6 @@ public class OrdersController {
                 return "ordersuccess";
         }
 
-        @Transactional
         @PostMapping("/order/buy-now")
         @ResponseBody
         public ResponseEntity<?> buyNow(
@@ -113,38 +112,28 @@ public class OrdersController {
                         User user = userRepository.findByUsername(principal.getName())
                                         .orElseThrow(() -> new RuntimeException("User not found"));
 
-                        // Clear current cart
-                        orderItemRepository.deleteAllByUserId(user.getId());
-
                         Product product = productRepository.findById(productId)
                                         .orElseThrow(() -> new RuntimeException("Product not found"));
 
                         if (product.getStock() == 0) {
-                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                                                        .contentType(MediaType.APPLICATION_JSON)
-                                                                        .body(Map.of("error",
-                                                                                                        "Add to cart failed: This product is out of stock!"));
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .body(Map.of("error", "Buy now failed: This product is out of stock!"));
                         } else if (product.getStock() < quantity) {
-                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                                                        .contentType(MediaType.APPLICATION_JSON)
-                                                                        .body(Map.of("error",
-                                                                                                        "Add to cart failed: Only " + product.getStock() + " items available!"));
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .body(Map.of("error", "Buy now failed: Only " + product.getStock()
+                                                                + " items available!"));
                         }
 
-                        OrderItem newItem = new OrderItem();
-                        newItem.setUserId(user.getId());
-                        newItem.setProductRef(product.getItemName());
-                        newItem.setQuantity(quantity);
-                        newItem.setUnitPrice(BigDecimal.valueOf(product.getPrice()));
-                        newItem.setCustom(false);
-                        orderItemRepository.save(newItem);
-
+                        // Do NOT save to cart/order_items table — just return DTO
                         CartItemDTO dto = new CartItemDTO();
                         dto.setProductId(product.getId());
                         dto.setItemName(product.getItemName());
                         dto.setImageLoc(product.getImageLoc());
                         dto.setQuantity(quantity);
                         dto.setUnitPrice(product.getPrice());
+                        dto.setCustom(false); // optional
 
                         return ResponseEntity.ok()
                                         .contentType(MediaType.APPLICATION_JSON)

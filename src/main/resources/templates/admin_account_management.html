@@ -24,14 +24,14 @@
           <img th:src="@{/img/search.png}" alt="search">
         </button>
       </div>
+      <div class="admin-header-actions">
+        <a th:href="@{/admin/user/restore}" title="Restore User" class="admin-header-action">
+          <img th:src="@{/img/restore-user.png}" alt="Restore User" class="admin-header-action-img">
+        </a>
+      </div>
     </div>
   </header>
   <main>
-    <div class="addproduct-container">
-      <a th:href="@{/admin/user/restore}">
-        <button class="addproduct-button"> Restore a User</button>
-      </a>
-    </div>
 
     <table class="table-section">
       <tr>
@@ -56,18 +56,22 @@
         <td th:text="${user.gender}"></td>
         <td th:text="${user.phone}"></td>
         <td th:text="${user.birthDate}"></td>
-        <td th:text="${user.role}"></td>
+        <td>
+          <form th:action="@{/admin/user/change-role}" method="post" class="change-role-form">
+            <input type="hidden" name="userId" th:value="${user.id}" />
+            <select name="newRole">
+              <option th:value="'USER'" th:selected="${user.role == 'USER'}">USER</option>
+              <option th:value="'ADMIN'" th:selected="${user.role == 'ADMIN'}">ADMIN</option>
+            </select>
+            <button type="submit">Change</button>
+          </form>
+        </td>
         <td th:text="${user.address}"></td>
         <td th:text="${user.lastLogin}"></td>
         <td id="table-description" style="position: relative;">
           <img th:src="@{${user.imagePath}}" alt="User Image" class="hover-image">
         </td>
         <td>
-          <!-- ✏️ Edit
-          <a th:href="@{'/products/edit/' + ${product.id}}" title="Edit" alt="Edit Product">
-            ✏️
-          </a> -->
-
           <!-- 🗑️ Archive (with confirmation) -->
           <a th:href="@{'/admin/user/delete/' + ${user.id}}"
             onclick="return confirm('Are you sure you want to archive this user?');" title="Archive/Delete"
@@ -78,68 +82,6 @@
       </tr>
     </table>
   </main>
-  <footer>
-    <div class="footer-container">
-      <div class="footer-logo">
-        <img th:src="@{/img/logowhite.png}" alt="Poppin Party Logo">
-        <p>POPPIN PARTY</p>
-        <p>CELEBRATION NEEDS</p>
-      </div>
-      <div class="footer-section">
-        <h3>CUSTOMER SERVICE</h3>
-        <ul>
-          <li>HELP CENTRE</li>
-          <li>CONTACT US</li>
-          <li>RETURN AND REFUND</li>
-          <li>POPPIN' GUARANTEE</li>
-          <li>FREE SHIPPING</li>
-          <li>PAYMENT METHODS</li>
-        </ul>
-      </div>
-      <div class="footer-section">
-        <h3>ABOUT POPPIN' PARTY</h3>
-        <ul>
-          <li>ABOUT US</li>
-          <li>PRIVACY POLICY</li>
-          <li>POPPIN' DEALS</li>
-          <li>MEDIA CONTACT</li>
-        </ul>
-      </div>
-      <div class="footer-section">
-        <h3>PAYMENT</h3>
-        <ul>
-          <li>GCASH</li>
-          <li>PAYPAL</li>
-          <li>CASHAPP</li>
-          <li>VISA</li>
-          <li>MASTERCARD</li>
-        </ul>
-      </div>
-      <div class="footer-section">
-        <h3>LOGISTICS</h3>
-        <ul>
-          <li>GOGO EXPRESS</li>
-          <li>NINJAVAN</li>
-          <li>UPS</li>
-          <li>FEDEX</li>
-          <li>LBC</li>
-          <li>DHL</li>
-        </ul>
-      </div>
-      <div class="footer-section">
-        <h3>FOLLOW US</h3>
-        <ul>
-          <li>FACEBOOK</li>
-          <li>INSTAGRAM</li>
-          <li>X</li>
-          <li>TIKTOK</li>
-        </ul>
-      </div>
-    </div>
-    <div class="copyright">
-      © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
-    </div>
-  </footer>
   <script type="module">
     import { updateCartCounter } from '/js/ajax.js';
 

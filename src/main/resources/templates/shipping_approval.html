@@ -91,6 +91,7 @@
             <th>User ID</th>
             <th>Username</th>
             <th>Order ID</th>
+            <th>Address</th>
             <th>Item Name</th>
             <th>Quantity</th>
             <th>Amount</th>
@@ -105,6 +106,7 @@
             <td th:text="${payment.user.id}"></td>
             <td th:text="${payment.user.username}"></td>
             <td th:text="${payment.order.id}"></td>
+            <td th:text="${payment.user.address}"></td>
             <td th:text="${payment.itemName}"></td>
             <td th:text="${payment.quantity}"></td>
             <td th:text="${#numbers.formatDecimal(payment.amount, 1, 2)}"></td>
@@ -145,25 +147,6 @@
             });
         }
     </script>
-
-    <footer>
-        <div class="footer-container">
-            <div class="footer-logo">
-                <img th:src="@{/img/logowhite.png}" alt="Poppin Party Logo">
-                <p>POPPIN PARTY</p>
-                <p>CELEBRATION NEEDS</p>
-            </div>
-            <div class="footer-section">
-                <h3>CUSTOMER SERVICE</h3>
-                <ul>
-                    <li><a th:href="@{/home}">MAIN PAGE</a></li>
-                    <li><a th:href="@{/logout}">LOG-OUT</a></li>
-                </ul>
-            </div>
-            <div class="copyright">
-                © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
-            </div>
-    </footer>
 </body>
 <style>
     .buttons {

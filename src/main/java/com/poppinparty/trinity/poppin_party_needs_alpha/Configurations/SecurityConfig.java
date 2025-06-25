@@ -46,8 +46,9 @@ public class SecurityConfig {
                     "/register", "/dummy", "/home", "/styles.css", "/img/**",
                     "/forgot-password", "/reset-password", "/login",
                     "/css/**", "/js/**", "/api/products/**", "/uploads/**", "/product-page/**",
-                    "/api/cart/**", "/products/see-more", "/products/category/**", "/products/customtarp"
+                    "/api/cart/**", "/api/check/**", "/products/see-more", "/products/category/**", "/products/customtarp"
                 ).permitAll()
+                .requestMatchers("/api/cart/remove").authenticated()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasRole("USER")
                 .anyRequest().authenticated()

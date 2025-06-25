@@ -24,14 +24,14 @@
                     <img th:src="@{/img/search.png}" alt="search">
                 </button>
             </div>
+            <div class="admin-header-actions">
+                <a th:href="@{/admin/accountManagement}" title="Go Back" class="admin-header-action">
+                    <img th:src="@{/img/back.png}" alt="Go Back" class="admin-header-action-img">
+                </a>
+            </div>
         </div>
     </header>
     <main>
-        <div class="addproduct-container">
-            <a th:href="@{/admin/accountManagement}">
-                <button class="addproduct-button">← Back to Active Users</button>
-            </a>
-        </div>
         <table class="table-section">
             <tr>
                 <th>ID</th>
@@ -66,75 +66,12 @@
                         onclick="return confirm('Restore this archived user?');"
                         style="background: none; border: none; cursor: pointer; text-decoration: none;"
                         title="Restore User">
-                         ♻️
+                        ♻️
                     </a>
                 </td>
             </tr>
         </table>
     </main>
-
-    <footer>
-        <div class="footer-container">
-            <div class="footer-logo">
-                <img th:src="@{/img/logowhite.png}" alt="Poppin Party Logo">
-                <p>POPPIN PARTY</p>
-                <p>CELEBRATION NEEDS</p>
-            </div>
-            <div class="footer-section">
-                <h3>CUSTOMER SERVICE</h3>
-                <ul>
-                    <li>HELP CENTRE</li>
-                    <li>CONTACT US</li>
-                    <li>RETURN AND REFUND</li>
-                    <li>POPPIN' GUARANTEE</li>
-                    <li>FREE SHIPPING</li>
-                    <li>PAYMENT METHODS</li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>ABOUT POPPIN' PARTY</h3>
-                <ul>
-                    <li>ABOUT US</li>
-                    <li>PRIVACY POLICY</li>
-                    <li>POPPIN' DEALS</li>
-                    <li>MEDIA CONTACT</li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>PAYMENT</h3>
-                <ul>
-                    <li>GCASH</li>
-                    <li>PAYPAL</li>
-                    <li>CASHAPP</li>
-                    <li>VISA</li>
-                    <li>MASTERCARD</li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>LOGISTICS</h3>
-                <ul>
-                    <li>GOGO EXPRESS</li>
-                    <li>NINJAVAN</li>
-                    <li>UPS</li>
-                    <li>FEDEX</li>
-                    <li>LBC</li>
-                    <li>DHL</li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>FOLLOW US</h3>
-                <ul>
-                    <li>FACEBOOK</li>
-                    <li>INSTAGRAM</li>
-                    <li>X</li>
-                    <li>TIKTOK</li>
-                </ul>
-            </div>
-        </div>
-        <div class="copyright">
-            © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
-        </div>
-    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {

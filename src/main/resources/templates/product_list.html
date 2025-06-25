@@ -15,32 +15,30 @@
 </head>
 
 <body>
-    <header class="sticky-header">
-        <div class="header-inner">
-            <div class="logo">
-                <a th:href="@{/admin/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
-            </div>
-            <div class="search">
-                <input type="text" class="search-input" placeholder="Search">
-                <button class="search-button">
-                    <img th:src="@{/img/search.png}" alt="search">
-                </button>
-            </div>
-        </div>
-    </header>
+  <header class="sticky-header">
+    <div class="header-inner">
+      <div class="logo">
+        <a th:href="@{/admin/home}"><img th:src="@{/img/logowhite.png}" alt="logo" id="logo"></a>
+      </div>
+      <div class="search">
+        <input type="text" class="search-input" placeholder="Search">
+        <button class="search-button">
+          <img th:src="@{/img/search.png}" alt="search">
+        </button>
+      </div>
+      <div class="admin-header-actions">
+        <a th:href="@{/products/add}" title="Add Product" class="admin-header-action">
+          <img th:src="@{/img/add-product.png}" alt="Add Product" class="admin-header-action-img">
+        </a>
+        <a th:href="@{/products/archived}" title="Archived Products" class="admin-header-action">
+          <img th:src="@{/img/archived-products.png}" alt="Archived Products" class="admin-header-action-img">
+        </a>
+      </div>
+    </div>
+  </header>
 
 
   <main>
-    <div class="addproduct-container">
-      <a th:href="@{/products/add}">
-        <button class="addproduct-button"> Add New Product</button>
-      </a>
-    </div>
-    <div class="addproduct-container">
-      <a th:href="@{/products/archived}">
-        <button class="addproduct-button"> Restore a Product</button>
-      </a>
-    </div>
     <table class="table-section">
       <tr>
         <th>ID</th>
@@ -66,15 +64,14 @@
         <td>
           <!-- ✏️ Edit -->
           <a th:href="@{'/products/edit/' + ${product.id}}" title="Edit" alt="Edit Product"
-             style="background: none; border: none; cursor: pointer; text-decoration: none;">
+            style="background: none; border: none; cursor: pointer; text-decoration: none;">
             ✏️
           </a>
 
           <!-- 🗑️ Archive (with confirmation) -->
           <a th:href="@{'/products/delete/' + ${product.id}}"
-             onclick="return confirm('Are you sure you want to archive this product?');"
-             title="Archive/Delete" alt="Archive Product"
-             style="background: none; border: none; cursor: pointer; text-decoration: none;">
+            onclick="return confirm('Are you sure you want to archive this product?');" title="Archive/Delete"
+            alt="Archive Product" style="background: none; border: none; cursor: pointer; text-decoration: none;">
             🗑️
           </a>
         </td>
@@ -82,32 +79,14 @@
     </table>
 
   </main>
-  <footer>
-    <div class="footer-container">
-      <div class="footer-logo">
-        <img th:src="@{/img/logowhite.png}" alt="Poppin Party Logo">
-        <p>POPPIN PARTY</p>
-        <p>CELEBRATION NEEDS</p>
-      </div>
-      <div class="footer-section">
-        <h3>CUSTOMER SERVICE</h3>
-        <ul>
-          <li><a th:href="@{/home}">MAIN PAGE</a></li>
-          <li><a th:href="@{/logout}">LOG-OUT</a></li>
-        </ul>
-      </div>
-      <div class="copyright">
-        © 2025 POPPIN PARTY CELEBRATION NEEDS™. ALL RIGHTS RESERVED
-      </div>
-  </footer>
 </body>
 <script type="module">
-    import { updateCartCounter } from '/js/ajax.js';
+  import { updateCartCounter } from '/js/ajax.js';
 
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log("DOM fully loaded");
-        updateCartCounter();
-    });
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM fully loaded");
+    updateCartCounter();
+  });
 </script>
 
 

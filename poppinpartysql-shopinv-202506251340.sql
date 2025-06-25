@@ -332,7 +332,7 @@ CREATE TABLE `order_items` (
   KEY `fk_product_ref` (`product_ref`),
   KEY `fk_order_items_user` (`user_id`),
   CONSTRAINT `fk_order_items_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=223 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=225 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -343,7 +343,7 @@ LOCK TABLES `order_items` WRITE;
 /*!40000 ALTER TABLE `order_items` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `order_items` VALUES
-(222,62,'Clown Wig',1,100.00,0,NULL,NULL,NULL,NULL,NULL,NULL);
+(224,62,'Patio String Lights',1,1000.00,0,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `order_items` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -549,7 +549,7 @@ CREATE TABLE `user` (
   `prof_img_loc` varchar(255) NOT NULL DEFAULT '/img/default-profile.png',
   PRIMARY KEY (`id`),
   CONSTRAINT `user_chk_1` CHECK (`role` in (_utf8mb4'ADMIN',_utf8mb4'USER'))
-) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -560,10 +560,11 @@ LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `user` VALUES
-(22,'San Pedro','pauloneil3334@gmail.com','$2a$12$L..6Q18MRGrt3eTM3asQ3O4pMsQo2qphjhnRXbRFmopZqShHC71yW','ADMIN','Paulo','2025-05-31 18:22:37','2025-06-24 05:42:23','MALE','Paulo Neil','09550367575','2004-08-24','/uploads/profiles/Paulo-98aced3b-797f-4034-8fcf-9b5427996a81-Screenshot_20250613_052726.png'),
+(22,'San Pedro','pauloneil3334@gmail.com','$2a$12$L..6Q18MRGrt3eTM3asQ3O4pMsQo2qphjhnRXbRFmopZqShHC71yW','ADMIN','Paulo','2025-05-31 18:22:37','2025-06-25 05:37:10','MALE','Paulo Neil','09550367575','2004-08-24','/uploads/profiles/Paulo-9bd7ecb5-fc5b-43aa-b183-b26691904015-Screenshot_20250613_062328.png'),
 (51,'General Mariano Alvarez','junkemail@email.com','$2a$10$oV7ZUvvMEUPn7rlmrWG1vupQJloi.uHmszHmz3zMxBrk/V6Ux02tO','USER','zhu','2025-06-22 00:55:27','2025-06-08 15:43:22','FEMALE','Zhu Yuan','12345','1977-07-28','/uploads/profiles/zhu-238fa235-c3bb-413c-bde4-8875f4198330-zhu-yuan-zenless-zone-zero.png'),
 (60,'San Pedro','junkemail5@gmail.com','$2a$12$YUQHzdv/0MO.ZF7bb.DPp.RIF/TZzpvfaKNRGpwuf8Y7yUf9dEB8y','USER','grace','2025-06-23 23:07:31','2025-06-22 07:59:09','FEMALE','Grace','123456','2000-02-22','/uploads/profiles/grace-b8cd3ee8-d316-4df0-806e-3f385add3123-grace.jpeg'),
-(62,'General Mariano Alvarez','junkemail6@gmail.com','$2a$10$5UN06wz.9bxlQ2pHhXI82eu4ZtauYvJfUiyP1/p5kjG4UI5l8KzxK','USER','yanagi','2025-06-24 05:39:06','2025-06-24 05:39:06','FEMALE','Yanagi','09969529267','2003-02-01','/uploads/profiles/yanagi-ba1ddcc0-fd0b-4291-a573-6cceb44d5314-d70210e934863e5b5f87e5f98cabca68.jpg');
+(62,'General Mariano Alvarez','junkemail6@gmail.com','$2a$10$5UN06wz.9bxlQ2pHhXI82eu4ZtauYvJfUiyP1/p5kjG4UI5l8KzxK','USER','yanagi','2025-06-24 05:39:06','2025-06-24 05:39:06','FEMALE','Yanagi','09969529267','2003-02-01','/uploads/profiles/yanagi-ba1ddcc0-fd0b-4291-a573-6cceb44d5314-d70210e934863e5b5f87e5f98cabca68.jpg'),
+(64,'Block 11 Excess Lot, Sampaloc Street, Teresita, Santo Niño, South Cotabato, SOCCSKSARGEN','sevillapaulo364@gmail.com','$2a$10$DRdZRvRbjPgIQQOIyMv5LOLpoK3uuXmIYmRXeM9nn.w5W3A25akIy','USER','neil','2025-06-25 03:40:10','2025-06-25 03:40:10','MALE','Paulo Neil','09969529267','2004-08-24','/uploads/profiles/neil-908b2300-afed-45a3-ba7d-2e4ed445afb3-Screenshot_20250613_062022.png');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -581,4 +582,4 @@ commit;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2025-06-24 13:56:09
+-- Dump completed on 2025-06-25 13:40:35

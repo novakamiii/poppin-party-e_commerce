@@ -2,6 +2,7 @@ package com.poppinparty.trinity.poppin_party_needs_alpha.AccountManagement;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,8 +16,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.User;
@@ -166,16 +169,16 @@ public class UserController {
         return "redirect:/login";
     }
 
-    @GetMapping("/api/check/username")
-    @ResponseBody
-    public boolean checkUsername(@RequestParam String username) {
-        return userRepository.existsByUsername(username);
+    @GetMapping("/api/check/email")
+    public ResponseEntity<Map<String, Boolean>> checkEmail(@RequestParam String email) {
+        boolean exists = userRepository.existsByEmail(email);
+        return ResponseEntity.ok(Map.of("exists", exists));
     }
 
-    @GetMapping("/api/check/email")
-    @ResponseBody
-    public boolean checkEmail(@RequestParam String email) {
-        return userRepository.existsByEmail(email);
+    @GetMapping("/api/check/username")
+    public ResponseEntity<Map<String, Boolean>> checkUsername(@RequestParam String username) {
+        boolean exists = userRepository.existsByUsername(username);
+        return ResponseEntity.ok(Map.of("exists", exists));
     }
 
     @GetMapping("/forgot-password")

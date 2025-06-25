@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import jakarta.transaction.Transactional;
@@ -75,6 +76,20 @@ public class AdminAccountManagementController {
         List<ArchivedUsers> archivedUsers = archivedUserRepository.findAll();
         model.addAttribute("archivedUsers", archivedUsers);
         return "accounts_archived";
+    }
+
+    @PostMapping("/admin/user/change-role")
+    public String changeUserRole(
+            @RequestParam Long userId,
+            @RequestParam String newRole) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setRole(newRole); // e.g., "USER" or "ADMIN"
+        userRepository.save(user);
+        log.info("Changed role of user ID {} to {}", userId, newRole);
+        return "redirect:/admin/accountManagement"; // redirect back to user list
     }
 
     @Transactional
