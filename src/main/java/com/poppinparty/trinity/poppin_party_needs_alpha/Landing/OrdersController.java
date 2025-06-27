@@ -162,7 +162,7 @@ public class OrdersController {
 
                         // 2. Parse items
                         ObjectMapper mapper = new ObjectMapper();
-                        List<Map<String, Object>> items = mapper.readValue(itemsJson, new TypeReference<>() {
+                        List<CartItemDTO> items = mapper.readValue(itemsJson, new TypeReference<>() {
                         });
 
                         // 3. Validate items
@@ -173,9 +173,9 @@ public class OrdersController {
 
                         // 4. Validate stock and calculate subtotal
                         BigDecimal subtotal = BigDecimal.ZERO;
-                        for (Map<String, Object> item : items) {
-                                Long productId = Long.valueOf(safeGet(item, "productId"));
-                                int quantity = Integer.parseInt(safeGet(item, "quantity"));
+                        for (CartItemDTO item : items) {
+                                Long productId = item.getProductId();
+                                int quantity = item.getQuantity();
 
                                 if (!isCustomProduct(productId)) {
                                         Product product = productRepository.findById(productId)
@@ -190,7 +190,7 @@ public class OrdersController {
                                         }
                                 }
                                 subtotal = subtotal.add(
-                                                new BigDecimal(safeGet(item, "unitPrice"))
+                                                BigDecimal.valueOf(item.getUnitPrice())
                                                                 .multiply(BigDecimal.valueOf(quantity)));
                         }
 
@@ -215,13 +215,12 @@ public class OrdersController {
                         order = orderRepository.save(order); // Save and get managed entity
                         log.info("Received payment method: {}", paymentMethod);
 
-
                         // 7. Process payments and update stock
-                        for (Map<String, Object> item : items) {
-                                Long productId = Long.valueOf(safeGet(item, "productId"));
-                                int quantity = Integer.parseInt(safeGet(item, "quantity"));
-                                BigDecimal price = new BigDecimal(safeGet(item, "unitPrice"));
-                                String itemName = safeGet(item, "itemName");
+                        for (CartItemDTO item : items) {
+                                Long productId = item.getProductId();
+                                int quantity = item.getQuantity();
+                                BigDecimal price = BigDecimal.valueOf(item.getUnitPrice());
+                                String itemName = item.getItemName();
 
                                 // Update stock for non-custom products
                                 if (!isCustomProduct(productId)) {
@@ -394,7 +393,8 @@ public class OrdersController {
 
                         if (product.getStock() < payment.getQuantity()) {
                                 return ResponseEntity.badRequest()
-                                        .body("Cannot restore: Not enough stock available. Only " + product.getStock() + " left.");
+                                                .body("Cannot restore: Not enough stock available. Only "
+                                                                + product.getStock() + " left.");
                         }
 
                         product.setStock(product.getStock() - payment.getQuantity());

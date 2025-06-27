@@ -22,6 +22,28 @@
     text-align: left;
 }
 
+
+
+.order-action-btn,
+.mark-received {
+    background-color: #b944fd;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-family: "Poppins", sans-serif;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    align-self: flex-end; /* Make sure it's right-aligned */
+}
+
+
+
+.order-action-btn:hover {
+    background-color: #9c2ee8;
+}
+
 .status-tabs {
     display: flex;
     margin-bottom: 20px;
@@ -58,14 +80,17 @@
 
 .order-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    position: relative; /* allow absolute children if needed */
     padding: 15px;
     border: 1px solid #ddd;
     border-radius: 8px;
     margin-bottom: 15px;
     background-color: white;
     box-shadow: 0 7px 7px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
 }
+
 
 .item-image {
     width: 100px;
@@ -116,11 +141,16 @@
 }
 
 .item-total {
-    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Align to right */
+    justify-content: flex-end; /* Push button to bottom */
     margin-left: auto;
-    /* Push to the right */
     font-family: 'Bebas Neue', sans-serif;
+    min-height: 100px; /* Ensures vertical space to align bottom */
+    gap: 6px;
 }
+
 
 .total-label {
     font-weight: bold;
@@ -134,7 +164,7 @@
     font-size: 1.5em;
 }
 
-.mark-received {
+/* .mark-received {
     background-color: #b944fd;
     color: white;
     border: none;
@@ -144,7 +174,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 1em;
     transition: background-color 0.2s;
-}
+} */
 
 .mark-received:hover {
     background-color: #9a2ae0;
