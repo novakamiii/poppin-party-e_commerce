@@ -2,6 +2,7 @@ package com.poppinparty.trinity.poppin_party_needs_alpha.Landing;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -220,6 +221,7 @@ public class OrdersController {
                                 payment.setPaymentMethodDetails(paymentMethod);
                                 payment.setDaysLeft(5);
                                 payment.setQuantity(quantity);
+                                payment.setOrderDate(LocalDateTime.now()); // ✅ Set the order date;
 
                                 if (isCustomProduct(productId)) {
                                         payment.setProductId(1L); // Default product ID for custom items
@@ -234,7 +236,7 @@ public class OrdersController {
                         }
 
                         // 8. Clear cart and send notification
-                        //orderItemRepository.deleteByUserId(user.getId());
+                        // orderItemRepository.deleteByUserId(user.getId());
 
                         notificationService.createNotification(
                                         user,
@@ -300,7 +302,10 @@ public class OrdersController {
                                                         payment.getStatus(),
                                                         payment.getTransactionId(),
                                                         orderId,
-                                                        payment.getQuantity());
+                                                        payment.getQuantity(),
+                                                        payment.getOrderDate() // ✅ Must be included
+                                        );
+
                                 })
                                 .toList();
         }

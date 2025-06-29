@@ -60,53 +60,69 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
                 grouped[order.transactionId].push(order);
             });
 
-            Object.entries(grouped).forEach(([transactionId, orders], index) => {
-                let subtotal = 0;
+            Object.entries(grouped)
+                .sort((a, b) => {
+                    const dateA = new Date(a[1][0].order_date);
+                    const dateB = new Date(b[1][0].order_date);
+                    return dateB - dateA;
+                })
+                .forEach(([transactionId, orders], index) => {
 
-                const orderItemsHtml = orders.map(order => {
-                    subtotal += parseFloat(order.amount);
+                    let subtotal = 0;
 
-                    const etaDays = order.status === "CANCELLED" ? "Cancelled" : (order.daysLeft ?? "N/A");
+                    const orderItemsHtml = orders.map(order => {
+                        subtotal += parseFloat(order.amount);
 
-                    let actionButton = '';
-                    if (status === "PENDING") {
-                        actionButton = `<button class="order-action-btn cancel-order" data-id="${order.id}">Cancel</button>`;
-                    } else if (status === "CANCELLED") {
-                        actionButton = `<button class="order-action-btn restore-order" data-id="${order.id}">Undo</button>`;
-                    } else if (status === "TO_RECEIVE") {
-                        actionButton = `<button class="order-action-btn mark-received" data-id="${order.orderId}">Mark as Received</button>`;
-                    }
+                        const etaDays = order.status === "CANCELLED" ? "Cancelled" : (order.daysLeft ?? "N/A");
 
-                    const etaHtml = order.status?.toUpperCase() !== "COMPLETED"
-                        ? `<p class="item-eta">ETA: ${etaDays} ${etaDays === "Cancelled" ? "" : "day(s) left"}</p>`
-                        : "";
+                        let actionButton = '';
+                        if (status === "PENDING") {
+                            actionButton = `<button class="order-action-btn cancel-order" data-id="${order.id}">Cancel</button>`;
+                        } else if (status === "CANCELLED") {
+                            const cancelledDate = new Date(order.order_date);
+                            const now = new Date();
+                            const hoursDiff = Math.abs(now - cancelledDate) / (1000 * 60 * 60);
 
-                    return `
-            <div class="order-item" data-order-id="${order.id}">
-              <div class="item-image">
+                            if (hoursDiff > 24) {
+                                actionButton = `<button class="order-action-btn restore-order" data-id="${order.id}" disabled style="opacity:0.6; cursor: not-allowed;">Undo (Expired)</button>`;
+                            } else {
+                                actionButton = `<button class="order-action-btn restore-order" data-id="${order.id}">Undo</button>`;
+                            }
+                        } else if (status === "TO_RECEIVE") {
+                            actionButton = `<button class="order-action-btn mark-received" data-id="${order.orderId}">Mark as Received</button>`;
+                        }
+
+                        const etaHtml = order.status?.toUpperCase() !== "COMPLETED"
+                            ? `<p class="item-eta">ETA: ${etaDays} ${etaDays === "Cancelled" ? "" : "day(s) left"}</p>`
+                            : "";
+
+                        return `
+        <div class="order-item" data-order-id="${order.id}">
+            <div class="item-image">
                 <img src="${order.imageLoc}" alt="${order.itemName}" />
-              </div>
-              <div class="item-details">
+            </div>
+            <div class="item-details">
                 <h3 class="item-name">${order.itemName}</h3>
                 <p class="tracking-number">Order ID: #${order.id}</p>
                 <p class="item-qty">QTY: ${order.quantity}</p>
                 ${etaHtml}
-              </div>
-              <div class="item-total">
+            </div>
+            <div class="item-total">
                 <span class="total-label">Item Price:</span>
                 <span class="total-price">₱${parseFloat(order.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                 ${actionButton}
-              </div>
             </div>
-          `;
-                }).join("");
+        </div>
+    `;
+                    }).join("");
 
-                const shippingOption = orders[0].shippingOption?.toLowerCase() || "standard";
-                const shippingFee = shippingFees[shippingOption] ?? 45;
-                const tax = subtotal * 0.12;
-                const total = subtotal + tax + shippingFee;
 
-                const transactionHtml = `
+                    const shippingOption = orders[0].shippingOption?.toLowerCase() || "standard";
+                    const shippingFee = shippingFees[shippingOption] ?? 45;
+                    const tax = subtotal * 0.12;
+                    const total = subtotal + tax + shippingFee;
+
+                    const transactionHtml = `
           <div class="order-status-container transaction-group">
             <div class="transaction-header" style="cursor: pointer;" data-toggle="transaction-${index}">
               <h2 class="order-status-title">Transaction ID: ${transactionId} 🔻</h2>
@@ -124,8 +140,8 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
           </div>
         `;
 
-                container.insertAdjacentHTML("beforeend", transactionHtml);
-            });
+                    container.insertAdjacentHTML("beforeend", transactionHtml);
+                });
 
             // Toggle collapsible body
             document.querySelectorAll('.transaction-header').forEach(header => {

@@ -1,6 +1,7 @@
 package com.poppinparty.trinity.poppin_party_needs_alpha.Entities;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public record OrderStatusDTO(
     Long id,
@@ -12,6 +13,7 @@ public record OrderStatusDTO(
     String status,
     String transactionId,
     Long orderId,
-    int quantity
+    int quantity,
+    LocalDateTime order_date
 ) {}
 

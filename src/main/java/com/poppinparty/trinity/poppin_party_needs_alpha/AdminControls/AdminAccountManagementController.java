@@ -1,6 +1,7 @@
 package com.poppinparty.trinity.poppin_party_needs_alpha.AdminControls;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -162,6 +163,8 @@ public class AdminAccountManagementController {
             archivedPayment.setQuantity(payment.getQuantity());
             archivedPayment.setCustomProductRef(payment.getCustomProductRef());
             archivedPayment.setIsCustom(payment.getIsCustom());
+            archivedPayment.setOrderDate(payment.getOrderDate());
+
 
             archivedPaymentsRepository.save(archivedPayment);
         }
@@ -299,6 +302,7 @@ public class AdminAccountManagementController {
             payment.setQuantity(archivedPayment.getQuantity() != null ? archivedPayment.getQuantity() : 0);
             payment.setCustomProductRef(archivedPayment.getCustomProductRef());
             payment.setIsCustom(archivedPayment.getIsCustom() != null ? archivedPayment.getIsCustom() : false);
+            payment.setOrderDate(archivedPayment.getOrderDate() != null ? archivedPayment.getOrderDate() : LocalDateTime.now());
 
             Payment savedPayment = paymentRepository.save(payment);
             log.debug("Restored payment ID {}", savedPayment.getId());

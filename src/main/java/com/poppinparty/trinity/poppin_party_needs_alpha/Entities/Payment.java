@@ -9,6 +9,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payments")
@@ -57,6 +58,10 @@ public class Payment {
 
     @Column(name = "is_custom")
     private Boolean isCustom = false;
+
+    @Column(name = "order_date")
+    private LocalDateTime orderDate;
+    
 
     public String getCustomProductRef() {
         return customProductRef;
@@ -168,6 +173,14 @@ public class Payment {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public LocalDateTime getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(LocalDateTime orderDate) {
+        this.orderDate = orderDate;
     }
 
     // Getters and Setters...
