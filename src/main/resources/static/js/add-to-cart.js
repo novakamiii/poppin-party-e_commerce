@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // If product does not exist (e.g., missing imageLoc or productId is -1/null/undefined)
     if (!item.imageLoc || item.productId === "-1" || item.productId === null || item.productId === undefined) {
       return `
-      <div class="cart-item sold-out" data-order-item-id="${item.id}">
+      <div class="cart-item sold-out" data-order-item-id="${item.id} data-product-id="${item.productId}">
         <img src="/img/sold-out.png" alt="Sold Out" class="cartpage-image" />
         <div class="product-details">
           <p class="cartpage-title">${item.itemName || "Product Unavailable"}</p>
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Normal product
     return `
-    <div class="cart-item" data-order-item-id="${item.id}">
+     <div class="cart-item" data-order-item-id="${item.id}" data-product-id="${item.productId}">
       <img src="${item.imageLoc}" alt="${item.itemName}" class="cartpage-image" />
       <div class="product-details">
         <p class="cartpage-title">${item.itemName}</p>
@@ -88,6 +88,26 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error(err);
     });
   }
+
+
+  const clearCartButton = document.getElementById("clearCartButton");
+
+  clearCartButton.addEventListener("click", () => {
+    if (!confirm("Are you sure you want to clear all items from your cart?")) return;
+
+    fetch("/api/cart/clear", {
+      method: "POST"
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to clear cart");
+        showEmptyCart();
+      })
+      .catch(err => {
+        console.error("Error clearing cart:", err);
+        alert("Something went wrong while clearing the cart.");
+      });
+  });
+
 
   function removeItem(productId, cartItemElement) {
     const params = new URLSearchParams();
@@ -136,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cartContainer.addEventListener("click", e => {
         const cartItem = e.target.closest(".cart-item");
         if (!cartItem) return;
-        const productId = cartItem.getAttribute("data-order-item-id");
+        const productId = cartItem.getAttribute("data-product-id");
         const input = cartItem.querySelector(".quantity-input");
         let qty = parseInt(input.value);
 

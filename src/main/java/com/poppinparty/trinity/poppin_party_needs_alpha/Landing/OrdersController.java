@@ -1,25 +1,3 @@
-/**
- * Controller for managing orders, order status, checkout, and related payment operations.
- * <p>
- * Handles endpoints for:
- * <ul>
- *   <li>Viewing order status and checkout pages</li>
- *   <li>Placing orders and processing payments</li>
- *   <li>Buying a product immediately ("Buy Now" functionality)</li>
- *   <li>Retrieving orders by status</li>
- *   <li>Cancelling and restoring orders</li>
- *   <li>Marking orders as received</li>
- * </ul>
- * <p>
- * Integrates with repositories for users, products, orders, order items, and payments,
- * as well as a notification service for user notifications.
- * <p>
- * All endpoints require authentication via {@link Principal}.
- * <p>
- * Transactional methods ensure data consistency for order placement, cancellation, and status updates.
- * <p>
- * Error handling is performed via HTTP status codes and flash attributes for user feedback.
- */
 package com.poppinparty.trinity.poppin_party_needs_alpha.Landing;
 
 import java.math.BigDecimal;
@@ -162,7 +140,7 @@ public class OrdersController {
 
                         // 2. Parse items
                         ObjectMapper mapper = new ObjectMapper();
-                        List<Map<String, Object>> items = mapper.readValue(itemsJson, new TypeReference<>() {
+                        List<CartItemDTO> items = mapper.readValue(itemsJson, new TypeReference<>() {
                         });
 
                         // 3. Validate items
@@ -173,9 +151,9 @@ public class OrdersController {
 
                         // 4. Validate stock and calculate subtotal
                         BigDecimal subtotal = BigDecimal.ZERO;
-                        for (Map<String, Object> item : items) {
-                                Long productId = Long.valueOf(safeGet(item, "productId"));
-                                int quantity = Integer.parseInt(safeGet(item, "quantity"));
+                        for (CartItemDTO item : items) {
+                                Long productId = item.getProductId();
+                                int quantity = item.getQuantity();
 
                                 if (!isCustomProduct(productId)) {
                                         Product product = productRepository.findById(productId)
@@ -190,7 +168,7 @@ public class OrdersController {
                                         }
                                 }
                                 subtotal = subtotal.add(
-                                                new BigDecimal(safeGet(item, "unitPrice"))
+                                                BigDecimal.valueOf(item.getUnitPrice())
                                                                 .multiply(BigDecimal.valueOf(quantity)));
                         }
 
@@ -215,13 +193,12 @@ public class OrdersController {
                         order = orderRepository.save(order); // Save and get managed entity
                         log.info("Received payment method: {}", paymentMethod);
 
-
                         // 7. Process payments and update stock
-                        for (Map<String, Object> item : items) {
-                                Long productId = Long.valueOf(safeGet(item, "productId"));
-                                int quantity = Integer.parseInt(safeGet(item, "quantity"));
-                                BigDecimal price = new BigDecimal(safeGet(item, "unitPrice"));
-                                String itemName = safeGet(item, "itemName");
+                        for (CartItemDTO item : items) {
+                                Long productId = item.getProductId();
+                                int quantity = item.getQuantity();
+                                BigDecimal price = BigDecimal.valueOf(item.getUnitPrice());
+                                String itemName = item.getItemName();
 
                                 // Update stock for non-custom products
                                 if (!isCustomProduct(productId)) {
@@ -257,7 +234,7 @@ public class OrdersController {
                         }
 
                         // 8. Clear cart and send notification
-                        orderItemRepository.deleteByUserId(user.getId());
+                        //orderItemRepository.deleteByUserId(user.getId());
 
                         notificationService.createNotification(
                                         user,
@@ -394,7 +371,8 @@ public class OrdersController {
 
                         if (product.getStock() < payment.getQuantity()) {
                                 return ResponseEntity.badRequest()
-                                        .body("Cannot restore: Not enough stock available. Only " + product.getStock() + " left.");
+                                                .body("Cannot restore: Not enough stock available. Only "
+                                                                + product.getStock() + " left.");
                         }
 
                         product.setStock(product.getStock() - payment.getQuantity());

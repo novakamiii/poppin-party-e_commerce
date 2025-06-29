@@ -234,12 +234,6 @@
           <li>POPPIN' GUARANTEE</li>
           <li>FREE SHIPPING</li>
           <li>PAYMENT METHODS</li>
-          <!--Admin Role-->
-          <li th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}">
-            <a th:href="@{/admin/home}">
-              ADMIN DASHBOARD
-            </a>
-          </li>
         </ul>
       </div>
       <div class="footer-section">

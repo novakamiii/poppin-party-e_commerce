@@ -1,22 +1,3 @@
-/**
- * REST controller for managing user notifications.
- * 
- * <p>
- * Provides endpoints to retrieve unread notifications, mark individual notifications as read,
- * and mark all notifications as read for the authenticated user.
- * </p>
- * 
- * <ul>
- *   <li><b>GET /api/notifications</b>: Retrieves unread notifications and their count for the current user.</li>
- *   <li><b>POST /api/notifications/{id}/read</b>: Marks a specific notification as read.</li>
- *   <li><b>POST /api/notifications/mark-all-read</b>: Marks all notifications as read for the current user.</li>
- * </ul>
- * 
- * <p>
- * Requires authentication. Uses {@link NotificationService} for notification operations and
- * {@link UserRepository} to fetch user details.
- * </p>
- */
 package com.poppinparty.trinity.poppin_party_needs_alpha.Landing;
 
 import java.security.Principal;

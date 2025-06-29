@@ -1,31 +1,3 @@
-/**
- * Controller for managing the shopping cart functionality.
- * Handles adding, updating, removing, and validating cart items for users.
- *
- * <p>Endpoints provided:
- * <ul>
- *   <li><b>GET /cart</b>: Returns the cart view page.</li>
- *   <li><b>GET /api/cart/count</b>: Returns the total number of items in the user's cart.</li>
- *   <li><b>GET /api/cart</b>: Returns a list of cart items for the logged-in user.</li>
- *   <li><b>POST /api/cart/add</b>: Adds a product to the user's cart, with stock validation.</li>
- *   <li><b>POST /api/cart/validate-checkout</b>: Validates stock for all items before checkout.</li>
- *   <li><b>POST /api/cart/update</b>: Updates the quantity of a specific product in the cart.</li>
- *   <li><b>POST /api/cart/remove</b>: Removes a product or custom tarpaulin from the cart.</li>
- *   <li><b>POST /api/cart/custom-tarpaulin</b>: Adds a custom tarpaulin item to the cart.</li>
- * </ul>
- *
- * <p>Dependencies:
- * <ul>
- *   <li>{@link OrderItemRepository} for cart item persistence.</li>
- *   <li>{@link ProductRepository} for product data and stock validation.</li>
- *   <li>{@link UserRepository} for user data retrieval.</li>
- * </ul>
- *
- * <p>Handles both regular products and custom tarpaulin items with custom fields.
- * All endpoints require the user to be authenticated (except for cart count, which returns 0 for guests).
- *
- * <p>Transactional annotation is used where multiple database operations may occur.
- */
 package com.poppinparty.trinity.poppin_party_needs_alpha.Landing;
 
 import java.math.BigDecimal;
@@ -45,6 +17,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.CartItemDTO;
@@ -292,6 +265,18 @@ public class CartController {
 
                 orderItemRepository.deleteById(id);
                 return ResponseEntity.ok("Item removed");
+        }
+
+        @PostMapping("/api/cart/clear")
+        public ResponseEntity<Void> clearCart(Principal principal) {
+                String username = principal.getName();
+                User user = userRepository.findByUsername(username)
+                                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+                List<OrderItem> items = orderItemRepository.findByUserId(user.getId());
+                orderItemRepository.deleteAll(items);
+
+                return ResponseEntity.ok().build();
         }
 
         @PostMapping("/api/cart/custom-tarpaulin")

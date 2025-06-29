@@ -56,12 +56,13 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
 
                 let actionButton = '';
                 if (status === "PENDING") {
-                    actionButton = `<span><a href="#" class="cancel-order" data-id="${order.id}">Cancel</a></span>`;
+                    actionButton = `<button class="order-action-btn cancel-order" data-id="${order.id}">Cancel</button>`;
                 } else if (status === "CANCELLED") {
-                    actionButton = `<span><a href="#" class="restore-order" data-id="${order.id}">Undo</a></span>`;
+                    actionButton = `<button class="order-action-btn restore-order" data-id="${order.id}">Undo</button>`;
                 } else if (status === "TO_RECEIVE") {
-                    actionButton = `<span><button class="mark-received" data-id="${order.orderId}">Mark as Received</button></span>`;
+                    actionButton = `<button class="order-action-btn mark-received" data-id="${order.orderId}">Mark as Received</button>`;
                 }
+
 
                 // Only show ETA if not COMPLETED
                 let etaHtml = "";
@@ -75,7 +76,7 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
                             <img src="${order.imageLoc}" alt="${order.itemName}" />
                         </div>
                         <div class="item-details">
-                            <h3 class="item-name">${order.itemName}</h3>
+                            <h3 class="item-name">#${order.id} - ${order.itemName}</h3>
                             <h3 class="tracking-number">${order.transactionId}</h3>
                             <p class="item-qty">QTY: ${order.quantity}</p>
                             ${etaHtml}

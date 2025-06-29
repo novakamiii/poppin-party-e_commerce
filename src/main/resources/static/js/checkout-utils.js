@@ -80,7 +80,7 @@ function renderItems(container, items) {
         <div class="price-quantity">
           <span class="price">₱${item.unitPrice.toFixed(2)}</span>
           <div class="quantity-controls">
-            <input type="number" value="${item.quantity}" min="1" class="quantity-input" />
+            <input type="number" value="${item.quantity}" min="1" class="quantity-input" readonly/>
           </div>
         </div>
       </div>

@@ -132,7 +132,7 @@
                 <form id="checkoutForm" method="post" action="/order/place" onsubmit="return validateCheckoutForm()">
                     <input type="hidden" name="shippingOption" id="shippingOptionInput">
                     <input type="hidden" name="paymentMethod" id="paymentMethodInput">
-                    <input type="hidden" name="itemsJson" id="itemsJsonInput">
+                    <input type="hidden" name="itemsJson" id="itemsJsonInput" />
                     <button type="submit" class="checkout-button">PLACE ORDER</button>
                 </form>
             </div>
@@ -221,6 +221,13 @@
         const savedShipping = localStorage.getItem("shippingOption") || "standard";
         const savedPayment = localStorage.getItem("paymentMethod") || "cod";
 
+        // Clean up checkoutItems on page load
+        let checkoutItems = JSON.parse(localStorage.getItem("checkoutItems") || "[]");
+        checkoutItems = checkoutItems.map(item => ({
+            ...item,
+            productId: item.productId ?? item.id
+        }));
+        localStorage.setItem("checkoutItems", JSON.stringify(checkoutItems));
 
         shippingInput.value = savedShipping;
         paymentInput.value = savedPayment;
@@ -270,9 +277,24 @@
             }
         });
 
-
-        // Form submission
-        document.getElementById("checkoutForm")?.addEventListener("submit", function (e) {
+        document.getElementById("checkoutForm")?.addEventListener("submit", async function (e) {
+            let items = [];
+            try {
+                const response = await fetch('/api/cart');
+                items = await response.json();
+                // Ensure productId is set for every item (fallback to id if needed)
+                items = items.map(item => ({
+                    ...item,
+                    productId: item.productId ?? item.id
+                }));
+                // Update localStorage so validateCheckoutForm() and summary use correct data
+                localStorage.setItem("checkoutItems", JSON.stringify(items));
+            } catch (err) {
+                alert("Failed to load cart items. Please try again.");
+                e.preventDefault();
+                return;
+            }
+            document.getElementById("itemsJsonInput").value = JSON.stringify(items);
             if (!validateCheckoutForm()) {
                 e.preventDefault();
             }
