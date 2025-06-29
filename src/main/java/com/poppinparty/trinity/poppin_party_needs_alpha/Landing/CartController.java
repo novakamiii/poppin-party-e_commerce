@@ -68,32 +68,35 @@ public class CartController {
                                 .stream()
                                 .map(orderItem -> {
                                         CartItemDTO dto = new CartItemDTO();
-                                        dto.setId(orderItem.getId()); // ✅ FIX
+                                        dto.setId(orderItem.getId());
                                         dto.setQuantity(orderItem.getQuantity());
                                         dto.setUnitPrice(orderItem.getUnitPrice().doubleValue());
 
                                         if (Boolean.TRUE.equals(orderItem.isCustom())) {
                                                 dto.setCustom(true);
                                                 dto.setItemName("Custom Tarpaulin (" + orderItem.getCustomSize() + ")");
-                                                dto.setImageLoc("https://placehold.co/150x100/b944fd/ffffff?font=poppins&text=Tarpulin");
-
+                                                dto.setImageLoc("https://placehold.co/150x100/b944fd/ffffff?font=poppins&text=Tarpaulin");
                                                 dto.setCustomSize(orderItem.getCustomSize());
                                                 dto.setEventType(orderItem.getEventType());
                                                 dto.setPersonalizedMessage(orderItem.getPersonalizedMessage());
                                                 dto.setTarpaulinThickness(orderItem.getTarpaulinThickness());
                                                 dto.setTarpaulinFinish(orderItem.getTarpaulinFinish());
-                                                dto.setProductId(-1L);
+                                                dto.setProductId(-1L); // mark custom tarpaulins with special ID
                                         } else {
-                                                Product product = productRepository
-                                                                .findByItemName(orderItem.getProductRef())
-                                                                .orElseThrow(() -> new RuntimeException(
-                                                                                "Product not found: " + orderItem
-                                                                                                .getProductRef()));
-
-                                                dto.setCustom(false);
-                                                dto.setProductId(product.getId());
-                                                dto.setItemName(product.getItemName());
-                                                dto.setImageLoc(product.getImageLoc());
+                                                Optional<Product> optionalProduct = productRepository
+                                                                .findByItemName(orderItem.getProductRef());
+                                                if (optionalProduct.isEmpty()) {
+                                                        dto.setCustom(false);
+                                                        dto.setProductId(-1L);
+                                                        dto.setItemName("Product Unavailable");
+                                                        dto.setImageLoc(null); // frontend will handle this as sold-out
+                                                } else {
+                                                        Product product = optionalProduct.get();
+                                                        dto.setCustom(false);
+                                                        dto.setProductId(product.getId());
+                                                        dto.setItemName(product.getItemName());
+                                                        dto.setImageLoc(product.getImageLoc());
+                                                }
                                         }
 
                                         return dto;

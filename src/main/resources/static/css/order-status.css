@@ -219,3 +219,8 @@
     margin-top: 20px;
     letter-spacing: 1px;
 }
+.order-item.missing-order {
+  background-color: #f5dede;
+  border: 2px dashed #b944fd;
+  box-shadow: 0 0 0 2px rgba(185, 68, 253, 0.2);
+}

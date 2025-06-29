@@ -46,6 +46,28 @@
             border-color: #ff6f61;
             box-shadow: 0 0 0 2px #ffe3e0;
         }
+
+        .group-header {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            font-size: 1.1em;
+            border-top: 3px solid #888;
+            border-left: 3px solid #888;
+            border-right: 3px solid #888;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .group-item,
+        .group-summary {
+            border-left: 3px solid #888;
+            border-right: 3px solid #888;
+            background-color: #fff;
+        }
+
+        .group-summary:last-child {
+            border-bottom: 3px solid #888;
+            border-radius: 0 0 10px 10px;
+        }
     </style>
 </head>
 
@@ -83,51 +105,31 @@
             <option th:value="@{/admin/transaction-approval?filter=CANCELLED}"
                 th:selected="${currentFilter == 'CANCELLED'}">Cancelled
             </option>
+            <label for="trackingFilter">Filter by Tracking Number:</label>
+            <input type="text" id="trackingFilter" placeholder="Enter tracking number" />
         </select>
     </div>
     <table class="table-section">
-        <tr>
-            <th>ID</th>
-            <th>User ID</th>
-            <th>Username</th>
-            <th>Order ID</th>
-            <th>Address</th>
-            <th>Item Name</th>
-            <th>Quantity</th>
-            <th>Amount</th>
-            <th>Tracking Number</th>
-            <th>Payment Method</th>
-            <th>Shipping Status</th>
-            <th>Order Date</th>
-            <th>Actions</th>
-        </tr>
-        <tr th:each="payment : ${payments}" th:data-status="${payment.status}">
-            <td th:text="${payment.id}"></td>
-            <td th:text="${payment.user.id}"></td>
-            <td th:text="${payment.user.username}"></td>
-            <td th:text="${payment.order.id}"></td>
-            <td th:text="${payment.user.address}"></td>
-            <td th:text="${payment.itemName}"></td>
-            <td th:text="${payment.quantity}"></td>
-            <td th:text="${#numbers.formatDecimal(payment.amount, 1, 2)}"></td>
-            <td th:text="${payment.order.trackingNumber}"></td>
-            <td th:text="${payment.order.paymentMethod}"></td>
-            <td th:text="${payment.status}"></td>
-            <td th:text="${#dates.format(payment.order.orderDate, 'yyyy-MM-dd HH:mm')}"></td>
-            <td>
-                <div class="buttonst">
-                    <a href="#" th:onclick="|updateStatus(${payment.order.id}, 'TO_SHIP')|" title="Mark as To Ship"
-                        style="background: none; border: none; cursor: pointer; text-decoration: none;">🚚</a>
-                    <a href="#" th:onclick="|updateStatus(${payment.order.id}, 'TO_RECEIVE')|"
-                        title="Mark as To Receive"
-                        style="background: none; border: none; cursor: pointer; text-decoration: none;">📦</a>
-                    <a href="#" th:onclick="|updateStatus(${payment.order.id}, 'COMPLETED')|" title="Mark as Completed"
-                        style="background: none; border: none; cursor: pointer; text-decoration: none;">✅</a>
-                    <a href="#" th:onclick="|updateStatus(${payment.order.id}, 'CANCELLED')|" title="Mark as Cancelled"
-                        style="background: none; border: none; cursor: pointer; text-decoration: none;">❌</a>
-                </div>
-            </td>
-        </tr>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Order ID</th>
+                <th>Address</th>
+                <th>Item Name</th>
+                <th>Quantity</th>
+                <th>Amount</th>
+                <th>Tracking Number</th>
+                <th>Payment Method</th>
+                <th>Shipping Status</th>
+                <th>Order Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- JS will populate rows here -->
+        </tbody>
     </table>
 
     <script th:inline="javascript">
@@ -164,45 +166,186 @@
     });
 </script>
 
+
+<script th:inline="javascript">
+    const payments = /*[[${payments}]]*/[];
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const tableBody = document.getElementById("tableBody");
+        if (!tableBody || payments.length === 0) return;
+
+        tableBody.innerHTML = "";
+
+        const grouped = {};
+
+        payments.forEach(p => {
+            const key = p.order.trackingNumber;
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(p);
+        });
+
+        Object.entries(grouped).forEach(([trackingNumber, group]) => {
+            let subtotal = 0;
+
+            const groupRows = [];
+
+            // Group Header
+            groupRows.push(`
+        <tr class="group-header">
+            <td colspan="13">📦 TRANSACTION ID: ${trackingNumber}</td>
+        </tr>
+    `);
+
+            group.forEach(p => {
+                subtotal += parseFloat(p.amount);
+                groupRows.push(`
+            <tr class="group-item">
+                <td>${p.id}</td>
+                <td>${p.user.id}</td>
+                <td>${p.user.username}</td>
+                <td>${p.order.id}</td>
+                <td>${p.user.address}</td>
+                <td>${p.itemName}</td>
+                <td>${p.quantity}</td>
+                <td>₱${parseFloat(p.amount).toFixed(2)}</td>
+                <td>${p.order.trackingNumber}</td>
+                <td>${p.order.paymentMethod}</td>
+                <td>${p.status}</td>
+                <td>${formatDate(p.order.orderDate)}</td>
+                <td class="buttonst">
+                    <a href="#" onclick="updateStatus(${p.id}, 'TO_SHIP')" title="Mark as To Ship">🚚</a>
+                    <a href="#" onclick="updateStatus(${p.id}, 'TO_RECEIVE')" title="Mark as To Receive">📦</a>
+                    <a href="#" onclick="updateStatus(${p.id}, 'COMPLETED')" title="Mark as Completed">✅</a>
+                    <a href="#" onclick="updateStatus(${p.id}, 'CANCELLED')" title="Mark as Cancelled">❌</a>
+                </td>
+            </tr>
+        `);
+            });
+
+            const vat = subtotal * 0.12;
+            const total = subtotal + vat;
+
+            groupRows.push(`
+        <tr class="group-summary"><td colspan="13" style="text-align:right;">Subtotal: ₱${subtotal.toFixed(2)}</td></tr>
+        <tr class="group-summary"><td colspan="13" style="text-align:right;">+ 12% VAT: ₱${vat.toFixed(2)}</td></tr>
+        <tr class="group-summary"><td colspan="13" style="text-align:right; font-weight: bold;">Total: ₱${total.toFixed(2)}</td></tr>
+    `);
+
+            const groupHTML = groupRows.join("");
+            tableBody.insertAdjacentHTML("beforeend", groupHTML);
+
+        });
+
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            return d.getFullYear() + "-" +
+                String(d.getMonth() + 1).padStart(2, '0') + "-" +
+                String(d.getDate()).padStart(2, '0') + " " +
+                String(d.getHours()).padStart(2, '0') + ":" +
+                String(d.getMinutes()).padStart(2, '0');
+        }
+    });
+
+    function updateStatus(paymentId, newStatus) {
+        fetch(`/admin/transaction/item/${paymentId}/status`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ newStatus })
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                response.text().then(text => alert('Error: ' + text));
+            }
+        });
+    }
+
+</script>
+
+
+
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        console.log("DOM fully loaded");
+
         const searchInput = document.querySelector('.search-input');
         const searchButton = document.querySelector('.search-button');
+        const trackingFilterInput = document.getElementById('trackingFilter');
         const transactionRows = document.querySelectorAll('.table-section tr:not(:first-child)');
 
         function performSearch() {
-            const searchTerm = searchInput.value.toLowerCase().trim();
+            const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            const trackingTerm = trackingFilterInput ? trackingFilterInput.value.toLowerCase().trim() : '';
 
-            transactionRows.forEach(row => {
-                const orderId = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-                const username = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
-                const itemName = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
-                const trackingNumber = row.querySelector('td:nth-child(8)').textContent.toLowerCase();
+            const rows = Array.from(document.querySelectorAll(".table-section tbody tr"));
 
-                const shouldShow = orderId.includes(searchTerm) ||
-                    username.includes(searchTerm) ||
-                    itemName.includes(searchTerm) ||
-                    trackingNumber.includes(searchTerm);
+            let group = [];
 
-                row.style.display = shouldShow ? '' : 'none';
+            rows.forEach((row, idx) => {
+                const isGroupHeader = row.textContent.includes("TRANSACTION ID:");
+                const isSummaryRow = row.textContent.includes("Subtotal:") || row.textContent.includes("VAT:") || row.textContent.includes("TOTAL:");
+
+                if (isGroupHeader) {
+                    // Process previous group
+                    if (group.length > 0) processGroup(group, searchTerm, trackingTerm);
+                    group = [row]; // new group starts
+                } else if (isSummaryRow || idx === rows.length - 1) {
+                    group.push(row);
+                    if (idx === rows.length - 1) processGroup(group, searchTerm, trackingTerm); // process last group
+                } else {
+                    group.push(row);
+                }
             });
+
+            function processGroup(groupRows, searchTerm, trackingTerm) {
+                const matchFound = groupRows.some(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length < 9) return false;
+
+                    const orderId = cells[3]?.textContent?.toLowerCase() || '';
+                    const username = cells[2]?.textContent?.toLowerCase() || '';
+                    const itemName = cells[5]?.textContent?.toLowerCase() || '';
+                    const trackingNumber = cells[8]?.textContent?.toLowerCase() || '';
+
+                    return (
+                        (orderId.includes(searchTerm) ||
+                            username.includes(searchTerm) ||
+                            itemName.includes(searchTerm) ||
+                            trackingNumber.includes(searchTerm)) &&
+                        trackingNumber.includes(trackingTerm)
+                    );
+                });
+
+                groupRows.forEach(row => {
+                    row.style.display = matchFound ? '' : 'none';
+                });
+            }
         }
 
-        // Add debounce to prevent rapid firing
+
         let debounceTimer;
         function debounceSearch() {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(performSearch, 300);
         }
 
-        searchButton.addEventListener('click', performSearch);
-        searchInput.addEventListener('input', debounceSearch);
+        if (searchButton) searchButton.addEventListener('click', performSearch);
+        if (searchInput) searchInput.addEventListener('input', debounceSearch);
+        if (trackingFilterInput) trackingFilterInput.addEventListener('input', debounceSearch);
 
-        // Also search when filter changes
-        document.querySelector('.filter-section select').addEventListener('change', () => {
-            setTimeout(performSearch, 500); // Wait for page to load new data
-        });
+        const filterDropdown = document.querySelector('.filter-section select');
+        if (filterDropdown) {
+            filterDropdown.addEventListener('change', () => {
+                setTimeout(performSearch, 500);
+            });
+        }
     });
+
+
 </script>
 
 </html>
