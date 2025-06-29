@@ -89,6 +89,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+
+  const clearCartButton = document.getElementById("clearCartButton");
+
+  clearCartButton.addEventListener("click", () => {
+    if (!confirm("Are you sure you want to clear all items from your cart?")) return;
+
+    fetch("/api/cart/clear", {
+      method: "POST"
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to clear cart");
+        showEmptyCart();
+      })
+      .catch(err => {
+        console.error("Error clearing cart:", err);
+        alert("Something went wrong while clearing the cart.");
+      });
+  });
+
+
   function removeItem(productId, cartItemElement) {
     const params = new URLSearchParams();
     params.append("id", productId); // if productId is actually OrderItem.id

@@ -17,6 +17,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.CartItemDTO;
@@ -264,6 +265,18 @@ public class CartController {
 
                 orderItemRepository.deleteById(id);
                 return ResponseEntity.ok("Item removed");
+        }
+
+        @PostMapping("/api/cart/clear")
+        public ResponseEntity<Void> clearCart(Principal principal) {
+                String username = principal.getName();
+                User user = userRepository.findByUsername(username)
+                                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+                List<OrderItem> items = orderItemRepository.findByUserId(user.getId());
+                orderItemRepository.deleteAll(items);
+
+                return ResponseEntity.ok().build();
         }
 
         @PostMapping("/api/cart/custom-tarpaulin")

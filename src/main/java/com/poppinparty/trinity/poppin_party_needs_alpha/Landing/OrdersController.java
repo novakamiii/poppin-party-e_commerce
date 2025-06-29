@@ -1,25 +1,3 @@
-/**
- * Controller for managing orders, order status, checkout, and related payment operations.
- * <p>
- * Handles endpoints for:
- * <ul>
- *   <li>Viewing order status and checkout pages</li>
- *   <li>Placing orders and processing payments</li>
- *   <li>Buying a product immediately ("Buy Now" functionality)</li>
- *   <li>Retrieving orders by status</li>
- *   <li>Cancelling and restoring orders</li>
- *   <li>Marking orders as received</li>
- * </ul>
- * <p>
- * Integrates with repositories for users, products, orders, order items, and payments,
- * as well as a notification service for user notifications.
- * <p>
- * All endpoints require authentication via {@link Principal}.
- * <p>
- * Transactional methods ensure data consistency for order placement, cancellation, and status updates.
- * <p>
- * Error handling is performed via HTTP status codes and flash attributes for user feedback.
- */
 package com.poppinparty.trinity.poppin_party_needs_alpha.Landing;
 
 import java.math.BigDecimal;
@@ -256,7 +234,7 @@ public class OrdersController {
                         }
 
                         // 8. Clear cart and send notification
-                        orderItemRepository.deleteByUserId(user.getId());
+                        //orderItemRepository.deleteByUserId(user.getId());
 
                         notificationService.createNotification(
                                         user,

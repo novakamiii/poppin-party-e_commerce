@@ -54,9 +54,14 @@
         <br>
         <div class="cart-container" id="cartContainer">
             <!-- AJAX will inject cart-item HTML here -->
-            <div class="cart-total">
+            <div class="cart-total"
+                style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <button id="clearCartButton" class="clear-cart-button">
+                    🗑️ Clear Cart
+                </button>
                 <h3>Total: ₱<span id="cartTotal">0</span></h3>
             </div>
+
         </div>
 
 

@@ -13,6 +13,7 @@ public class ArchivedProduct {
     private String itemName;
     private Double price;
     private Long stock;
+    @jakarta.persistence.Column(columnDefinition = "TEXT")
     private String description;
     private String imageLoc;
     private String category;
