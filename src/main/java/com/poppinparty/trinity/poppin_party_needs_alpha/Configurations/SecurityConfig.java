@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -41,37 +42,36 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/register", "/dummy", "/home", "/styles.css", "/img/**",
-                    "/forgot-password", "/reset-password", "/login",
-                    "/css/**", "/js/**", "/api/products/**", "/uploads/**", "/product-page/**",
-                    "/api/cart/**", "/api/check/**", "/products/see-more", "/products/category/**", "/products/customtarp"
-                ).permitAll()
-                .requestMatchers("/api/cart/remove").authenticated()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/user/**").hasRole("USER")
-                .anyRequest().authenticated()
-            )
-            .exceptionHandling(exception -> exception
-                .authenticationEntryPoint((request, response, authException) -> {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"error\": \"Unauthorized\"}");
-                    response.sendRedirect("/login");
-                })
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/redirect", true)
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutSuccessUrl("/home")
-                .permitAll()
-            )
-            .csrf(csrf -> csrf.disable());
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/register", "/dummy", "/home", "/styles.css", "/img/**",
+                                "/forgot-password", "/reset-password", "/login",
+                                "/css/**", "/js/**", "/api/products/**", "/uploads/**", "/product-page/**",
+                                "/api/cart/**", "/api/check/**", "/products/see-more", "/products/category/**",
+                                "/products/customtarp")
+                        .permitAll()
+                        .requestMatchers("/api/cart/remove").authenticated()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/user/**").hasRole("USER")
+                        .anyRequest().authenticated())
+                .exceptionHandling(exception -> exception
+                        .defaultAuthenticationEntryPointFor(
+                                (request, response, authException) -> {
+                                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                    response.setContentType("application/json");
+                                    response.getWriter().write("{\"authenticated\": false}");
+                                },
+                                new AntPathRequestMatcher("/api/**")))
+
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/redirect", true)
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/home")
+                        .permitAll())
+                .csrf(csrf -> csrf.disable());
         return http.build();
     }
 

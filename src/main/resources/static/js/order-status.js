@@ -23,6 +23,13 @@ export function handleUrlParams() {
         }
     }
 }
+
+export const shippingFees = {
+    standard: 45,
+    express: 75,
+    overnight: 150
+};
+
 export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
     fetch(`/api/orders?status=${status}`)
         .then(res => res.json())
@@ -35,59 +42,99 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
 
             container.innerHTML = "";
 
-            if (!Array.isArray(data)) {
-                container.innerHTML = "<p>Error: Expected a list of orders.</p>";
+            if (!Array.isArray(data) || data.length === 0) {
+                container.innerHTML = `
+          <div class="no-orders-found">
+            <img src="/img/no-results.png" alt="No orders" class="no-orders-image">
+            <p class="no-orders-message">No orders found for this status</p>
+          </div>
+        `;
                 return;
             }
 
-            if (data.length === 0) {
-                container.innerHTML =
-                    `<div class="no-orders-found">
-                        <img src="/img/no-results.png" alt="No orders" class="no-orders-image">
-                        <p class="no-orders-message">No orders found for this status</p>
-                    </div>
-                `;
-
-                return;
-            }
-
+            const grouped = {};
             data.forEach(order => {
-                const etaDays = order.status === "CANCELLED" ? "Cancelled" : (order.daysLeft ?? "N/A");
-
-                let actionButton = '';
-                if (status === "PENDING") {
-                    actionButton = `<button class="order-action-btn cancel-order" data-id="${order.id}">Cancel</button>`;
-                } else if (status === "CANCELLED") {
-                    actionButton = `<button class="order-action-btn restore-order" data-id="${order.id}">Undo</button>`;
-                } else if (status === "TO_RECEIVE") {
-                    actionButton = `<button class="order-action-btn mark-received" data-id="${order.orderId}">Mark as Received</button>`;
+                if (!grouped[order.transactionId]) {
+                    grouped[order.transactionId] = [];
                 }
+                grouped[order.transactionId].push(order);
+            });
 
+            Object.entries(grouped).forEach(([transactionId, orders], index) => {
+                let subtotal = 0;
 
-                // Only show ETA if not COMPLETED
-                let etaHtml = "";
-                if ((order.status || "").trim().toUpperCase() !== "COMPLETED") {
-                    etaHtml = `<p class="item-eta">ETA: ${etaDays} ${etaDays === "Cancelled" ? "" : "day(s) left"}</p>`;
-                }
+                const orderItemsHtml = orders.map(order => {
+                    subtotal += parseFloat(order.amount);
 
-                container.insertAdjacentHTML("beforeend", `
-                    <div class="order-item" data-order-id="${order.id}">
-                        <div class="item-image">
-                            <img src="${order.imageLoc}" alt="${order.itemName}" />
-                        </div>
-                        <div class="item-details">
-                            <h3 class="item-name">#${order.id} - ${order.itemName}</h3>
-                            <h3 class="tracking-number">${order.transactionId}</h3>
-                            <p class="item-qty">QTY: ${order.quantity}</p>
-                            ${etaHtml}
-                        </div>
-                        <div class="item-total">
-                            <span class="total-label">TOTAL:</span>
-                            <span class="total-price">₱${order.amount.toFixed(2)}</span>
-                            ${actionButton}
-                        </div>
-                    </div>
-                `);
+                    const etaDays = order.status === "CANCELLED" ? "Cancelled" : (order.daysLeft ?? "N/A");
+
+                    let actionButton = '';
+                    if (status === "PENDING") {
+                        actionButton = `<button class="order-action-btn cancel-order" data-id="${order.id}">Cancel</button>`;
+                    } else if (status === "CANCELLED") {
+                        actionButton = `<button class="order-action-btn restore-order" data-id="${order.id}">Undo</button>`;
+                    } else if (status === "TO_RECEIVE") {
+                        actionButton = `<button class="order-action-btn mark-received" data-id="${order.orderId}">Mark as Received</button>`;
+                    }
+
+                    const etaHtml = order.status?.toUpperCase() !== "COMPLETED"
+                        ? `<p class="item-eta">ETA: ${etaDays} ${etaDays === "Cancelled" ? "" : "day(s) left"}</p>`
+                        : "";
+
+                    return `
+            <div class="order-item" data-order-id="${order.id}">
+              <div class="item-image">
+                <img src="${order.imageLoc}" alt="${order.itemName}" />
+              </div>
+              <div class="item-details">
+                <h3 class="item-name">${order.itemName}</h3>
+                <p class="tracking-number">Order ID: #${order.id}</p>
+                <p class="item-qty">QTY: ${order.quantity}</p>
+                ${etaHtml}
+              </div>
+              <div class="item-total">
+                <span class="total-label">Item Price:</span>
+                <span class="total-price">₱${parseFloat(order.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                ${actionButton}
+              </div>
+            </div>
+          `;
+                }).join("");
+
+                const shippingOption = orders[0].shippingOption?.toLowerCase() || "standard";
+                const shippingFee = shippingFees[shippingOption] ?? 45;
+                const tax = subtotal * 0.12;
+                const total = subtotal + tax + shippingFee;
+
+                const transactionHtml = `
+          <div class="order-status-container transaction-group">
+            <div class="transaction-header" style="cursor: pointer;" data-toggle="transaction-${index}">
+              <h2 class="order-status-title">Transaction ID: ${transactionId} 🔻</h2>
+            </div>
+            <div class="transaction-body" id="transaction-${index}">
+              ${orderItemsHtml}
+              <div class="transaction-summary" style="text-align:right; margin-top: 10px;">
+                <p class="subtotal">Subtotal: ₱${subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                <p class="tax">+ 12% VAT: ₱${tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                <p class="shipping">+ Shipping (${shippingOption}): ₱${shippingFee.toLocaleString()}</p>
+                <hr>
+                <p class="total"><strong>Total: ₱${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong></p>
+              </div>
+            </div>
+          </div>
+        `;
+
+                container.insertAdjacentHTML("beforeend", transactionHtml);
+            });
+
+            // Toggle collapsible body
+            document.querySelectorAll('.transaction-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const body = document.getElementById(header.dataset.toggle);
+                    if (body) {
+                        body.style.display = body.style.display === 'none' ? 'block' : 'none';
+                    }
+                });
             });
         })
         .catch(err => {
@@ -96,6 +143,8 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
             console.error("Order fetch error:", err);
         });
 }
+
+
 
 export function initStatusTabs(tabSelector, containerId, defaultStatus = "PENDING") {
     const tabs = document.querySelectorAll(tabSelector);

@@ -125,6 +125,17 @@
     margin-top: 0;
     margin-bottom: 5px;
 }
+.subtotal, .tax, .total, .shipping {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2em;
+    color: #333;
+}
+.total
+{
+    font-size: 35px;
+    font-weight: bold;
+    color: #b944fd; /* Your brand purple */
+}
 
 .item-qty {
     color: #777;
