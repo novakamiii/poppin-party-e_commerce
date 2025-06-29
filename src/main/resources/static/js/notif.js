@@ -1,8 +1,31 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  const isAuthenticated = await isUserAuthenticated();
+  if (!isAuthenticated) {
+    console.log("User not authenticated. Notifications disabled.");
+    return; // ✅ Don't initialize anything related to notifications
+  }
   const notifButton = document.querySelector('.notif-button');
   const notifCounter = document.getElementById('notification-counter');
   const notifContent = document.getElementById('notif-content');
   const markAllReadBtn = document.getElementById('mark-all-read');
+
+
+  async function isUserAuthenticated() {
+    try {
+      const response = await fetch('/api/authentication/check', {
+        credentials: 'include',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (!response.ok) return false;
+
+      const data = await response.json();
+      return data.authenticated === true;
+    } catch (error) {
+      return false;
+    }
+  }
+
 
   // Toggle dropdown visibility
   notifButton?.addEventListener('click', (e) => {

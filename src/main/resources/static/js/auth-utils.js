@@ -1,6 +1,6 @@
 export const checkAuth = async (actionName) => {
   try {
-    const response = await fetch('/api/auth/check', {
+    const response = await fetch('/api/authentication/check', {
       credentials: 'include',
       headers: { 'Accept': 'application/json' }
     });
@@ -20,7 +20,7 @@ export const checkAuth = async (actionName) => {
     console.error("Auth check failed:", error);
     return false;
   }
-};
+};  
 
 
 export const setupAuthProtectedElements = () => {

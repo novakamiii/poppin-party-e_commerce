@@ -80,6 +80,17 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/api/authentication/check")
+    public ResponseEntity<Map<String, Object>> checkAuth(Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+        if (principal == null) {
+            response.put("authenticated", false);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+        response.put("authenticated", true);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/redirect")
     public String redirectBasedOnRole(Authentication authentication) {
         System.out.println("Redirecting based on role: " + authentication);
