@@ -5,12 +5,9 @@ export const checkAuth = async (actionName) => {
       headers: { 'Accept': 'application/json' }
     });
 
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      if (!data.authenticated) {
-        alert(`You need to be logged in to ${actionName}!`);
-        window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
-      }
+    if (response.status === 401) {
+      alert(`You need to be logged in to ${actionName}!`);
+      window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
       return false;
     }
 
@@ -20,7 +17,8 @@ export const checkAuth = async (actionName) => {
     console.error("Auth check failed:", error);
     return false;
   }
-};  
+};
+
 
 
 export const setupAuthProtectedElements = () => {

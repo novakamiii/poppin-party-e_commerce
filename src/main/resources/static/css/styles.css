@@ -9,7 +9,8 @@ body {
   text-decoration: line-through;
   color: #888;
 }
-.out-of-stock-message{
+
+.out-of-stock-message {
   color: rgb(73, 73, 73);
   font-weight: bold;
   margin-top: 10px;
@@ -386,6 +387,24 @@ body {
   max-width: 100%;
   height: auto;
 }
+
+.cart-item.sold-out {
+  opacity: 0.5;
+  pointer-events: auto;
+  position: relative;
+}
+
+.cart-item.sold-out .remove-btn {
+  pointer-events: auto;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.cart-item.sold-out .item-check {
+  pointer-events: none;
+  /* optional if you want it uncheckable */
+}
+
 
 .empty-cart {
   display: flex;
@@ -968,7 +987,8 @@ body {
 
 .tarpaulinbanner img {
   width: 100%;
-  max-width: 1000px; /* original size cap */
+  max-width: 1000px;
+  /* original size cap */
   height: auto;
   display: block;
   margin: 0 auto;
@@ -1468,4 +1488,75 @@ td:last-child a:last-child {
     font-size: 1em;
     padding: 5px 8px;
   }
+}
+
+/* General transaction container header */
+.transaction-header td {
+  background-color: #eef4ff;
+  font-weight: 600;
+  font-size: 1.05em;
+  padding: 12px;
+  border-top: 2px solid #bcd4ff;
+  border-bottom: 2px solid #bcd4ff;
+  color: #204080;
+  letter-spacing: 0.5px;
+}
+
+/* Item rows with alternating colors */
+.table-section tr.item-row:nth-child(even) {
+  background-color: #ffffff;
+}
+
+.table-section tr.item-row:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+/* Summary rows styling */
+.subtotal-row td,
+.vat-row td,
+.total-row td {
+  background-color: #f4f4f4;
+  padding: 8px 12px;
+  text-align: right;
+  font-size: 0.95em;
+  border-top: 1px dashed #ccc;
+}
+
+.total-row td {
+  background-color: #e0ffe0;
+  font-weight: bold;
+  border-bottom: 2px solid #98d498;
+}
+
+/* Transaction spacing */
+.transaction-separator td {
+  height: 12px;
+  background-color: transparent;
+  border: none;
+}
+
+/* Hover effect on rows */
+.table-section tr:hover {
+  background-color: #f0f8ff;
+}
+
+/* Action button tooltip effect */
+.buttonst a {
+  position: relative;
+}
+
+.buttonst a:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, -5px);
+  background-color: #333;
+  color: #fff;
+  font-size: 0.75em;
+  padding: 4px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 999;
+  opacity: 0.95;
 }

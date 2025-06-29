@@ -18,7 +18,26 @@ export function handleUrlParams() {
                     orderElement.scrollIntoView({ behavior: 'smooth' });
                     orderElement.classList.add('highlighted');
                     setTimeout(() => orderElement.classList.remove('highlighted'), 2000);
+                } else if (container) {
+                    container.insertAdjacentHTML("afterbegin", `
+                            <div class="order-item missing-order" style="opacity: 0.7; pointer-events: none;">
+                            <div class="item-image">
+                                <img src="https://placehold.co/150x100?text=Sold+Out" alt="Missing Product">
+                            </div>
+                            <div class="item-details">
+                                <h3 class="item-name">Order Not Found</h3>
+                                <p class="tracking-number">N/A</p>
+                                <p class="item-qty">Product Deprecated.</p>
+                                <p class="item-eta" style="color: red;">Unavailable</p>
+                            </div>
+                            <div class="item-total">
+                                <span class="total-label">Status:</span>
+                                <span class="total-price" style="color: red;">Not Found</span>
+                            </div>
+                            </div>
+                        `);
                 }
+
             }, 500);
         }
     }

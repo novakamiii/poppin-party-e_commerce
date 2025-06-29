@@ -54,49 +54,33 @@ public class AdminTransactionController {
         return "shipping_approval";
     }
 
-    @PostMapping("/transaction/{orderId}/status")
-    public ResponseEntity<?> updateOrderStatus(
-            @PathVariable Long orderId,
+    @PostMapping("/transaction/item/{paymentId}/status")
+    public ResponseEntity<?> updateItemStatus(
+            @PathVariable Long paymentId,
             @RequestBody StatusUpdateRequest request) {
 
-        // Validate status
-        if (!Arrays.asList(Order.PENDING, Order.TO_SHIP, Order.TO_RECEIVE,
-                Order.COMPLETED, Order.CANCELLED).contains(request.getNewStatus())) {
-            return ResponseEntity.badRequest().body("Invalid status");
-        }
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment item not found"));
 
-        // Get the order first
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+        payment.setStatus(request.getNewStatus());
+        paymentRepository.save(payment);
 
-        // Update status
-        orderStatusService.updateOrderStatus(orderId, request.getNewStatus());
+        // Optional: send a notification specific to this item
+        String message = switch (request.getNewStatus()) {
+            case "TO_SHIP" -> "An item in your order is being prepared for shipping";
+            case "TO_RECEIVE" -> "An item in your order has been shipped";
+            case "COMPLETED" -> "An item in your order has been delivered";
+            case "CANCELLED" -> "An item in your order has been cancelled";
+            default -> "";
+        };
 
-        // Send notification based on new status
-        String message = "";
-        switch (request.getNewStatus()) { // Use request.getNewStatus() instead of undefined newStatus
-            case "TO_SHIP":
-                message = "Your order #" + orderId + " is being prepared for shipping";
-                break;
-            case "TO_RECEIVE":
-                message = "Your order #" + orderId + " has been shipped";
-                break;
-            case "COMPLETED":
-                message = "Your order #" + orderId + " has been delivered";
-                break;
-            case "CANCELLED":
-                message = "Your order #" + orderId + " has been cancelled";
-                break;
-        }
-
-        // Only send notification if there's a message (skip for PENDING)
         if (!message.isEmpty()) {
             notificationService.createNotification(
-                    order.getUser(),
+                    payment.getUser(),
                     message,
-                    order.getTrackingNumber(),
+                    payment.getOrder().getTrackingNumber(),
                     request.getNewStatus(),
-                    orderId);
+                    payment.getOrder().getId());
         }
 
         return ResponseEntity.ok().build();
