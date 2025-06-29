@@ -69,8 +69,12 @@
             <div class="product-info">
                 <h1 id="productTitle" class="product-page-title"></h1>
                 <div class="product-rating">
-                    <span class="stars">★★★★★</span>
-                    <span class="review-count">(1,234 Reviews)</span>
+                    <span class="stars" id="productStars">★★★★★</span>
+                    <span class="review-count" id="productReviews">(1,234 Reviews)</span>
+                </div>
+
+                <div class="out-of-stock-message" id="outOfStockMessage" style="display: none;">
+                    <small>This product is currently out of stock</small>
                 </div>
                 <p class="product-page-price" id="productPrice"></p>
 
@@ -85,9 +89,6 @@
                 <div class="action-buttons">
                     <button class="add-to-cart-btn" id="addToCartBtn">ADD TO CART</button>
                     <button class="buy-now-btn" id="buyNowBtn">BUY NOW</button>
-                    <div class="out-of-stock-message" id="outOfStockMessage" style="display: none;">
-                        This product is currently out of stock
-                    </div>
                 </div>
 
                 <div class="product-description">
@@ -174,7 +175,48 @@
     </footer>
 </body>
 
-<!-- Buy Now and Add to Cart -->
+<script>
+    const productId = window.location.pathname.split("/").pop();
+    const starsEl = document.getElementById('productStars');
+    const reviewsEl = document.getElementById('productReviews');
+
+    function loadOrGenerateRating(productId) {
+        const ratingKey = `product-rating-${productId}`;
+        const reviewKey = `product-reviews-${productId}`;
+
+        let rating = localStorage.getItem(ratingKey);
+        let reviewCount = localStorage.getItem(reviewKey);
+
+        if (!rating || !reviewCount) {
+            // Generate new values
+            rating = Math.floor(Math.random() * 5) + 1; // 1 to 5 stars
+            reviewCount = Math.floor(Math.random() * (5000 - 50 + 1)) + 50; // 50 to 5000
+
+            // Store in localStorage
+            localStorage.setItem(ratingKey, rating);
+            localStorage.setItem(reviewKey, reviewCount);
+        }
+
+        return {
+            rating: parseInt(rating),
+            reviewCount: parseInt(reviewCount)
+        };
+    }
+
+    const { rating, reviewCount } = loadOrGenerateRating(productId);
+
+    // Display stars
+    const filledStars = '★'.repeat(rating);
+    const emptyStars = '☆'.repeat(5 - rating);
+    starsEl.textContent = filledStars + emptyStars;
+
+    // Display review count
+    reviewsEl.textContent = `(${reviewCount.toLocaleString()} Reviews)`;
+
+
+</script>
+
+
 <script type="module">
     import { handleBuyNow, updateCartCounter } from '/js/ajax.js';
     import { authWrapper } from '/js/auth-utils.js';
@@ -189,6 +231,7 @@
         const qtyInput = document.getElementById("product-qty");
         const minusBtn = document.querySelector('.qty-btn.minus');
         const plusBtn = document.querySelector('.qty-btn.plus');
+        const productId = window.location.pathname.split("/").pop();
 
         // Quantity controls
         if (qtyInput && minusBtn && plusBtn) {
@@ -236,13 +279,11 @@
 
                         if (response.redirected) {
                             alert('You must be logged in to access this feature!');
-                            window.location.href = response.url;
-                            return;
                         }
 
                         if (!response.ok) {
                             const errorMessage = await response.text();
-                            throw new Error(errorMessage);
+                            throw new Error(errorMessage); s
                         }
 
                         const message = await response.text();
@@ -271,6 +312,41 @@
                 });
             });
         }
+
+        fetch(`/api/products/${productId}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to load product details');
+                return res.json();
+            })
+            .then(product => {
+                // Update DOM
+                const title = document.getElementById('productTitle');
+                const price = document.getElementById('productPrice');
+                const stockInfo = document.getElementById('stockInfo');
+                const image = document.getElementById('mainProductImage');
+
+                title.textContent = product.itemName;
+                price.textContent = `₱${product.price.toFixed(2)}`;
+                stockInfo.textContent = `Available stock: ${product.stock}`;
+                image.src = product.imageLoc;
+
+                // ✅ Apply strikethrough and disable buttons if out of stock
+                if (product.stock === 0) {
+                    title.classList.add('strikethrough');
+                    document.getElementById('outOfStockMessage').style.display = 'block';
+                    document.getElementById('addToCartBtn').disabled = true;
+                    document.getElementById('buyNowBtn').disabled = true;
+                } else {
+                    title.classList.remove('strikethrough');
+                    document.getElementById('outOfStockMessage').style.display = 'none';
+                    document.getElementById('addToCartBtn').disabled = false;
+                    document.getElementById('buyNowBtn').disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error('Product fetch error:', err);
+                alert("Failed to load product info.");
+            });
     });
 </script>
 

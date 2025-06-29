@@ -5,6 +5,18 @@ body {
   background-color: #d9d9d9;
 }
 
+.strikethrough {
+  text-decoration: line-through;
+  color: #888;
+}
+.out-of-stock-message{
+  color: rgb(73, 73, 73);
+  font-weight: bold;
+  margin-top: 10px;
+  font-family: "Bebas Neue", sans-serif;
+}
+
+
 .admin-header-actions {
   display: flex;
   align-items: center;

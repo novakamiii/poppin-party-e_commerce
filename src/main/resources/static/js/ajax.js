@@ -17,22 +17,9 @@ export function addProductAjax(formElement, onSuccess, onError) {
     });
 }
 
-/**
- * Given a product object, returns an HTML string for the product card.
- *
- * @param {object} product - The product object with id, title, price, imagePath.
- * @returns {string} HTML string of product card.
- */
-
-
-//Old version with button inside image link
-/*
-<a href="/product-page/${product.id}">
-            <img src="${product.imageLoc}" alt="${product.itemName}" />
-          </a> */
-
 export function createProductCardHTML(product) {
   const outOfStock = product.stock === 0;
+
   return `
     <a href="/product-page/${product.id}" class="product-card-link" style="text-decoration:none;color:inherit;">
       <div class="product-card">
@@ -41,7 +28,9 @@ export function createProductCardHTML(product) {
         </div>
         <div class="product-details">
           <p class="product-title">
-            ${product.itemName}
+            <span class="${outOfStock ? 'strikethrough' : ''}">
+              ${product.itemName}
+            </span>
             ${outOfStock ? '<span class="out-of-stock-label" style="color:grey;font-weight:bold;margin-left:8px;">(Out of Stock)</span>' : ''}
           </p>
           <p class="product-price">₱${product.price}</p>
@@ -50,6 +39,7 @@ export function createProductCardHTML(product) {
     </a>
   `;
 }
+
 
 // Initialize cart counter on page load
 export function initCartCounter() {

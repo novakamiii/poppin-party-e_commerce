@@ -76,7 +76,7 @@ export function loadOrdersByStatus(status, containerId = "orderStatusContent") {
                             <img src="${order.imageLoc}" alt="${order.itemName}" />
                         </div>
                         <div class="item-details">
-                            <h3 class="item-name">${order.itemName}</h3>
+                            <h3 class="item-name">#${order.id} - ${order.itemName}</h3>
                             <h3 class="tracking-number">${order.transactionId}</h3>
                             <p class="item-qty">QTY: ${order.quantity}</p>
                             ${etaHtml}

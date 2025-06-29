@@ -2,6 +2,7 @@ package com.poppinparty.trinity.poppin_party_needs_alpha.AccountManagement;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.User;
@@ -54,9 +56,11 @@ public class UserController {
     }
 
     @GetMapping("/checkAuth")
+    @ResponseBody
     public String checkAuth() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
+        if (authentication != null && authentication.isAuthenticated()
+                && !authentication.getPrincipal().equals("anonymousUser")) {
             return "Authenticated as: " + authentication.getName() + ", Roles: " + authentication.getAuthorities();
         } else {
             return "Not authenticated";
@@ -64,11 +68,16 @@ public class UserController {
     }
 
     @GetMapping("/api/auth/check")
-    public ResponseEntity<?> checkAuth(Principal principal) {
-        if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public ResponseEntity<Map<String, Object>> checkAuth(Authentication auth) {
+        Map<String, Object> result = new HashMap<>();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            result.put("authenticated", false);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
         }
-        return ResponseEntity.ok().build();
+        result.put("authenticated", true);
+        result.put("username", auth.getName());
+        result.put("roles", auth.getAuthorities());
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/redirect")
@@ -197,8 +206,15 @@ public class UserController {
 
     @GetMapping("/reset-password")
     public String showResetForm(@RequestParam String email, Model model) {
-        model.addAttribute("email", email);
-        return "reset_password";
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            model.addAttribute("email", email);
+            model.addAttribute("username", "Unknown User");
+        } else {
+            model.addAttribute("email", email);
+            model.addAttribute("username", user.getUsername());
+        }
+        return "reset_password"; // Make sure your HTML file is named reset_password.html
     }
 
     @PostMapping("/reset-password")

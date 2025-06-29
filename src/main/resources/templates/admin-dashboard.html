@@ -114,7 +114,6 @@
         </div>
 
         <div class="dashboard-card">
-            <!-- <img th:src="@{/img/logowhite.png}" alt="LandingPage" class="icon"> -->
              <div class="icon">🛍️</div>
             <h2>Landing</h2>
             <div class="addproduct-container">
@@ -129,6 +128,15 @@
             <div class="addproduct-container">
                 <a th:href="@{/account}">
                     <button class="addproduct-button">Your Account</button>
+                </a>
+            </div>
+        </div>
+        <div class="dashboard-card">
+            <div class="icon">❌</div>
+            <h2>Log Out</h2>
+            <div class="addproduct-container">
+                <a th:href="@{/logout}">
+                    <button class="addproduct-button">Log Out</button>
                 </a>
             </div>
         </div>
