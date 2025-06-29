@@ -1,6 +1,7 @@
 package com.poppinparty.trinity.poppin_party_needs_alpha.Entities;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -61,6 +62,9 @@ public class ArchivedPayments {
 
     @Column(name = "is_custom")
     private Boolean isCustom = false;
+
+    @Column(name = "order_date")
+    private LocalDateTime orderDate;
 
     
 
@@ -182,6 +186,14 @@ public class ArchivedPayments {
 
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
+    }
+
+    public LocalDateTime getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(LocalDateTime orderDate) {
+        this.orderDate = orderDate;
     }
 
 }
