@@ -221,11 +221,12 @@
     import { handleBuyNow, updateCartCounter } from '/js/ajax.js';
     import { authWrapper } from '/js/auth-utils.js';
 
+    let productStock = 0; // Store product stock for later checks
+
     document.addEventListener('DOMContentLoaded', () => {
         console.log("DOM fully loaded");
         updateCartCounter();
 
-        // Initialize elements
         const addToCartBtn = document.getElementById("addToCartBtn");
         const buyNowBtn = document.getElementById("buyNowBtn");
         const qtyInput = document.getElementById("product-qty");
@@ -250,10 +251,15 @@
             });
         }
 
-        // Add to Cart
+        // Add to Cart button
         if (addToCartBtn && qtyInput) {
             addToCartBtn.addEventListener("click", () => {
                 authWrapper("add items to cart", async () => {
+                    if (productStock === 0) {
+                        alert("This product is out of stock and cannot be added to the cart.");
+                        return;
+                    }
+
                     const rawProductId = window.location.pathname.split("/").pop();
                     const productId = parseInt(rawProductId);
                     const quantity = parseInt(qtyInput.value);
@@ -283,7 +289,7 @@
 
                         if (!response.ok) {
                             const errorMessage = await response.text();
-                            throw new Error(errorMessage); s
+                            throw new Error(errorMessage);
                         }
 
                         const message = await response.text();
@@ -294,13 +300,17 @@
                     }
                 });
             });
-
         }
 
-        // Buy Now
+        // Buy Now button
         if (buyNowBtn && qtyInput) {
             buyNowBtn.addEventListener("click", () => {
                 authWrapper("complete your purchase", async () => {
+                    if (productStock === 0) {
+                        alert("This product is out of stock and cannot be purchased.");
+                        return;
+                    }
+
                     const quantity = parseInt(qtyInput.value);
                     const productId = window.location.pathname.split("/").pop();
 
@@ -313,13 +323,15 @@
             });
         }
 
+        // Fetch product info
         fetch(`/api/products/${productId}`)
             .then(res => {
                 if (!res.ok) throw new Error('Failed to load product details');
                 return res.json();
             })
             .then(product => {
-                // Update DOM
+                productStock = product.stock; // Save stock
+
                 const title = document.getElementById('productTitle');
                 const price = document.getElementById('productPrice');
                 const stockInfo = document.getElementById('stockInfo');
@@ -330,18 +342,26 @@
                 stockInfo.textContent = `Available stock: ${product.stock}`;
                 image.src = product.imageLoc;
 
-                // ✅ Apply strikethrough and disable buttons if out of stock
                 if (product.stock === 0) {
                     title.classList.add('strikethrough');
                     document.getElementById('outOfStockMessage').style.display = 'block';
-                    document.getElementById('addToCartBtn').disabled = true;
-                    document.getElementById('buyNowBtn').disabled = true;
+
+                    addToCartBtn.disabled = true;
+                    buyNowBtn.disabled = true;
+
+                    addToCartBtn.classList.add('disabled-btn');
+                    buyNowBtn.classList.add('disabled-btn');
                 } else {
                     title.classList.remove('strikethrough');
                     document.getElementById('outOfStockMessage').style.display = 'none';
-                    document.getElementById('addToCartBtn').disabled = false;
-                    document.getElementById('buyNowBtn').disabled = false;
+
+                    addToCartBtn.disabled = false;
+                    buyNowBtn.disabled = false;
+
+                    addToCartBtn.classList.remove('disabled-btn');
+                    buyNowBtn.classList.remove('disabled-btn');
                 }
+
             })
             .catch(err => {
                 console.error('Product fetch error:', err);
@@ -349,6 +369,7 @@
             });
     });
 </script>
+
 
 <!-- Checking Auth -->
 <script type="module">

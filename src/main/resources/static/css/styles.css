@@ -297,6 +297,16 @@ body {
   border-radius: 5px;
 }
 
+.disabled-btn {
+  background-color: #ccc !important;
+  color: #666 !important;
+  border: 1px solid #999 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+
 .cart-container {
   background-color: #d9d9d9;
   padding: 20px;
