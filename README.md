@@ -3,6 +3,6 @@
 PUP-SPC
 BSIT 2-1
 
-Danzel Bordeos
-Paulo Neil Sevilla
-Jhondrei Apeta
+- Danzel Bordeos
+- Paulo Neil Sevilla
+- Jhondrei Apeta
