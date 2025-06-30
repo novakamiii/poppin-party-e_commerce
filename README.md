@@ -1,7 +1,6 @@
 # POPPINPARTYWEB
 ### For INTEPROG & OOP Final Project
-PUP-SPC
-BSIT 2-1
+PUP-SPC  BSIT 2-1
 
 - Danzel Bordeos
 - Paulo Neil Sevilla
