@@ -1,6 +1,4 @@
 package com.poppinparty.trinity.poppin_party_needs_alpha.AdminControls;
-
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Payment;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.PaymentRepository;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Services.OrderStatusService;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Entities.Order;
 import com.poppinparty.trinity.poppin_party_needs_alpha.Services.NotificationService;
-import com.poppinparty.trinity.poppin_party_needs_alpha.Repositories.OrderRepository;
 
 @Controller
 @RequestMapping("/admin")
@@ -27,12 +22,6 @@ public class AdminTransactionController {
 
     @Autowired
     private PaymentRepository paymentRepository;
-
-    @Autowired
-    private OrderRepository orderRepository; // Add this
-
-    @Autowired
-    private OrderStatusService orderStatusService;
 
     @Autowired
     private NotificationService notificationService;
@@ -65,7 +54,7 @@ public class AdminTransactionController {
         payment.setStatus(request.getNewStatus());
         paymentRepository.save(payment);
 
-        // Optional: send a notification specific to this item
+        //send a notification specific to this item
         String message = switch (request.getNewStatus()) {
             case "TO_SHIP" -> "An item in your order is being prepared for shipping";
             case "TO_RECEIVE" -> "An item in your order has been shipped";
