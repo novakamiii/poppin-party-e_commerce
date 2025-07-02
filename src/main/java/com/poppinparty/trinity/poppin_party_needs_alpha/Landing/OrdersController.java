@@ -236,7 +236,7 @@ public class OrdersController {
                         }
 
                         // 8. Clear cart and send notification
-                        // orderItemRepository.deleteByUserId(user.getId());
+                        orderItemRepository.deleteByUserId(user.getId());
 
                         notificationService.createNotification(
                                         user,
